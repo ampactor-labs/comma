@@ -68,10 +68,3 @@ Anything that holds a note holds it until you press the same button again. The
 control in the corner mutes the page or stops everything at once, and escape
 stops everything. There's an octave switch in the header because phone speakers
 reproduce almost nothing below 500 Hz, and the whole point is audible beating.
-
-## Related
-
-The research program this grew out of lives in
-[cfc-scouting](https://github.com/ampactor-labs/cfc-scouting), specifically
-`PROGRAM.md`: rhythm as compression, cross-frequency coupling as the thing that
-spans timescales, and the residual as the music.
