@@ -1,3 +1,7 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Comma</title>
 <style>
   :root {
@@ -473,7 +477,7 @@
     <span class="strobe-label" id="strobe-1-label">Stripes stand still when the interval is pure. They crawl when it isn't.</span>
   </div>
 
-  <p>The true fifth sits perfectly still. The piano's fifth <em>wobbles</em>: a slow pulse, roughly once a second. That pulse is two notes disagreeing about where they are. Once you hear it you can't unhear it, and I'm sorry.</p>
+  <p>The true fifth sits perfectly still. The piano's fifth <em>wobbles</em>: a steady pulse you can count, and the band above tells you its exact speed at the register you're hearing. That pulse is two notes disagreeing about where they are. Once you hear it you can't unhear it, and I'm sorry.</p>
 </header>
 
 <section>
@@ -535,8 +539,8 @@
         <tbody id="err-body"></tbody>
       </table>
     </div>
-    <div class="readout">
-      Beat rate is how fast the two versions pulse against each other, at this tuning. It runs from a lazy <b class="just-t">0.4 per second</b> to a nervous <b class="temp-t">8.6 per second</b>, more than a twenty-fold spread.
+    <div class="readout" id="beat-note">
+      Beat rate is how fast the two versions pulse against each other, at the register you're listening at. Right now it runs from a lazy <b class="just-t"><span id="beat-lo">0.37</span> per second</b> to a nervous <b class="temp-t"><span id="beat-hi">8.63</span> per second</b>, a <span id="beat-x">23</span>-fold spread.
     </div>
   </div>
 
@@ -566,10 +570,10 @@
     <div class="readout" id="phase-read">Each dot is one oscillator's phase. They drift apart at their own rate; that spreading is the machine thinking.</div>
     <div class="slider-row">
       <label for="coupling">Coupling</label>
-      <input type="range" id="coupling" min="0" max="100" value="12">
+      <input type="range" id="coupling" min="0" max="800" value="12">
       <span class="readout num" id="coupling-val">K = 0.12</span>
     </div>
-    <div class="readout">Turn coupling up and the oscillators start listening to each other. Turn it far enough and they give up their differences and lock into one voice.</div>
+    <div class="readout">Turn coupling up and the oscillators start listening to each other. Turn it far enough and anything held in their differences is erased in seconds. This knob comes back twice more below; it is the same knob each time, driving the same bank.</div>
   </div>
 </section>
 
@@ -583,37 +587,55 @@
 
   <p class="wide">Feed a random signal into the bank and watch what sticks. Because the oscillators run at different speeds, each one holds a different slice of the recent past; the slow ones hold further back, the fast ones hold sharper. Train a readout on top and you can ask the bank questions about what it just heard. How well it answers is a number, and the number is measurable.</p>
 
-  <p>This is a real technique, called <strong>reservoir computing</strong>. You don't train the bank. You only train one linear layer that reads it. Everything hard is done by physics.</p>
+  <p>The technique is called <strong>reservoir computing</strong>. You don't train the bank. You only train one linear layer that reads it. Everything hard is done by physics.</p>
 
   <div class="panel">
     <h3>Live measurement</h3>
-    <p class="note" style="margin-bottom:1rem">This runs an actual simulation in your browser and fits an actual readout. The numbers below are measured, not illustrated. Give it a second.</p>
+    <p class="note" style="margin-bottom:1rem">Your browser integrates the bank and fits the readout; every number below comes out of that fit. Give it a second.</p>
     <div class="btn-row">
       <button id="b-run">Run the experiment</button>
       <button id="b-sweep">Sweep the coupling</button>
+      <button id="b-think" disabled title="Run the experiment first">Hear it think</button>
     </div>
     <div class="grid-2">
       <div>
-        <canvas id="mc" height="240" aria-label="Memory capacity by delay"></canvas>
-        <div class="readout" style="margin-top:0.5rem">How much of the input from <span class="num">k</span> steps ago is still recoverable.</div>
+        <canvas id="mc" height="240" aria-label="Memory capacity by delay; tap a bar to inspect that delay"></canvas>
+        <div class="readout" style="margin-top:0.5rem">How much of the input from <span class="num">k</span> steps ago is still recoverable, one fit at a time. When the bars run out, the probe keeps going until the memory actually dies.</div>
       </div>
       <div>
         <canvas id="tradeoff" height="240" aria-label="Memory versus nonlinear capacity as coupling varies"></canvas>
         <div class="readout" style="margin-top:0.5rem">Reach against mixing, as coupling rises. These two cross.</div>
       </div>
     </div>
+    <canvas id="recon" height="200" style="margin-top:1.2rem" aria-label="Input signal versus what the readout reconstructs at the selected delay"></canvas>
+    <div class="readout" id="recon-read" style="margin-top:0.5rem">After a run, this shows the readout remembering: the input as it actually was <span class="num">k</span> steps ago against what the bank reconstructs from its present state. Tap a bar above to change <span class="num">k</span>.</div>
     <div class="readout" id="run-read" style="margin-top:1rem">Not run yet.</div>
   </div>
 
   <p class="wide">A bank like this can remember or it can mix, and it can't do both. Turn the coupling up and the oscillators start agreeing with each other. Agreement is what mixing is made of, and mixing is what lets a readout answer questions harder than <em>what did you hear twenty steps ago</em>. Sweep it and watch what that buys, and what it costs.</p>
 
-  <p class="wide">Uncoupled, the bank can be read three seconds back. At the top of the sweep it reaches less than one second, and mixing has gone up sevenfold. The exchange lives in <em>reach</em>, not in any single capacity number, and that's worth knowing before you measure one: count only the first thirty delays and you're looking through a six-tenths-of-a-second window at a memory three seconds long. The window hides the whole effect.</p>
+  <p class="wide">Uncoupled, the bank can be read almost three seconds back. At the top of the sweep it reaches one second, and mixing has gone up close to eightfold. The exchange lives in <em>reach</em>, not in any single capacity number, and that's worth knowing before you measure one: count only the first thirty delays and you're looking through a six-tenths-of-a-second window at a memory nearly three seconds long. The window hides the whole effect.</p>
 
-  <p class="wide">One number stays stubborn through all of it. Capacity never gets near thirty-four, which is its own ceiling: thirty-four state variables, and never more than half of them in use. The rest exist on paper and hold nothing new, because <strong>the oscillators are very nearly the same oscillator.</strong> Their frequencies differ by between 0.37 and 8.63 Hz out of 220.</p>
+  <p class="wide">One number stays stubborn through all of it. Capacity never gets near thirty-four, which is its own ceiling: thirty-four numbers the readout sees, and never more than half of them in use. The rest exist on paper and hold nothing new, because <strong>the oscillators are very nearly the same oscillator.</strong> Their frequencies differ by between 0.37 and 8.63 Hz out of 220.</p>
 
   <p class="wide">Which is the comma again, wearing a different hat. The intervals are nearly right; that's the whole reason a piano nearly works. But nearly-right oscillators are nearly-redundant oscillators, and a bank of them holds far less than its size promises. The shortfall is the smallness of the error, measured this time in units of memory.</p>
 
   <p>The comma isn't noise in this machine. It's the budget.</p>
+
+  <div class="panel">
+    <h3>Shrink the comma</h3>
+    <p style="max-width:40rem">That's a claim you can test. This slider scales the piano's errors — all eleven detunings together — from nothing up to half again their real size. Shrink them to zero and the bank becomes eleven copies of one tuning fork; measure it and watch the memory go with them.</p>
+    <div class="slider-row">
+      <label for="spread">Size of the errors</label>
+      <input type="range" id="spread" min="0" max="150" value="100">
+      <span class="readout num" id="spread-val">&times;1.00 &middot; widest detuning 8.63 Hz</span>
+    </div>
+    <div class="btn-row">
+      <button id="b-spread">Measure at this size</button>
+    </div>
+    <canvas id="budget" height="220" aria-label="Capacity as a function of how large the tuning errors are"></canvas>
+    <div class="readout" id="spread-read" style="margin-top:0.5rem">Each measurement adds a point: capacity against the size of the error fan. The curve that appears is the budget line.</div>
+  </div>
 </section>
 
 <section>
@@ -641,17 +663,17 @@
       <button id="b-reset">Reset</button>
     </div>
     <div class="slots" id="slots"></div>
-    <div class="readout" id="store-read">Ten characters, held as phase offsets between eleven oscillators. Nothing is written down anywhere.</div>
+    <div class="readout" id="store-read">Ten characters, held as phase offsets between eleven oscillators.</div>
     <div class="slider-row">
-      <label for="leak">Coupling (decay)</label>
-      <input type="range" id="leak" min="0" max="100" value="0">
-      <span class="readout num" id="leak-val">K = 0.00</span>
+      <label for="leak">Coupling &mdash; same knob</label>
+      <input type="range" id="leak" min="0" max="800" value="12">
+      <span class="readout num" id="leak-val">K = 0.12</span>
     </div>
   </div>
 
   <p class="wide">You can't hear a phase; the ear is nearly phase-deaf for steady tones, which Helmholtz worked out in the 1860s. So the register is read the way every tuner reads one: play it against a reference standing exactly where you wrote it. Matched slots reinforce and ring out. Drifted slots cancel themselves toward silence. <strong>Interference turns phase into loudness</strong>, and loudness the ear is extremely good at.</p>
 
-  <p class="wide">Leave the coupling at zero and it holds forever. Turn it up and the oscillators start persuading each other toward agreement, and as they agree, the differences between them vanish, and the message dissolves letter by letter into a single unified hum. Read it back as it goes and <strong>you hear voices drop out one at a time.</strong></p>
+  <p class="wide">Leave the coupling at its default whisper and the message very nearly keeps: four and a half minutes pass before the first slot slips, and the slot that slips is held by one of the most in-tune intervals on the page. Turn the knob up and the oscillators start persuading each other, and as they agree, the differences the message was written in get pulled apart, and it dissolves letter by letter. Read it back as it goes and <strong>you hear voices drop out one at a time.</strong></p>
 
   <p><strong>Watch which letters die first.</strong> The ones held by nearly-in-tune pairs go immediately; they had the least disagreement to spend. The ones held by the <em>worst</em> intervals, the ones the piano gets most catastrophically wrong, are the last to go. The more wrong the interval, the longer it can keep a secret.</p>
 </section>
@@ -666,7 +688,7 @@
 
   <p class="wide">That was one machine the whole time. The fast reading listens; the slow reading remembers; and they are the same eleven oscillators, running at once, not interfering with each other, because they live on different clocks.</p>
 
-  <p class="wide">Which puts both readings on one knob. Turn the coupling up and the bank mixes harder, sevenfold across the sweep. Turn the coupling up and both of its memories go: the fast reading's reach falls from three seconds to under one, and the slow reading dissolves letter by letter as the oscillators talk themselves into agreement. <strong>The same agreement that makes the bank a better computer makes it a worse witness</strong>, on both clocks at once. There is no setting where you get everything, and the exchange rate is fixed by how badly the intervals disagree.</p>
+  <p class="wide">Which puts both readings on one knob, and on this page it is literally one knob: every coupling slider above is the same control, driving the same bank. Turn it up and the bank mixes harder, close to eightfold across the sweep. Turn the coupling up and both of its memories go: the fast reading's reach falls from three seconds to under one, and the slow reading dissolves letter by letter as the oscillators talk themselves into agreement. <strong>The same agreement that makes the bank a better computer makes it a worse witness</strong>, on both clocks at once. There is no setting where you get everything, and the exchange rate is fixed by how badly the intervals disagree.</p>
 
   <p class="wide">The error is not the price of the machine. <strong>The error is the machine.</strong> A bank of oscillators in perfect agreement is a single tuning fork: it computes nothing, remembers nothing, and has nothing to say. Everything it can do, it can do because it can't close.</p>
 
@@ -680,10 +702,10 @@
 
   <div class="foot">
     <p class="note">
-      <strong>What's real here.</strong> The audio is genuine additive synthesis at the stated frequencies; the beat rates you hear are the actual arithmetic, and they scale with the playback register, which is why the table's last column changes when you switch it. The reservoir is a bank of coupled damped resonators integrated live in your browser, with a ridge-regression readout fit on the spot; the capacity numbers are measured from that fit, not scripted, and its detunings stay pinned to concert pitch regardless of what you're listening at. Capacity is scored on 3,500 samples the readout never saw, fit on a different 3,500; with thirty-four features, in-sample scores carry a floor near 0.01 per task from fitting noise alone, which is enough to invent a result that isn't there. Reach is found by scanning past the edge of the chart until the held-out score dies, so it's a property of the bank rather than of the window. The oscillators are damped rather than self-sustaining, so what they hold is what you put in, and the linear part of each step is solved exactly instead of stepped, which is what keeps the fastest detunings stable. The storage register holds phase deviation from free-running, quantised to thirty-two levels per pair, and the read is real interference in the audio graph &mdash; two oscillators per slot, one at the current phase and one at the written phase, summing to 2&middot;|cos(&Delta;/2)|. Nothing on this page is a mock-up.
+      <strong>Where the numbers come from.</strong> The audio is additive synthesis at the stated frequencies; the beat rates you hear are the frequency differences themselves, and they scale with the playback register, which is why the table's last column changes when you switch it. The reservoir is a bank of coupled damped resonators integrated live in your browser, with a ridge-regression readout fit on the spot; the capacity numbers come out of that fit, and its detunings stay pinned to concert pitch regardless of what you're listening at. Capacity is scored on 3,500 samples the readout never saw, fit on a different 3,500; with thirty-four features, in-sample scores carry a floor near 0.01 per task from fitting noise alone, which is enough to invent a result that isn't there. Reach is found by scanning past the edge of the chart until the held-out score dies, so it's a property of the bank rather than of the window. The budget panel reruns the entire measurement with every detuning multiplied by one factor; at zero the bank is eleven copies of one tuning fork and holds 1.08 of its ceiling of 34. The oscillators are damped rather than self-sustaining, so what they hold is what you put in, and the linear part of each step is solved exactly instead of stepped, which is what keeps the fastest detunings stable. The storage register holds phase deviation from free-running, quantised to thirty-two levels per pair, and the read is interference in the audio graph &mdash; two oscillators per slot, one at the current phase and one at the written phase, summing to 2&middot;|cos(&Delta;/2)|. Its decay is the same mean-field coupling, integrated while you watch. Nothing schedules which letter dies; the detunings decide.
     </p>
     <p class="note" style="margin-top:1rem">
-      <strong>What isn't claimed.</strong> This is not a better computer than the one you're reading it on. It's a demonstration that a physical system's <em>imperfections</em> can be its computational substrate, and that in this particular system the imperfection has a name musicians have used since Pythagoras.
+      <strong>The size of the claim.</strong> This is not a better computer than the one you're reading it on. It's a demonstration that a physical system's <em>imperfections</em> can be its computational substrate, and that in this particular system the imperfection has a name musicians have used since Pythagoras.
     </p>
     <div class="sig">JJ + MO &middot; 4EVA</div>
   </div>
@@ -700,6 +722,7 @@
   //  misses each one. Errors in cents = just − nearest tempered.
   // ══════════════════════════════════════════════════════════
 
+  // [verify:intervals] begin
   var REF = 220; // A3
 
   function cents(ratio) { return 1200 * Math.log2(ratio); }
@@ -736,6 +759,7 @@
   var OMEGA = IV.map(function (v) {      // detuning, rad/s
     return 2 * Math.PI * (v.fJust - v.fTemp);
   });
+  // [verify:intervals] end
 
   // ══════════════════════════════════════════════════════════
   //  AUDIO
@@ -760,7 +784,12 @@
       ac = new (window.AudioContext || window.webkitAudioContext)();
       MASTER = ac.createGain();
       MASTER.gain.value = muted ? 0 : 1;
-      MASTER.connect(ac.destination);
+      // a gentle limiter so coherent phase stacks (the register read) can't clip
+      var comp = ac.createDynamicsCompressor();
+      comp.threshold.value = -12; comp.knee.value = 24; comp.ratio.value = 6;
+      comp.attack.value = 0.004; comp.release.value = 0.18;
+      MASTER.connect(comp);
+      comp.connect(ac.destination);
     }
     if (ac.state === "suspended") ac.resume();
     return ac;
@@ -810,12 +839,12 @@
 
   // Additive voice with harmonics so coincident partials actually beat.
   // dur === null holds the note until something stops it.
-  function voice(freq, t0, dur, gain, partials, id) {
+  function voice(freq, t0, dur, gain, partials, id, busNode) {
     var c = audio();
     var out = c.createGain();
     var held = (dur === null || dur === undefined);
     out.gain.value = 0;
-    out.connect(bus());
+    out.connect(busNode || bus());
     if (held) dur = 1e6;
     var np = partials || 4;
     var oscs = [];
@@ -864,6 +893,12 @@
         }
       });
       register(id, out, oscs);
+      if (dur) {
+        out.gain.setValueAtTime(1, t + dur - 0.12);
+        out.gain.linearRampToValueAtTime(0, t + dur);
+        oscs.forEach(function (o) { try { o.stop(t + dur + 0.1); } catch (e) {} });
+        later(function () { if (playing(id)) stopSound(id); }, (dur + 0.25) * 1000);
+      }
       return;
     }
     voice(fa, t, dur);
@@ -917,8 +952,15 @@
     var c = audio();
     var t = c.currentTime + 0.05;
     var b = beatFifth();
-    voice(cRoot(), t, 2.6); voice(gJust(), t, 2.6);
-    voice(cRoot(), t + 3.0, 2.6); voice(gTemp(), t + 3.0, 2.6);
+    var out = c.createGain();
+    out.gain.value = 1;
+    out.connect(bus());
+    var oscs = [];
+    [[cRoot(), t], [gJust(), t], [cRoot(), t + 3.0], [gTemp(), t + 3.0]].forEach(function (p) {
+      voice(p[0], p[1], 2.6, null, null, null, out).oscs.forEach(function (o) { oscs.push(o); });
+    });
+    register("both", out, oscs);
+    later(function () { if (playing("both")) stopSound("both"); }, 6000);
     setStrobe(0, "Pure first, then the piano's. Listen for the wobble arriving.");
     later(function () {
       setStrobe(b, "There it is, " + b.toFixed(2) + " wobbles a second.");
@@ -934,7 +976,7 @@
     octLo.setAttribute("aria-pressed", v === 1 ? "true" : "false");
     stopBank();
     buildTable();
-    setStrobe(beatFifth() * 0.5,
+    setStrobe(0,
       v === 4 ? "Lifted two octaves. Everything sits where a small speaker can actually produce it."
               : "Down at concert pitch. Richer, but you'll want headphones.");
   }
@@ -945,28 +987,37 @@
   function climb(pure) {
     var c = audio();
     var t = c.currentTime + 0.05;
+    var out = c.createGain();
+    out.gain.value = 1;
+    out.connect(bus());
+    var oscs = [];
+    function cv(freq, at, dur, g, np) {
+      voice(freq, at, dur, g, np, null, out).oscs.forEach(function (o) { oscs.push(o); });
+    }
     var root = cRoot();
     var step = pure ? 1.5 : Math.pow(2, 7 / 12);
     var f = root;
     for (var i = 0; i < 13; i++) {
       var fold = f;
       while (fold > root * 2) fold /= 2;
-      voice(fold, t + i * 0.30, 0.42, 0.13, 3);
+      cv(fold, t + i * 0.30, 0.42, 0.13, 3);
       f *= step;
     }
     var landing = root * Math.pow(step, 12);
     while (landing > root * 2) landing /= 2;
     var t2 = t + 13 * 0.30 + 0.35;
-    voice(root, t2, 3.2, 0.17, 4);
-    voice(landing, t2, 3.2, 0.17, 4);
+    cv(root, t2, 3.2, 0.17, 4);
+    cv(landing, t2, 3.2, 0.17, 4);
+    register("climb", out, oscs);
     var b = Math.abs(landing - root);
-    setTimeout(function () {
+    later(function () {
       if (pure) {
         setStrobe(b, "Landed " + b.toFixed(2) + " Hz off home. Twelve pure fifths do not come home.");
       } else {
         setStrobe(0, "Dead silent. Twelve shaved fifths land exactly on home, because we made them.");
       }
     }, (13 * 0.30 + 0.35) * 1000);
+    later(function () { if (playing("climb")) stopSound("climb"); }, (13 * 0.30 + 0.35 + 3.5) * 1000);
     return b;
   }
 
@@ -1031,7 +1082,7 @@
   // ══════════════════════════════════════════════════════════
 
   var AUDIO_BTNS = ["b-just", "b-temp", "b-both", "b-stack-just",
-                    "b-stack-temp", "b-bank", "b-listen"];
+                    "b-stack-temp", "b-bank", "b-listen", "b-think"];
 
   function syncSound() {
     document.querySelectorAll("[data-sound]").forEach(function (el) {
@@ -1182,8 +1233,9 @@
       var pct = (Math.abs(v.err) / maxErr) * 100;
       var sign = v.err >= 0 ? "+" : "−";
       var beat = v.beat * OCT;
+      var den = Math.round(v.n / v.ratio);
       tr.innerHTML =
-        "<td>" + v.name + " <span style='color:var(--dim)'>(" + v.n + ":16)</span></td>" +
+        "<td>" + v.name + " <span style='color:var(--dim)'>(" + v.n + ":" + den + ")</span></td>" +
         "<td class='num opt'>" + v.cents.toFixed(1) + "¢</td>" +
         "<td class='num opt' style='color:var(--dim)'>" + v.edo + "¢</td>" +
         "<td class='num' style='color:var(--temper)'>" + sign + Math.abs(v.err).toFixed(2) + "¢</td>" +
@@ -1192,12 +1244,21 @@
       tr.style.cursor = "pointer";
       tr.title = "Tap to play this interval, pure against tempered";
       tr.addEventListener("click", function () {
-        dyad(v.fJust * OCT, v.fTemp * OCT, 3.2);
+        if (muted) return;
+        dyad(v.fJust * OCT, v.fTemp * OCT, 3.2, "row");
         setStrobe(beat, v.name + ": pure and tempered together, beating " + beat.toFixed(2) + " times a second.");
       });
       frag.appendChild(tr);
     });
     body.appendChild(frag);
+    var bLo = document.getElementById("beat-lo");
+    if (bLo) {
+      var beats = IV.map(function (v) { return v.beat * OCT; });
+      var mn = Math.min.apply(null, beats), mx = Math.max.apply(null, beats);
+      bLo.textContent = mn.toFixed(2);
+      document.getElementById("beat-hi").textContent = mx.toFixed(2);
+      document.getElementById("beat-x").textContent = String(Math.round(mx / mn));
+    }
   }
   buildTable();
 
@@ -1224,62 +1285,108 @@
   //  nonlinear capacity at all. It's also the observable an ear has:
   //  the cochlea is a filter bank followed by a detector, and the beat
   //  you hear in §03 is that square.
+  //
+  //  The fitting below runs in frame-sized slices so the page stays
+  //  live and the chart fills in as each readout lands. tools/verify.mjs
+  //  extracts the [verify:*] blocks and re-checks every number the
+  //  prose claims.
   // ══════════════════════════════════════════════════════════
 
+  // [verify:core] begin
   var DT = 0.02;          // 50 Hz
   var GAMMA = 0.6;        // damping — memory time constant 1/γ ≈ 1.7 s
   var IN_GAIN = 0.30;
+  var SEED = 12345;
+  var WASH = 500, TRAIN = 3500, TESTN = 3500;
+  var NF = 3 * N + 1;     // readout width: Re, Im, |z|² per oscillator, plus bias
+  var LEN = WASH + TRAIN + TESTN;
   var DRIVE = [];
   for (var d = 0; d < N; d++) DRIVE.push(0.55 + 0.45 * ((d * 7) % 11) / 10);
-
   var DECAY = Math.exp(-GAMMA * DT);
-  var ROT_C = OMEGA.map(function (w) { return Math.cos(w * DT); });
-  var ROT_S = OMEGA.map(function (w) { return Math.sin(w * DT); });
 
-  function simulate(K, T, seedInput) {
+  // seeded PRNG with a 2^32 state cycle; the naive LCG this replaced
+  // lost low bits past 2^53 and cycled after 10,466 draws
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function makeInput(T) {
+    var u = new Float64Array(T);
+    var rng = mulberry32(SEED);
+    for (var t = 0; t < T; t++) u[t] = (rng() * 2 - 1) * 0.8;
+    return u;
+  }
+
+  // progressive simulator: step(n) advances n steps, returns true when done.
+  // scale multiplies every detuning — ×1 is the piano, ×0 is no errors at all.
+  function makeSim(K, scale) {
+    var s = (scale === undefined ? 1 : scale);
+    var rotC = [], rotS = [];
+    for (var j0 = 0; j0 < N; j0++) {
+      var w0 = OMEGA[j0] * s;
+      rotC.push(Math.cos(w0 * DT));
+      rotS.push(Math.sin(w0 * DT));
+    }
     var re = new Float64Array(N), im = new Float64Array(N);
-    var nf = 3 * N + 1;
-    var X = new Float64Array(T * nf);
-    var u = seedInput || new Float64Array(T);
-    if (!seedInput) {
-      var s = 12345;
-      for (var t0 = 0; t0 < T; t0++) {
-        s = (s * 1103515245 + 12345) & 0x7fffffff;
-        u[t0] = ((s / 0x7fffffff) * 2 - 1) * 0.8;
-      }
-    }
     var nre = new Float64Array(N), nim = new Float64Array(N);
-    for (var t = 0; t < T; t++) {
-      var mr = 0, mi = 0;
-      for (var q = 0; q < N; q++) { mr += re[q]; mi += im[q]; }
-      mr /= N; mi /= N;
-      for (var j = 0; j < N; j++) {
-        var r = re[j], m = im[j];
-        var amp2 = r * r + m * m;
-        // exact rotation + decay for the linear part
-        var xr = DECAY * (r * ROT_C[j] - m * ROT_S[j]);
-        var xi = DECAY * (r * ROT_S[j] + m * ROT_C[j]);
-        // saturating nonlinearity, coupling, drive
-        xr -= DT * amp2 * r;          xi -= DT * amp2 * m;
-        xr += DT * K * (mr - r);      xi += DT * K * (mi - m);
-        xr += DRIVE[j] * u[t] * IN_GAIN;
-        var mag = Math.sqrt(xr * xr + xi * xi);
-        if (mag > 6) { xr *= 6 / mag; xi *= 6 / mag; }
-        nre[j] = xr; nim[j] = xi;
+    var X = new Float64Array(LEN * NF);
+    var u = makeInput(LEN);
+    var t = 0;
+    function step(n) {
+      var end = Math.min(LEN, t + n);
+      for (; t < end; t++) {
+        var mr = 0, mi = 0;
+        for (var q = 0; q < N; q++) { mr += re[q]; mi += im[q]; }
+        mr /= N; mi /= N;
+        for (var j = 0; j < N; j++) {
+          var r = re[j], m = im[j];
+          var amp2 = r * r + m * m;
+          // exact rotation + decay for the linear part
+          var xr = DECAY * (r * rotC[j] - m * rotS[j]);
+          var xi = DECAY * (r * rotS[j] + m * rotC[j]);
+          // saturating nonlinearity, coupling, drive
+          xr -= DT * amp2 * r;          xi -= DT * amp2 * m;
+          xr += DT * K * (mr - r);      xi += DT * K * (mi - m);
+          xr += DRIVE[j] * u[t] * IN_GAIN;
+          var mag = Math.sqrt(xr * xr + xi * xi);
+          if (mag > 6) { xr *= 6 / mag; xi *= 6 / mag; }
+          nre[j] = xr; nim[j] = xi;
+        }
+        for (var k2 = 0; k2 < N; k2++) { re[k2] = nre[k2]; im[k2] = nim[k2]; }
+        var base = t * NF;
+        for (var f2 = 0; f2 < N; f2++) {
+          X[base + f2] = re[f2];
+          X[base + N + f2] = im[f2];
+          X[base + 2 * N + f2] = re[f2] * re[f2] + im[f2] * im[f2];
+        }
+        X[base + 3 * N] = 1;
       }
-      for (var k2 = 0; k2 < N; k2++) { re[k2] = nre[k2]; im[k2] = nim[k2]; }
-      var base = t * nf;
-      for (var f2 = 0; f2 < N; f2++) {
-        X[base + f2] = re[f2];
-        X[base + N + f2] = im[f2];
-        X[base + 2 * N + f2] = re[f2] * re[f2] + im[f2] * im[f2];
-      }
-      X[base + 3 * N] = 1;
+      return t >= LEN;
     }
-    return { X: X, u: u, nf: nf, T: T };
+    return { X: X, u: u, step: step };
   }
 
   // ── ridge regression via normal equations + LU ──
+  function xtxAccumulate(X, XtX, t0, t1) {
+    for (var t = t0; t < t1; t++) {
+      var b = t * NF;
+      for (var a = 0; a < NF; a++) {
+        var xa = X[b + a];
+        for (var c = a; c < NF; c++) XtX[a * NF + c] += xa * X[b + c];
+      }
+    }
+  }
+  function xtxFinish(XtX) {
+    for (var a = 0; a < NF; a++)
+      for (var c = 0; c < a; c++) XtX[a * NF + c] = XtX[c * NF + a];
+    for (var d2 = 0; d2 < NF; d2++) XtX[d2 * NF + d2] += 1e-6 * TRAIN;
+  }
+
   function luFactor(A, n) {
     var piv = new Int32Array(n);
     for (var i = 0; i < n; i++) piv[i] = i;
@@ -1295,17 +1402,16 @@
         }
         var tp = piv[c]; piv[c] = piv[best]; piv[best] = tp;
       }
-      var d = A[c * n + c];
-      if (Math.abs(d) < 1e-12) d = 1e-12;
+      var dd = A[c * n + c];
+      if (Math.abs(dd) < 1e-12) dd = 1e-12;
       for (var rr = c + 1; rr < n; rr++) {
-        var f = A[rr * n + c] / d;
+        var f = A[rr * n + c] / dd;
         A[rr * n + c] = f;
         for (var cc = c + 1; cc < n; cc++) A[rr * n + cc] -= f * A[c * n + cc];
       }
     }
     return piv;
   }
-
   function luSolve(A, piv, b, n) {
     var y = new Float64Array(n);
     for (var i = 0; i < n; i++) {
@@ -1317,88 +1423,152 @@
     for (var k = n - 1; k >= 0; k--) {
       var t = y[k];
       for (var m = k + 1; m < n; m++) t -= A[k * n + m] * x[m];
-      var d = A[k * n + k];
-      x[k] = t / (Math.abs(d) < 1e-12 ? 1e-12 : d);
+      var dd = A[k * n + k];
+      x[k] = t / (Math.abs(dd) < 1e-12 ? 1e-12 : dd);
     }
     return x;
   }
 
-  // Score on data the readout never saw. With 34 features and 3500
-  // training samples, in-sample R² has a floor near nf/T ≈ 0.01 per
-  // task from fitting noise, which sums to ~0.3 of phantom capacity
-  // over 31 delays and shows up as a long tail that isn't real.
-  function capacity(K, maxDelay, withReach) {
-    var WASH = 500, T = 3500, TEST = 3500;
-    var sim = simulate(K, WASH + T + TEST);
-    var nf = sim.nf;
-    var teA = WASH + T, teB = WASH + T + TEST;
-    var XtX = new Float64Array(nf * nf);
-    for (var t = WASH; t < WASH + T; t++) {
-      var b = t * nf;
-      for (var a = 0; a < nf; a++) {
-        var xa = sim.X[b + a];
-        for (var c = a; c < nf; c++) XtX[a * nf + c] += xa * sim.X[b + c];
-      }
+  function fitTarget(X, A, piv, target) {
+    var Xty = new Float64Array(NF);
+    for (var t = WASH; t < WASH + TRAIN; t++) {
+      var b = t * NF, yv = target[t];
+      for (var a = 0; a < NF; a++) Xty[a] += X[b + a] * yv;
     }
-    for (var a2 = 0; a2 < nf; a2++)
-      for (var c2 = 0; c2 < a2; c2++) XtX[a2 * nf + c2] = XtX[c2 * nf + a2];
-    for (var d2 = 0; d2 < nf; d2++) XtX[d2 * nf + d2] += 1e-6 * T;
+    return luSolve(A, piv, Xty, NF);
+  }
 
-    var A = Float64Array.from(XtX);
-    var piv = luFactor(A, nf);
-
-    function fitScore(target) {
-      var Xty = new Float64Array(nf);
-      for (var t = WASH; t < WASH + T; t++) {
-        var b = t * nf, yv = target[t];
-        for (var a = 0; a < nf; a++) Xty[a] += sim.X[b + a] * yv;
-      }
-      var w = luSolve(A, piv, Xty, nf);
-      var sy = 0, syy = 0, sp = 0, spp = 0, syp = 0, n = 0;
-      for (var t2 = teA; t2 < teB; t2++) {   // held out
-        var bb = t2 * nf, p = 0;
-        for (var a3 = 0; a3 < nf; a3++) p += w[a3] * sim.X[bb + a3];
-        var yy = target[t2];
-        sy += yy; syy += yy * yy; sp += p; spp += p * p; syp += yy * p; n++;
-      }
-      var cov = syp / n - (sy / n) * (sp / n);
-      var vy = syy / n - (sy / n) * (sy / n);
-      var vp = spp / n - (sp / n) * (sp / n);
-      if (vy < 1e-12 || vp < 1e-12) return 0;
-      var r = cov / Math.sqrt(vy * vp);
-      return Math.max(0, Math.min(1, r * r));
+  // squared correlation between prediction and target over [lo, hi) —
+  // score on data the readout never saw. With 34 features and 3,500
+  // training samples, in-sample scores carry a floor near NF/TRAIN ≈ 0.01
+  // per task from fitting noise alone, enough to invent a memory tail
+  // that isn't there.
+  function scoreRange(X, w, target, lo, hi) {
+    var sy = 0, syy = 0, sp = 0, spp = 0, syp = 0, n = 0;
+    for (var t = lo; t < hi; t++) {
+      var b = t * NF, p = 0;
+      for (var a = 0; a < NF; a++) p += w[a] * X[b + a];
+      var yy = target[t];
+      sy += yy; syy += yy * yy; sp += p; spp += p * p; syp += yy * p; n++;
     }
+    var cov = syp / n - (sy / n) * (sp / n);
+    var vy = syy / n - (sy / n) * (sy / n);
+    var vp = spp / n - (sp / n) * (sp / n);
+    if (vy < 1e-12 || vp < 1e-12) return 0;
+    var r = cov / Math.sqrt(vy * vp);
+    return Math.max(0, Math.min(1, r * r));
+  }
 
-    var LEN = WASH + T + TEST;
+  function delayTarget(u, k) {
+    var tgt = new Float64Array(LEN);
+    for (var t = k; t < LEN; t++) tgt[t] = u[t - k];
+    return tgt;
+  }
+  function nlTarget(u) {
+    var tgt = new Float64Array(LEN);
+    for (var t = 4; t < LEN; t++) tgt[t] = u[t - 1] * u[t - 3];
+    return tgt;
+  }
+  // [verify:core] end
 
-    function delayScore(k) {
-      var tgt = new Float64Array(LEN);
-      for (var t3 = k; t3 < LEN; t3++) tgt[t3] = sim.u[t3 - k];
-      return fitScore(tgt);
+  // ══════════════════════════════════════════════════════════
+  //  JOB QUEUE — heavy math in frame-sized slices; "paced" jobs
+  //  run at most one per frame so the chart fills visibly
+  // ══════════════════════════════════════════════════════════
+
+  var JOBS = [];
+  var jobsRunning = false;
+  function job(fn, paced) {
+    JOBS.push({ fn: fn, paced: !!paced });
+    if (!jobsRunning) { jobsRunning = true; requestAnimationFrame(drainJobs); }
+  }
+  function drainJobs() {
+    var stop = performance.now() + 12;
+    var pacedDone = false;
+    while (JOBS.length) {
+      if (JOBS[0].paced && pacedDone) break;
+      if (performance.now() >= stop) break;
+      var j = JOBS.shift();
+      if (j.paced) pacedDone = true;
+      j.fn();
     }
+    if (JOBS.length) requestAnimationFrame(drainJobs);
+    else jobsRunning = false;
+  }
+  function jobsBusy() { return jobsRunning || JOBS.length > 0; }
 
-    var mc = [];
-    for (var k = 0; k <= maxDelay; k++) mc.push(delayScore(k));
+  // ══════════════════════════════════════════════════════════
+  //  THE EXPERIMENT — progressive: simulate, factor, then one
+  //  readout per frame; then probe past the chart until memory dies
+  // ══════════════════════════════════════════════════════════
 
-    // Scan past the chart until the held-out score dies. Reach must be
-    // measured beyond maxDelay or it just reports the window's width.
-    var reach = maxDelay;
-    if (withReach) {
-      for (var probe = maxDelay + 10; probe <= 260; probe += 10) {
-        if (delayScore(probe) < 0.01) break;
-        reach = probe;
+  var lastRun = null;    // { res, sim, done } — feeds the charts and the ear
+  var lastSweep = null;
+  var mcSel = 10;        // which delay the reconstruction panel shows
+
+  function runExperiment(opts) {
+    var sim = makeSim(opts.K, opts.scale);
+    var XtX = new Float64Array(NF * NF);
+    var A = null, piv = null;
+    var res = {
+      K: opts.K, scale: opts.scale === undefined ? 1 : opts.scale,
+      mc: [], W: [], probes: [], reach: 30, reachSec: 30 * DT,
+      nl: 0, total: 0, ceiling: NF
+    };
+    if (opts.commit) {
+      lastRun = { res: res, sim: sim, done: false };
+      mcSel = 10;
+      drawMC(); drawRecon();
+    }
+    var c;
+    for (c = 0; c < 5; c++) job(function () { sim.step(1500); });
+    for (c = 0; c < 4; c++) (function (i) {
+      job(function () {
+        var a = WASH + Math.floor(i * TRAIN / 4);
+        var b = WASH + Math.floor((i + 1) * TRAIN / 4);
+        xtxAccumulate(sim.X, XtX, a, b);
+      });
+    })(c);
+    job(function () {
+      xtxFinish(XtX);
+      A = Float64Array.from(XtX);
+      piv = luFactor(A, NF);
+    });
+    for (c = 0; c <= 30; c++) (function (k) {
+      job(function () {
+        var tgt = delayTarget(sim.u, k);
+        var w = fitTarget(sim.X, A, piv, tgt);
+        res.W.push(w);
+        res.mc.push(scoreRange(sim.X, w, tgt, WASH + TRAIN, LEN));
+        if (opts.commit) drawMC();
+      }, true);
+    })(c);
+    job(function () { probeStep(40); }, true);
+
+    function probeStep(k) {
+      var tgt = delayTarget(sim.u, k);
+      var w = fitTarget(sim.X, A, piv, tgt);
+      var sc = scoreRange(sim.X, w, tgt, WASH + TRAIN, LEN);
+      res.probes.push({ k: k, sc: sc });
+      if (opts.commit) drawMC();
+      if (sc >= 0.01) {
+        res.reach = k;
+        res.reachSec = k * DT;
+        if (k < 260) { job(function () { probeStep(k + 10); }, true); return; }
       }
+      finishRun();
     }
-
-    var nl = new Float64Array(LEN);
-    for (var t4 = 4; t4 < LEN; t4++) nl[t4] = sim.u[t4 - 1] * sim.u[t4 - 3];
-    var nlScore = fitScore(nl);
-
-    var total = mc.reduce(function (s, v) { return s + v; }, 0);
-    // Dambre et al. 2012: total capacity is bounded by the number of
-    // independent state variables. That bound is the readout width.
-    return { mc: mc, total: total, nl: nlScore, ceiling: nf, reach: reach,
-             reachSec: (reach * DT) };
+    function finishRun() {
+      job(function () {
+        var tgt = nlTarget(sim.u);
+        var w = fitTarget(sim.X, A, piv, tgt);
+        res.nl = scoreRange(sim.X, w, tgt, WASH + TRAIN, LEN);
+        res.total = 0;
+        for (var i = 0; i < res.mc.length; i++) res.total += res.mc[i];
+        if (opts.commit) { lastRun.done = true; drawMC(); drawRecon(); }
+        if (opts.onDone) opts.onDone(res);
+      });
+    }
   }
 
   // ══════════════════════════════════════════════════════════
@@ -1407,13 +1577,21 @@
 
   var mcCv = document.getElementById("mc");
   var trCv = document.getElementById("tradeoff");
-  var lastMC = null, lastSweep = null;
+  var reconCv = document.getElementById("recon");
+  var budgetCv = document.getElementById("budget");
+
+  function mcGeom(w) {
+    var pad = { l: 34, r: 10, t: 16, b: 26 };
+    var res = lastRun ? lastRun.res : null;
+    var lastProbe = (res && res.probes.length) ? res.probes[res.probes.length - 1].k : 30;
+    var xmax = Math.max(31, lastProbe + 10);
+    return { pad: pad, pw: w - pad.l - pad.r, xmax: xmax };
+  }
 
   function drawMC() {
     var f = fit(mcCv), g = f.g, w = f.w, h = f.h;
     g.clearRect(0, 0, w, h);
-    var pad = { l: 34, r: 10, t: 16, b: 26 };
-    var pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+    var gm = mcGeom(w), pad = gm.pad, pw = gm.pw, ph = h - pad.t - pad.b;
 
     g.strokeStyle = css("--rule"); g.lineWidth = 1;
     g.beginPath(); g.moveTo(pad.l, pad.t); g.lineTo(pad.l, pad.t + ph); g.lineTo(pad.l + pw, pad.t + ph); g.stroke();
@@ -1426,27 +1604,125 @@
       g.beginPath(); g.moveTo(pad.l, y); g.lineTo(pad.l + pw, y); g.stroke(); g.globalAlpha = 1;
     });
 
-    if (!lastMC) {
+    if (!lastRun) {
       g.fillStyle = css("--dim"); g.textAlign = "center"; g.font = "10px " + css("--mono");
       g.fillText("run the experiment", pad.l + pw / 2, pad.t + ph / 2);
       return;
     }
 
-    var n = lastMC.mc.length;
-    var bw = pw / n;
-    for (var i = 0; i < n; i++) {
-      var v = lastMC.mc[i];
+    var res = lastRun.res;
+    var xw = pw / gm.xmax;
+
+    for (var i = 0; i < res.mc.length; i++) {
+      var v = res.mc[i];
       var bh = ph * v;
       g.fillStyle = i === 0 ? css("--just") : css("--temper");
       g.globalAlpha = i === 0 ? 0.95 : 0.34 + 0.5 * v;
-      g.fillRect(pad.l + i * bw + 0.6, pad.t + ph - bh, Math.max(1, bw - 1.2), bh);
+      g.fillRect(pad.l + i * xw + 0.5, pad.t + ph - bh, Math.max(1, xw - 1), bh);
+      g.globalAlpha = 1;
+      if (lastRun.done && i === mcSel) {
+        g.strokeStyle = css("--ink"); g.lineWidth = 1.2;
+        g.strokeRect(pad.l + i * xw + 0.5, pad.t + ph - Math.max(bh, 3), Math.max(1, xw - 1), Math.max(bh, 3));
+      }
     }
-    g.globalAlpha = 1;
+
+    if (res.probes.length) {
+      // the chart had to be widened to hold the memory: mark its old edge
+      var xEdge = pad.l + 31 * xw;
+      g.strokeStyle = css("--dim"); g.globalAlpha = 0.6; g.setLineDash([3, 3]);
+      g.beginPath(); g.moveTo(xEdge, pad.t); g.lineTo(xEdge, pad.t + ph); g.stroke();
+      g.setLineDash([]); g.globalAlpha = 1;
+      g.fillStyle = css("--dim"); g.font = "9px " + css("--mono"); g.textAlign = "left";
+      g.fillText("the old edge", xEdge + 4, pad.t + 10);
+
+      g.strokeStyle = css("--just"); g.lineWidth = 1.4; g.beginPath();
+      res.probes.forEach(function (p, pi) {
+        var x = pad.l + (p.k + 0.5) * xw;
+        var y = pad.t + ph * (1 - Math.min(1, p.sc));
+        if (pi === 0) g.moveTo(x, y); else g.lineTo(x, y);
+      });
+      g.stroke();
+      res.probes.forEach(function (p) {
+        var x = pad.l + (p.k + 0.5) * xw;
+        var y = pad.t + ph * (1 - Math.min(1, p.sc));
+        g.fillStyle = p.sc >= 0.01 ? css("--just") : css("--temper");
+        g.beginPath(); g.arc(x, y, 2.6, 0, Math.PI * 2); g.fill();
+      });
+      // threshold line the probe has to die under
+      var yThr = pad.t + ph * (1 - 0.01);
+      g.strokeStyle = css("--temper"); g.globalAlpha = 0.4; g.setLineDash([2, 4]);
+      g.beginPath(); g.moveTo(pad.l + 31 * xw, yThr); g.lineTo(pad.l + pw, yThr); g.stroke();
+      g.setLineDash([]); g.globalAlpha = 1;
+    }
 
     g.fillStyle = css("--dim"); g.textAlign = "center"; g.font = "9px " + css("--mono");
-    g.fillText("0", pad.l + bw / 2, h - 8);
-    g.fillText(String(n - 1), pad.l + pw - bw / 2, h - 8);
+    g.fillText("0", pad.l + xw / 2, h - 8);
     g.fillText("delay k  (steps into the past)", pad.l + pw / 2, h - 8);
+    g.textAlign = "right";
+    g.fillText(String(gm.xmax - 1), pad.l + pw, h - 8);
+    if (lastRun.done) {
+      g.textAlign = "left"; g.fillStyle = css("--just");
+      g.fillText("readable to " + res.reach + " (" + res.reachSec.toFixed(1) + " s)", pad.l + 4, pad.t + 10);
+    }
+  }
+
+  mcCv.addEventListener("click", function (ev) {
+    if (!lastRun || !lastRun.done) return;
+    var rect = mcCv.getBoundingClientRect();
+    var gm = mcGeom(mcCv.clientWidth);
+    var k = Math.floor((ev.clientX - rect.left - gm.pad.l) / (gm.pw / gm.xmax));
+    if (k >= 0 && k <= 30) { mcSel = k; drawMC(); drawRecon(); }
+  });
+
+  function drawRecon() {
+    var f = fit(reconCv), g = f.g, w = f.w, h = f.h;
+    g.clearRect(0, 0, w, h);
+    var pad = { l: 34, r: 10, t: 16, b: 8 };
+    var pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+    var mid = pad.t + ph / 2;
+
+    g.strokeStyle = css("--rule"); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(pad.l, mid); g.lineTo(pad.l + pw, mid); g.stroke();
+
+    if (!lastRun || !lastRun.done || !lastRun.res.W[mcSel]) {
+      g.fillStyle = css("--dim"); g.textAlign = "center"; g.font = "10px " + css("--mono");
+      g.fillText("run the experiment, then tap a bar", pad.l + pw / 2, mid - 8);
+      return;
+    }
+
+    var res = lastRun.res, sim = lastRun.sim;
+    var k = mcSel, wv = res.W[k];
+    var t0 = WASH + TRAIN + 40, T2 = 150;
+    var half = ph / 2 / 1.1;
+
+    function yOf(v) { return mid - Math.max(-1.05, Math.min(1.05, v)) * half; }
+
+    g.strokeStyle = css("--just"); g.lineWidth = 2; g.beginPath();
+    for (var t = 0; t < T2; t++) {
+      var x = pad.l + (t / (T2 - 1)) * pw;
+      var y = yOf(sim.u[t0 + t - k]);
+      if (t === 0) g.moveTo(x, y); else g.lineTo(x, y);
+    }
+    g.stroke();
+
+    g.strokeStyle = css("--temper"); g.lineWidth = 1.4; g.beginPath();
+    for (var t2 = 0; t2 < T2; t2++) {
+      var b = (t0 + t2) * NF, p = 0;
+      for (var a = 0; a < NF; a++) p += wv[a] * sim.X[b + a];
+      var x2 = pad.l + (t2 / (T2 - 1)) * pw;
+      var y2 = yOf(p);
+      if (t2 === 0) g.moveTo(x2, y2); else g.lineTo(x2, y2);
+    }
+    g.stroke();
+
+    g.font = "9px " + css("--mono"); g.textAlign = "left";
+    g.fillStyle = css("--just");
+    g.fillText("what it heard, " + k + " steps ago", pad.l + 4, pad.t + 2);
+    g.fillStyle = css("--temper");
+    g.fillText("what it remembers now", pad.l + 4, pad.t + 14);
+    g.fillStyle = css("--dim"); g.textAlign = "right";
+    g.fillText("delay " + k + " = " + (k * DT).toFixed(2) + " s ago · held-out R² " +
+      (res.mc[k] !== undefined ? res.mc[k].toFixed(2) : "—"), pad.l + pw, pad.t + 2);
   }
 
   function drawSweep() {
@@ -1458,7 +1734,7 @@
     g.strokeStyle = css("--rule"); g.lineWidth = 1;
     g.beginPath(); g.moveTo(pad.l, pad.t); g.lineTo(pad.l, pad.t + ph); g.lineTo(pad.l + pw, pad.t + ph); g.stroke();
 
-    if (!lastSweep) {
+    if (!lastSweep || lastSweep.length < 2) {
       g.fillStyle = css("--dim"); g.textAlign = "center"; g.font = "10px " + css("--mono");
       g.fillText("sweep the coupling", pad.l + pw / 2, pad.t + ph / 2);
       return;
@@ -1495,7 +1771,6 @@
     g.fillStyle = css("--just"); g.fillText("how far back it reaches", pad.l + 4, pad.t + 12);
     g.fillStyle = css("--temper"); g.fillText("how hard it mixes", pad.l + 4, pad.t + 24);
 
-    // endpoints in real units, so the normalisation can't mislead
     g.textAlign = "left"; g.fillStyle = css("--just");
     g.fillText(a.reachSec.toFixed(1) + "s", pad.l + 2, pad.t + ph * (1 - a.reach / maxM) - 6);
     g.textAlign = "right";
@@ -1507,40 +1782,121 @@
     g.fillText("coupling K  →", pad.l + pw / 2, h - 8);
   }
 
-  document.getElementById("b-run").addEventListener("click", function () {
-    var btn = this;
-    btn.disabled = true; btn.textContent = "Measuring…";
+  // ── the budget curve: capacity against the size of the error fan ──
+  var spreadPts = [];
+  var SPREAD_K = 0.12;   // fixed so the curve varies one thing only
+  var MAX_BEAT = Math.max.apply(null, IV.map(function (v) { return v.beat; }));
+
+  function drawBudget() {
+    var f = fit(budgetCv), g = f.g, w = f.w, h = f.h;
+    g.clearRect(0, 0, w, h);
+    var pad = { l: 34, r: 12, t: 16, b: 26 };
+    var pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+    var YMAX = 17;
+
+    g.strokeStyle = css("--rule"); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(pad.l, pad.t); g.lineTo(pad.l, pad.t + ph); g.lineTo(pad.l + pw, pad.t + ph); g.stroke();
+
+    g.fillStyle = css("--dim"); g.font = "9px " + css("--mono"); g.textAlign = "right";
+    [0, 5, 10, 15].forEach(function (v) {
+      var y = pad.t + ph * (1 - v / YMAX);
+      g.fillText(String(v), pad.l - 5, y + 3);
+      g.strokeStyle = css("--rule"); g.globalAlpha = 0.4;
+      g.beginPath(); g.moveTo(pad.l, y); g.lineTo(pad.l + pw, y); g.stroke(); g.globalAlpha = 1;
+    });
+
+    // half the ceiling, which nothing measured here has ever crossed
+    var yHalf = pad.t + ph * (1 - 17 / YMAX);
+    g.strokeStyle = css("--temper"); g.globalAlpha = 0.5; g.setLineDash([3, 4]);
+    g.beginPath(); g.moveTo(pad.l, yHalf); g.lineTo(pad.l + pw, yHalf); g.stroke();
+    g.setLineDash([]); g.globalAlpha = 1;
+    g.fillStyle = css("--temper"); g.textAlign = "left";
+    g.fillText("half the ceiling (17 of 34)", pad.l + 4, yHalf + 10);
+
+    var xPiano = pad.l + (1 / 1.5) * pw;
+    g.strokeStyle = css("--dim"); g.globalAlpha = 0.5; g.setLineDash([2, 3]);
+    g.beginPath(); g.moveTo(xPiano, pad.t + ph * 0.25); g.lineTo(xPiano, pad.t + ph); g.stroke();
+    g.setLineDash([]); g.globalAlpha = 1;
+    g.fillStyle = css("--dim"); g.textAlign = "center";
+    g.fillText("the piano", xPiano, pad.t + ph * 0.25 - 4);
+
+    g.fillStyle = css("--dim"); g.textAlign = "center";
+    g.fillText("size of the errors  ×the piano's  →", pad.l + pw / 2, h - 8);
+
+    if (!spreadPts.length) {
+      g.fillStyle = css("--dim"); g.font = "10px " + css("--mono");
+      g.fillText("measure at a few sizes and the budget line appears", pad.l + pw / 2, pad.t + ph / 2);
+      return;
+    }
+
+    g.strokeStyle = css("--just"); g.lineWidth = 2; g.beginPath();
+    spreadPts.forEach(function (p, i) {
+      var x = pad.l + (p.scale / 1.5) * pw;
+      var y = pad.t + ph * (1 - Math.min(YMAX, p.total) / YMAX);
+      if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+    });
+    if (spreadPts.length > 1) g.stroke();
+    spreadPts.forEach(function (p) {
+      var x = pad.l + (p.scale / 1.5) * pw;
+      var y = pad.t + ph * (1 - Math.min(YMAX, p.total) / YMAX);
+      g.fillStyle = css("--just");
+      g.beginPath(); g.arc(x, y, 3, 0, Math.PI * 2); g.fill();
+      g.fillStyle = css("--ink"); g.font = "9px " + css("--mono"); g.textAlign = "center";
+      g.fillText(p.total.toFixed(1), x, y - 7);
+    });
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  BUTTONS — run, sweep, spread; all share the job queue
+  // ══════════════════════════════════════════════════════════
+
+  var bRun = document.getElementById("b-run");
+  var bSweep = document.getElementById("b-sweep");
+  var bSpread = document.getElementById("b-spread");
+  var bThink = document.getElementById("b-think");
+  var bThinkReady = false;
+
+  function setBusy(busy) {
+    bRun.disabled = busy; bSweep.disabled = busy; bSpread.disabled = busy;
+  }
+
+  bRun.addEventListener("click", function () {
+    if (jobsBusy()) return;
+    setBusy(true);
+    bRun.textContent = "Measuring…";
     var read = document.getElementById("run-read");
-    read.textContent = "Integrating 4000 steps and fitting 31 readouts…";
-    setTimeout(function () {
-      var K = parseInt(document.getElementById("coupling").value, 10) / 100;
-      lastMC = capacity(K, 30, true);
-      drawMC();
+    var K = sharedK;
+    read.textContent = "Integrating 7,500 steps, then fitting the readout one delay at a time. Watch the bars land.";
+    runExperiment({ K: K, commit: true, onDone: function (res) {
       read.innerHTML =
         "At <b>K = " + K.toFixed(2) + "</b>: capacity <b class='just-t'>" +
-        lastMC.total.toFixed(2) + "</b> in the first 31 delays, against a ceiling of <b>" +
-        lastMC.ceiling + "</b> &nbsp;·&nbsp; nonlinear task (u<sub>t−1</sub>·u<sub>t−3</sub>) at <b class='temp-t'>" +
-        (lastMC.nl * 100).toFixed(1) + "%</b> &nbsp;·&nbsp; memory still readable <b>" +
-        lastMC.reach + " steps</b> back (" + lastMC.reachSec.toFixed(1) + " s), which is past the right edge of the chart." +
-        "<br>" + lastMC.ceiling + " features, fit on 3500 samples and <b>scored on 3500 it never saw</b>. " +
-        "The gap between " + lastMC.total.toFixed(2) + " and " + lastMC.ceiling +
-        " is redundancy: near-identical oscillators holding near-identical things.";
-      btn.disabled = false; btn.textContent = "Run the experiment";
-    }, 30);
+        res.total.toFixed(2) + "</b> in the first 31 delays, against a ceiling of <b>" +
+        NF + "</b> &nbsp;·&nbsp; nonlinear task (u<sub>t−1</sub>·u<sub>t−3</sub>) at <b class='temp-t'>" +
+        (res.nl * 100).toFixed(1) + "%</b> &nbsp;·&nbsp; memory still readable <b>" +
+        res.reach + " steps</b> back (" + res.reachSec.toFixed(1) + " s)" +
+        (res.reach > 30 ? ", past where the chart used to end." : ".") +
+        "<br>" + NF + " features, fit on 3,500 samples and <b>scored on 3,500 it never saw</b>. " +
+        "The gap between " + res.total.toFixed(2) + " and " + NF +
+        " is redundancy: near-identical oscillators holding near-identical things. " +
+        "Tap a bar to watch the readout remember that delay.";
+      bThinkReady = true;
+      bThink.title = "Replay eight seconds of the bank's state as sound";
+      bRun.textContent = "Run the experiment";
+      setBusy(false);
+      syncSound();
+    } });
   });
 
-  document.getElementById("b-sweep").addEventListener("click", function () {
-    var btn = this;
-    btn.disabled = true; btn.textContent = "Sweeping…";
+  bSweep.addEventListener("click", function () {
+    if (jobsBusy()) return;
+    setBusy(true);
+    bSweep.textContent = "Sweeping…";
     var read = document.getElementById("run-read");
     var Ks = [0, 0.12, 0.45, 1.0, 2.0, 4.0, 6.0, 8.0];
     var out = [];
-    var idx = 0;
-    read.textContent = "Sweeping coupling — 8 full experiments…";
-    function step() {
-      if (idx >= Ks.length) {
-        lastSweep = out;
-        drawSweep();
+    read.textContent = "Sweeping coupling — eight full experiments, measured as they land…";
+    function runNext(i) {
+      if (i >= Ks.length) {
         var lo = out[0], hi = out[out.length - 1];
         read.innerHTML =
           "Across the sweep, mixing climbs <b class='temp-t'>" + (lo.nl * 100).toFixed(1) + "% → " +
@@ -1553,28 +1909,189 @@
           ", because that window is too short to contain what's being lost. " +
           "Neither number ever approaches the ceiling of " + hi.ceiling + ", and that shortfall is the redundancy: " +
           "eleven oscillators this close together are close to being one oscillator.";
-        btn.disabled = false; btn.textContent = "Sweep the coupling";
+        bSweep.textContent = "Sweep the coupling";
+        setBusy(false);
         return;
       }
-      var K = Ks[idx++];
-      var r = capacity(K, 30, true);
-      out.push({ K: K, total: r.total, nl: r.nl, ceiling: r.ceiling,
-                 reach: r.reach, reachSec: r.reachSec });
-      lastSweep = out; drawSweep();
-      setTimeout(step, 15);
+      runExperiment({ K: Ks[i], commit: false, onDone: function (res) {
+        out.push({ K: Ks[i], total: res.total, nl: res.nl, ceiling: res.ceiling,
+                   reach: res.reach, reachSec: res.reachSec });
+        lastSweep = out;
+        drawSweep();
+        runNext(i + 1);
+      } });
     }
-    setTimeout(step, 30);
+    runNext(0);
   });
 
+  var spreadSlider = document.getElementById("spread");
+  var spreadVal = document.getElementById("spread-val");
+  spreadSlider.addEventListener("input", function () {
+    var s = parseInt(this.value, 10) / 100;
+    spreadVal.innerHTML = "&times;" + s.toFixed(2) + " &middot; widest detuning " +
+      (MAX_BEAT * s).toFixed(2) + " Hz";
+  });
+
+  bSpread.addEventListener("click", function () {
+    if (jobsBusy()) return;
+    setBusy(true);
+    bSpread.textContent = "Measuring…";
+    var s = parseInt(spreadSlider.value, 10) / 100;
+    var read = document.getElementById("spread-read");
+    read.textContent = "Same experiment, errors at ×" + s.toFixed(2) + "…";
+    runExperiment({ K: SPREAD_K, scale: s, commit: false, onDone: function (res) {
+      var replaced = false;
+      for (var i = 0; i < spreadPts.length; i++) {
+        if (Math.abs(spreadPts[i].scale - s) < 0.005) { spreadPts[i] = { scale: s, total: res.total, reach: res.reach, reachSec: res.reachSec }; replaced = true; }
+      }
+      if (!replaced) spreadPts.push({ scale: s, total: res.total, reach: res.reach, reachSec: res.reachSec });
+      spreadPts.sort(function (a, b) { return a.scale - b.scale; });
+      drawBudget();
+      read.innerHTML = "At <b>&times;" + s.toFixed(2) + "</b>: capacity <b class='just-t'>" +
+        res.total.toFixed(2) + "</b> of 34, readable <b>" + res.reachSec.toFixed(1) +
+        " s</b> back, at K = " + SPREAD_K.toFixed(2) + " on held-out data." +
+        (s === 0 ? " Eleven identical oscillators hold about one oscillator's worth: the whole bank collapses to a single tuning fork." : "") +
+        " Measure a few sizes and compare against the piano's ×1.00.";
+      bSpread.textContent = "Measure at this size";
+      setBusy(false);
+    } });
+  });
+
+  // ── hear it think: replay the bank's measured envelopes as sound ──
+  bThink.dataset.sound = "think";
+  bThink.dataset.on = "Stop listening";
+  bThink.addEventListener("click", function () {
+    if (playing("think")) { stopSound("think"); return; }
+    if (!lastRun || !lastRun.done) return;
+    var c = audio();
+    var t = c.currentTime + 0.1;
+    var durS = 8, STEPS = 400;
+    var base = WASH + TRAIN;
+    var master = c.createGain();
+    master.gain.value = 0.9;
+    master.connect(bus());
+    var oscs = [];
+
+    // the input, as a loudness contour on filtered noise
+    var nbuf = c.createBuffer(1, Math.ceil(c.sampleRate * durS), c.sampleRate);
+    var nd = nbuf.getChannelData(0);
+    for (var i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    var nsrc = c.createBufferSource(); nsrc.buffer = nbuf;
+    var nfil = c.createBiquadFilter(); nfil.type = "lowpass"; nfil.frequency.value = 1100;
+    var ng = c.createGain(); ng.gain.value = 0;
+    nsrc.connect(nfil); nfil.connect(ng); ng.connect(master);
+    var ncurve = new Float32Array(STEPS);
+    for (var s2 = 0; s2 < STEPS; s2++)
+      ncurve[s2] = 0.012 + 0.05 * Math.abs(lastRun.sim.u[base + s2]) / 0.8;
+    ng.gain.setValueCurveAtTime(ncurve, t, durS);
+    nsrc.start(t); nsrc.stop(t + durS + 0.05);
+    oscs.push(nsrc);
+
+    // eleven voices, each gain following its oscillator's measured |z|
+    var amax = 1e-9;
+    var amps = [];
+    for (var j = 0; j < N; j++) {
+      var arr = new Float32Array(STEPS);
+      for (var s3 = 0; s3 < STEPS; s3++) {
+        var p = lastRun.sim.X[(base + s3) * NF + 2 * N + j];
+        var av = Math.sqrt(p > 0 ? p : 0);
+        arr[s3] = av;
+        if (av > amax) amax = av;
+      }
+      amps.push(arr);
+    }
+    for (var j2 = 0; j2 < N; j2++) {
+      var o = c.createOscillator();
+      o.type = "sine";
+      o.frequency.value = IV[j2].fJust * OCT;
+      var gg = c.createGain(); gg.gain.value = 0;
+      var curve = new Float32Array(STEPS);
+      for (var s4 = 0; s4 < STEPS; s4++) curve[s4] = 0.085 * (amps[j2][s4] / amax);
+      gg.gain.setValueCurveAtTime(curve, t, durS);
+      o.connect(gg); gg.connect(master);
+      o.start(t); o.stop(t + durS + 0.05);
+      oscs.push(o);
+    }
+    register("think", master, oscs);
+    later(function () { if (playing("think")) stopSound("think"); }, (durS + 0.4) * 1000);
+    document.getElementById("run-read").innerHTML =
+      "Eight seconds of the bank thinking: the hiss is the input it was given; the eleven voices swell " +
+      "as their oscillators catch it. What you're hearing is the state the readout reads.";
+  });
+
+  // keep "hear it think" locked until there's a run to hear
+  var syncSoundBase = syncSound;
+  syncSound = function () {
+    syncSoundBase();
+    if (!bThinkReady) bThink.disabled = true;
+  };
+
   // ══════════════════════════════════════════════════════════
-  //  PHASE PORTRAIT (live, ambient)
+  //  ONE BANK — eleven phases at the true detunings, integrated
+  //  live. The portrait draws them; the register reads them. The
+  //  coupling knob below and the ones above are the same knob.
   // ══════════════════════════════════════════════════════════
 
+  // [verify:bank] begin
+  var TWO_PI = Math.PI * 2;
+  function bankStepPure(phase, dev, K, dtReal) {
+    var h = 0.002;
+    var n = Math.max(1, Math.min(40, Math.round(dtReal / h)));
+    var hh = dtReal / n;
+    for (var s = 0; s < n; s++) {
+      var mr = 0, mi = 0;
+      for (var i = 0; i < phase.length; i++) { mr += Math.cos(phase[i]); mi += Math.sin(phase[i]); }
+      mr /= phase.length; mi /= phase.length;
+      var R = Math.sqrt(mr * mr + mi * mi);
+      var psiM = Math.atan2(mi, mr);
+      for (var j = 0; j < phase.length; j++) {
+        var pull = K * R * Math.sin(psiM - phase[j]) * hh;
+        phase[j] = (phase[j] + OMEGA[j] * hh + pull) % TWO_PI;
+        dev[j] += pull;
+      }
+    }
+    return { R: Math.sqrt(Math.pow(avgCos(phase), 2) + Math.pow(avgSin(phase), 2)) };
+  }
+  function avgCos(ph) { var s = 0; for (var i = 0; i < ph.length; i++) s += Math.cos(ph[i]); return s / ph.length; }
+  function avgSin(ph) { var s = 0; for (var i = 0; i < ph.length; i++) s += Math.sin(ph[i]); return s / ph.length; }
+  // [verify:bank] end
+
+  var bank = {
+    phase: new Float64Array(N),
+    dev: new Float64Array(N),
+    stored: new Float64Array(N),
+    written: false
+  };
+  for (var bi = 0; bi < N; bi++) bank.phase[bi] = (bi * TWO_PI) / N;
+
+  var sharedK = 0.12;
   var phaseCv = document.getElementById("phase");
-  var livePhase = new Float64Array(N);
-  for (var pi = 0; pi < N; pi++) livePhase[pi] = (pi * 2 * Math.PI) / N;
-  var liveK = 0.12;
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var kSliderA = document.getElementById("coupling");
+  var kSliderB = document.getElementById("leak");
+  var kValA = document.getElementById("coupling-val");
+  var kValB = document.getElementById("leak-val");
+
+  function setK(v) {
+    sharedK = Math.max(0, Math.min(8, v));
+    var sv = String(Math.round(sharedK * 100));
+    kSliderA.value = sv; kSliderB.value = sv;
+    kValA.textContent = "K = " + sharedK.toFixed(2);
+    kValB.textContent = "K = " + sharedK.toFixed(2);
+    document.getElementById("phase-read").textContent = sharedK < 0.3
+      ? "A whisper. Each oscillator keeps its own time, and anything written into their differences stays put. This is where the memory lives."
+      : sharedK < 2
+        ? "Enough to talk. The nearly-in-tune oscillators lock together first and give up what they held; the worst intervals hold out longest."
+        : "Strong. Written differences are erased in seconds, the in-tune first, the most wrong last.";
+  }
+  kSliderA.addEventListener("input", function () { setK(parseInt(this.value, 10) / 100); });
+  kSliderB.addEventListener("input", function () { setK(parseInt(this.value, 10) / 100); });
+
+  // trails so the fast clocks read as orbits instead of flicker
+  var TRAIL = 22;
+  var phHist = [];
+  for (var pj = 0; pj < N; pj++) phHist.push([]);
 
   function drawPhase() {
     var f = fit(phaseCv), g = f.g, w = f.w, h = f.h;
@@ -1584,70 +2101,48 @@
     g.strokeStyle = css("--rule"); g.lineWidth = 1;
     g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2); g.stroke();
 
-    // order parameter (how locked the bank is)
-    var sr = 0, si = 0;
-    for (var i = 0; i < N; i++) { sr += Math.cos(livePhase[i]); si += Math.sin(livePhase[i]); }
-    sr /= N; si /= N;
-    var order = Math.sqrt(sr * sr + si * si);
+    var mr = avgCos(bank.phase), mi = avgSin(bank.phase);
+    var order = Math.sqrt(mr * mr + mi * mi);
 
     g.strokeStyle = css("--temper"); g.lineWidth = 2; g.globalAlpha = 0.7;
-    g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + sr * R, cy + si * R); g.stroke();
+    g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + mr * R, cy + mi * R); g.stroke();
     g.globalAlpha = 1;
 
     var maxErr = Math.max.apply(null, IV.map(function (v) { return Math.abs(v.err); }));
     for (var j = 0; j < N; j++) {
-      var a = livePhase[j];
-      var x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R;
       var wrongness = Math.abs(IV[j].err) / maxErr;
+      var hist = phHist[j];
+      for (var q = 0; q < hist.length; q++) {
+        var ah = hist[q];
+        g.fillStyle = css("--just");
+        g.globalAlpha = 0.05 + 0.25 * (q / hist.length) * (0.35 + 0.65 * wrongness);
+        g.beginPath();
+        g.arc(cx + Math.cos(ah) * R, cy + Math.sin(ah) * R, 1.6 + 2 * wrongness, 0, Math.PI * 2);
+        g.fill();
+      }
+      var a = bank.phase[j];
       g.fillStyle = css("--just");
       g.globalAlpha = 0.35 + 0.65 * wrongness;
-      g.beginPath(); g.arc(x, y, 3 + 4 * wrongness, 0, Math.PI * 2); g.fill();
+      g.beginPath();
+      g.arc(cx + Math.cos(a) * R, cy + Math.sin(a) * R, 3 + 4 * wrongness, 0, Math.PI * 2);
+      g.fill();
       g.globalAlpha = 1;
     }
 
     g.fillStyle = css("--dim"); g.font = "9px " + css("--mono"); g.textAlign = "center";
     g.fillText("agreement " + (order * 100).toFixed(0) + "%", cx, cy + R + 20);
     g.textAlign = "left";
-    g.fillText("dot size = how wrong that interval is on a piano", 10, 14);
+    g.fillText("eleven clocks at their true speeds", 10, 14);
+    g.fillText("dot size = how wrong that interval is on a piano", 10, 26);
   }
-
-  var lastT = performance.now();
-  function tick(now) {
-    var dt = Math.min(0.05, (now - lastT) / 1000);
-    lastT = now;
-    if (!reduced) {
-      var mr = 0, mi = 0;
-      for (var i = 0; i < N; i++) { mr += Math.cos(livePhase[i]); mi += Math.sin(livePhase[i]); }
-      mr /= N; mi /= N;
-      for (var j = 0; j < N; j++) {
-        var mean = Math.atan2(mi, mr);
-        livePhase[j] += (OMEGA[j] * 0.25 + liveK * 6 * Math.sin(mean - livePhase[j])) * dt;
-      }
-    }
-    drawPhase();
-    requestAnimationFrame(tick);
-  }
-
-  var coupling = document.getElementById("coupling");
-  coupling.addEventListener("input", function () {
-    liveK = parseInt(this.value, 10) / 100;
-    document.getElementById("coupling-val").textContent = "K = " + liveK.toFixed(2);
-    document.getElementById("phase-read").textContent = liveK < 0.05
-      ? "Barely coupled. Each oscillator keeps its own time; the bank stays spread out, which is where the memory lives."
-      : liveK < 0.6
-        ? "Coupled enough to talk. The dots pull toward each other but the badly-tuned ones resist; this is the working range."
-        : "Strongly coupled. They've surrendered their differences and locked into one voice, which is beautiful and computationally useless.";
-  });
 
   // ══════════════════════════════════════════════════════════
-  //  STORAGE — phase deviation from free-running
+  //  STORAGE — the register is the same bank read slowly: write
+  //  phase kicks, then let the real coupling argue them away
   // ══════════════════════════════════════════════════════════
 
   var ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ .,!?'";
-  var SLOTS = N - 1; // 10 phase differences relative to oscillator 0
-  var stored = new Float64Array(SLOTS);   // written offsets
-  var devi = new Float64Array(SLOTS);     // current deviation
-  var written = false;
+  var SLOTS = N - 1; // 10 slots on oscillators 1..10; oscillator 0 is the anchor
 
   function buildSlots() {
     var host = document.getElementById("slots");
@@ -1668,17 +2163,17 @@
     var slots = document.getElementById("slots").children;
     var intact = 0;
     for (var i = 0; i < SLOTS; i++) {
-      var idx = Math.round((devi[i] / (2 * Math.PI)) * 32);
+      var idx = Math.round((bank.dev[i + 1] / TWO_PI) * 32);
       idx = ((idx % 32) + 32) % 32;
       var ch = ALPHA[idx];
-      var want = Math.round((stored[i] / (2 * Math.PI)) * 32);
+      var want = Math.round((bank.stored[i + 1] / TWO_PI) * 32);
       want = ((want % 32) + 32) % 32;
-      var ok = written && idx === want;
+      var ok = bank.written && idx === want;
       if (ok) intact++;
       out += ch;
       var el = slots[i];
       el.querySelector(".ch").textContent = ch === " " ? "␣" : ch;
-      el.className = "slot " + (written ? (ok ? "ok" : "bad") : "");
+      el.className = "slot " + (bank.written ? (ok ? "ok" : "bad") : "");
     }
     return { text: out, intact: intact };
   }
@@ -1689,11 +2184,14 @@
       var ch = i < s.length ? s[i] : " ";
       var idx = ALPHA.indexOf(ch);
       if (idx < 0) idx = ALPHA.indexOf(" ");
-      var phi = (idx / 32) * 2 * Math.PI;
-      stored[i] = phi;
-      devi[i] = phi;
+      var phi = (idx / 32) * TWO_PI;
+      // writing is a physical act: kick the oscillator's phase by the
+      // difference between where its deviation is and where we want it
+      bank.phase[i + 1] = (bank.phase[i + 1] + (phi - bank.dev[i + 1])) % TWO_PI;
+      bank.dev[i + 1] = phi;
+      bank.stored[i + 1] = phi;
     }
-    written = true;
+    bank.written = true;
     var r = readBack();
     document.getElementById("store-read").innerHTML =
       "Written. Held as <b>" + SLOTS + "</b> phase offsets, <b>" + (SLOTS * 5) +
@@ -1701,34 +2199,20 @@
       r.text.replace(/ /g, "␣") + "</b>.";
   }
 
-  var leakSlider = document.getElementById("leak");
-  var decayTimer = null;
-
-  function decayStep(K) {
-    // deviations relax toward their mean — coupling erases difference.
-    // resistance scales with how far this oscillator's own frequency
-    // sits from the pack: the worst intervals hold longest.
-    var mean = 0;
-    for (var i = 0; i < SLOTS; i++) mean += devi[i];
-    mean /= SLOTS;
-    var maxErr = Math.max.apply(null, IV.map(function (v) { return Math.abs(v.err); }));
-    for (var j = 0; j < SLOTS; j++) {
-      var stubborn = Math.abs(IV[j + 1].err) / maxErr;   // 0..1
-      var rate = K * 0.09 * (1.05 - 0.95 * stubborn);
-      devi[j] += (mean - devi[j]) * rate;
-    }
+  var lastStoreText = "";
+  function updateStoreRead() {
     var r = readBack();
-    document.getElementById("store-read").innerHTML = written
-      ? "Reading back: <b class='" + (r.intact === SLOTS ? "just-t" : "temp-t") + "'>" +
-        r.text.replace(/ /g, "␣") + "</b>, <b>" + r.intact + " of " + SLOTS +
-        "</b> characters still intact."
-      : "Nothing written yet.";
+    var html = "Reading back: <b class='" + (r.intact === SLOTS ? "just-t" : "temp-t") + "'>" +
+      r.text.replace(/ /g, "␣") + "</b>, <b>" + r.intact + " of " + SLOTS +
+      "</b> characters still intact" +
+      (sharedK < 0.3 ? ". At this whisper of coupling they'll outlast your patience."
+                     : sharedK < 2 ? ". Coupling is arguing them away, nearly-in-tune first."
+                                   : ". At this coupling the register empties in seconds.");
+    if (html !== lastStoreText) {
+      lastStoreText = html;
+      document.getElementById("store-read").innerHTML = html;
+    }
   }
-
-  leakSlider.addEventListener("input", function () {
-    var K = parseInt(this.value, 10) / 100;
-    document.getElementById("leak-val").textContent = "K = " + K.toFixed(2);
-  });
 
   document.getElementById("b-write").addEventListener("click", function () {
     writeMessage(document.getElementById("msg").value);
@@ -1742,7 +2226,7 @@
   // cancel toward silence. Interference converts phase into loudness,
   // and loudness is something the ear is very good at.
   function playVerify() {
-    if (!written) writeMessage(document.getElementById("msg").value);
+    if (!bank.written) writeMessage(document.getElementById("msg").value);
     stopBank();
     var c = audio();
     var t = c.currentTime + 0.08;
@@ -1758,70 +2242,67 @@
     var oscs = [];
     var ringing = 0;
     for (var i = 0; i < SLOTS; i++) {
-      var f = IV[i + 1].fJust * OCT;
-      var period = 1 / f;
-      var pReg = ((devi[i] % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-      var pRef = ((stored[i] % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+      var fq = IV[i + 1].fJust * OCT;
+      var period = 1 / fq;
+      var pReg = ((bank.dev[i + 1] % TWO_PI) + TWO_PI) % TWO_PI;
+      var pRef = ((bank.stored[i + 1] % TWO_PI) + TWO_PI) % TWO_PI;
       // interference amplitude 2|cos(Δ/2)| happens in the graph, not here;
       // this is only for the readout line
       var delta = Math.abs(pReg - pRef);
-      if (delta > Math.PI) delta = 2 * Math.PI - delta;
+      if (delta > Math.PI) delta = TWO_PI - delta;
       if (Math.cos(delta / 2) > 0.55) ringing++;
 
       [pReg, pRef].forEach(function (ph) {
         var o = c.createOscillator();
         o.type = "sine";
-        o.frequency.value = f;
+        o.frequency.value = fq;
         var g = c.createGain();
         g.gain.value = 0.075;
         o.connect(g); g.connect(master);
-        o.start(t + (ph / (2 * Math.PI)) * period);
+        o.start(t + (ph / TWO_PI) * period);
         o.stop(t + dur + 0.1);
         oscs.push(o);
       });
     }
     bankNodes = { oscs: oscs, master: master };
     syncSound();
-    // this one ends on its own; let the controls know when it does
     later(function () { if (bankNodes && bankNodes.master === master) { bankNodes = null; syncSound(); } },
           (dur + 0.3) * 1000);
 
-    var r = readBack();
+    readBack();
     document.getElementById("store-read").innerHTML =
       "Beating the register against a reference standing where you wrote it. <b class='" +
       (ringing === SLOTS ? "just-t" : "temp-t") + "'>" + ringing + " of " + SLOTS +
-      "</b> voices ringing; a drifted slot cancels itself to silence, so what you hear is the message checking out.";
+      "</b> voices ringing; a drifted slot cancels toward silence, so what you hear is the message checking out.";
   }
 
   document.getElementById("b-listen").addEventListener("click", playVerify);
 
-  document.getElementById("b-decay").addEventListener("click", function () {
-    if (decayTimer) { clearInterval(decayTimer); decayTimer = null; this.textContent = "Let it decay"; return; }
-    if (!written) writeMessage(document.getElementById("msg").value);
-    var btn = this;
-    btn.textContent = "Stop decay";
-    if (parseInt(leakSlider.value, 10) === 0) {
-      leakSlider.value = 40;
-      document.getElementById("leak-val").textContent = "K = 0.40";
+  var bDecay = document.getElementById("b-decay");
+  bDecay.addEventListener("click", function () {
+    var on = bDecay.getAttribute("aria-pressed") === "true";
+    if (on) {
+      bDecay.setAttribute("aria-pressed", "false");
+      bDecay.textContent = "Let it decay";
+      setK(0.12);
+      return;
     }
-    decayTimer = setInterval(function () {
-      var K = parseInt(leakSlider.value, 10) / 100;
-      if (K <= 0) return;
-      decayStep(K);
-    }, 90);
+    if (!bank.written) writeMessage(document.getElementById("msg").value);
+    bDecay.setAttribute("aria-pressed", "true");
+    bDecay.textContent = "Ease it back";
+    setK(2.0);
   });
 
   document.getElementById("b-reset").addEventListener("click", function () {
-    if (decayTimer) { clearInterval(decayTimer); decayTimer = null; }
-    document.getElementById("b-decay").textContent = "Let it decay";
-    written = false;
-    stored = new Float64Array(SLOTS);
-    devi = new Float64Array(SLOTS);
-    leakSlider.value = 0;
-    document.getElementById("leak-val").textContent = "K = 0.00";
+    bank.written = false;
+    for (var i = 0; i < N; i++) { bank.dev[i] = 0; bank.stored[i] = 0; }
+    bDecay.setAttribute("aria-pressed", "false");
+    bDecay.textContent = "Let it decay";
+    setK(0.12);
     buildSlots();
+    lastStoreText = "";
     document.getElementById("store-read").textContent =
-      "Ten characters, held as phase offsets between eleven oscillators. Nothing is written down anywhere.";
+      "Ten characters, held as phase offsets between eleven oscillators.";
     stopBank();
   });
 
@@ -1829,14 +2310,38 @@
   //  BOOT
   // ══════════════════════════════════════════════════════════
 
-  function redrawAll() { drawSpiral(); drawMC(); drawSweep(); drawPhase(); }
+  var lastT = performance.now();
+  var storeSync = 0, portraitSync = 0;
+  function tick(now) {
+    var dt = Math.min(0.05, (now - lastT) / 1000);
+    lastT = now;
+    bankStepPure(bank.phase, bank.dev, sharedK, dt);
+    if (!reduced) {
+      for (var j = 0; j < N; j++) {
+        phHist[j].push(bank.phase[j]);
+        if (phHist[j].length > TRAIL) phHist[j].shift();
+      }
+      drawPhase();
+    } else if (now - portraitSync > 200) {
+      portraitSync = now;
+      drawPhase();
+    }
+    if (bank.written && now - storeSync > 250) {
+      storeSync = now;
+      updateStoreRead();
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function redrawAll() { drawSpiral(); drawMC(); drawSweep(); drawRecon(); drawBudget(); drawPhase(); }
   window.addEventListener("resize", redrawAll);
   var mq = window.matchMedia("(prefers-color-scheme: dark)");
   if (mq.addEventListener) mq.addEventListener("change", redrawAll);
   new MutationObserver(redrawAll).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
+  setK(0.12);
   redrawAll();
   requestAnimationFrame(tick);
-  setStrobe(beatFifth() * 0.5, "Stripes stand still when the interval is pure. They crawl when it isn't.");
+  setStrobe(0, "Stripes stand still when the interval is pure. They crawl when it isn't.");
 })();
 </script>
