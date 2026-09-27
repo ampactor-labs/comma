@@ -8,14 +8,14 @@ run at those errors, 0.37 to 8.63 Hz, and only a linear readout is trained,
 which makes them a reservoir computer. It is one HTML file with no
 dependencies; a Node script reruns its simulation to check 14 claims.
 
-**Status: working.** It runs from the file alone, but no test drives it in a browser, and the live link returns 404 until the portfolio site next deploys.
+**Status: working.** It runs from the file alone, and no test drives it in a browser.
 
 Live: https://ampactor.dev/comma/
 
 ## Quick start
 
-Open `index.html` in a browser with sound on, or the live link above once the
-portfolio site deploys. There is nothing to install or build, and the page
+Open `index.html` in a browser with sound on, or open the live link above.
+There is nothing to install or build, and the page
 makes no network requests.
 
 In the first panel, Play the true fifth holds a steady tone and Play the
