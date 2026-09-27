@@ -1134,7 +1134,12 @@
   function fit(cv) {
     var dpr = window.devicePixelRatio || 1;
     var w = cv.clientWidth;
-    var h = parseInt(cv.getAttribute("height"), 10);
+    // The CSS height comes from the markup's height attribute, read once:
+    // setting cv.height below rewrites that attribute to h * dpr, so reading
+    // it again on the next frame would compound the scale (3x per frame on a
+    // phone) until the canvas hit the browser's size limit.
+    if (!cv.dataset.cssHeight) cv.dataset.cssHeight = cv.getAttribute("height");
+    var h = parseInt(cv.dataset.cssHeight, 10);
     cv.width = Math.round(w * dpr);
     cv.height = Math.round(h * dpr);
     cv.style.height = h + "px";
