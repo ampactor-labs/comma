@@ -338,6 +338,37 @@ console.log("— a letter in a piano: Reed–Solomon over GF(32) (lab/channel.ht
     loud / over > 0.97, (100 * loud / over).toFixed(1) + "% refused");
 }
 
+console.log("— a comodulogram for a sunflower (lab/comodulogram.html) —");
+{
+  const P = labBlock("comodulogram.html", "pac", ["comodulogramSync", "synthPAC"]);
+  const nSig = (r) => r.sig.flat().filter(Boolean).length;
+  const maxZ = (r) => Math.max(...r.z.flat());
+  const sp = P.synthPAC(50, 240, 0.8, 7);
+  const PBs = [[0.3, 0.42], [0.42, 0.6], [0.6, 0.85]], ABs = [[3, 5], [5, 7], [7, 9]];
+  const rs = P.comodulogramSync(sp, 50, PBs, ABs, 200, 1, { surrogate: "blocks" });
+  claim("a test signal coupled at 0.5 Hz × 6 Hz lights its own cell",
+    rs.sig[1][1] && maxZ(rs) > 10, "max z " + maxZ(rs).toFixed(1) + ", cells " + nSig(rs));
+  const quiet = P.comodulogramSync(P.synthPAC(50, 240, 0, 7), 50, PBs, ABs, 200, 1, { surrogate: "blocks" });
+  claim("the same signal uncoupled stays dark", nSig(quiet) === 0, "max z " + maxZ(quiet).toFixed(2));
+
+  // the page's bank run at K = 8, 600 s, block-shuffle surrogates
+  const PB = [[0.30, 0.46], [0.46, 0.61], [0.61, 0.76], [0.76, 1.00]];
+  const AB = [[4.0, 6.0], [6.2, 7.8], [7.5, 9.4]];
+  const bankSignal = (mode) => {
+    const b = Kit.bench(kitOm, { mode }), secs = 600, W = 500;
+    const sim = b.makeSim(8, 1, Kit.makeInput(W + secs * 50)); sim.step(Infinity);
+    const x = new Float64Array(secs * 50);
+    for (let t = 0; t < x.length; t++) { let s2 = 0; for (let j = 0; j < b.N; j++) s2 += sim.X[(t + W) * b.NF + j]; x[t] = s2; }
+    return x;
+  };
+  const add = P.comodulogramSync(bankSignal("additive"), 50, PB, AB, 300, 1, { surrogate: "blocks" });
+  const mul = P.comodulogramSync(bankSignal("multiplicative"), 50, PB, AB, 300, 1, { surrogate: "blocks" });
+  claim("the page's additive bank stays dark over 600 s at K = 8",
+    nSig(add) === 0, "max z " + maxZ(add).toFixed(2));
+  claim("the multiplicative bank lights up over the same 600 s",
+    nSig(mul) >= 3 && maxZ(mul) > 8, "max z " + maxZ(mul).toFixed(1) + ", cells " + nSig(mul));
+}
+
 console.log(failures.length
   ? "\n" + failures.length + " claim(s) FAILED"
   : "\nevery claim on the page and in the back country reproduces");

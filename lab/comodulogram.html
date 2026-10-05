@@ -22,14 +22,15 @@
   .legend .ramp { flex: 1 1 8rem; max-width: 14rem; height: 10px; border: 1px solid var(--rule); border-radius: 2px;
     background: linear-gradient(90deg, var(--panel-2), var(--temper)); }
   .legend .sigkey { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--ink); vertical-align: -2px; margin-right: 0.3rem; }
-  .heat-title { display: flex; justify-content: space-between; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
-  .heat-title h3 { margin-bottom: 0.5rem; }
+  h3.ht { margin-bottom: 0.2rem; }
+  .readout.hr { margin-bottom: 0.4rem; }
   .big { font-family: var(--mono); font-size: 1.5rem; letter-spacing: -0.02em; color: var(--ink); }
   .controls { display: grid; grid-template-columns: 1fr; gap: 0.2rem 1.4rem; }
   @media (min-width: 46rem) { .controls { grid-template-columns: 1fr 1fr; } }
   .field { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
   .field > span { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dim); }
-  .field input, .field select { max-width: 100%; min-height: 40px; }
+  .field input, .field select { width: 100%; max-width: 100%; min-height: 40px; }
+  .field.span2 { grid-column: span 2; }
   .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.2rem, 1fr)); gap: 0.8rem; margin: 0.9rem 0; }
   .fieldset { border: 1px solid var(--rule); border-radius: 3px; padding: 0.8rem 0.9rem 0.2rem; margin: 0.9rem 0; min-width: 0; }
   .fieldset legend { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--dim); padding: 0 0.4rem; }
@@ -117,14 +118,14 @@
 
     <div class="grid-2" style="margin-top:0.8rem">
       <div>
-        <div class="heat-title"><h3>Additive (the main page's bank)</h3><span class="readout" id="add-max"></span></div>
+        <h3 class="ht">Additive (the main page's bank)</h3><div class="readout hr" id="add-max">&nbsp;</div>
         <div class="heat-box">
           <canvas id="heat-add" height="250" tabindex="0" aria-label="Comodulogram of the additive bank: phase bands across, amplitude bands up, each cell colored by z-score against surrogates. Use arrow keys to move between cells."></canvas>
           <div class="tip" id="tip-add" aria-hidden="true"></div>
         </div>
       </div>
       <div>
-        <div class="heat-title"><h3>Multiplicative</h3><span class="readout" id="mul-max"></span></div>
+        <h3 class="ht">Multiplicative</h3><div class="readout hr" id="mul-max">&nbsp;</div>
         <div class="heat-box">
           <canvas id="heat-mul" height="250" tabindex="0" aria-label="Comodulogram of the multiplicative bank, same layout and color scale as the additive one. Use arrow keys to move between cells."></canvas>
           <div class="tip" id="tip-mul" aria-hidden="true"></div>
@@ -149,6 +150,7 @@
   <div class="panel sweep-wrap" id="sweep-wrap" hidden>
     <h3>Largest z across the grid, coupling swept</h3>
     <canvas id="sweep" height="220" aria-label="Line chart: the largest z-score in each bank's comodulogram as coupling K runs from 0 to 8. Filled dots mark couplings where at least one cell survives the false-discovery correction."></canvas>
+    <p class="note" style="margin:0.5rem 0 0">Blue: additive. Amber: multiplicative. A filled dot means at least one cell at that coupling survives the false-discovery correction; hollow means none does. The sweep uses 500 surrogates a cell.</p>
     <div class="table-scroll"><table id="sweep-table"><thead><tr><th>K</th><th>additive max z</th><th>cells</th><th>multiplicative max z</th><th>cells</th></tr></thead><tbody></tbody></table></div>
   </div>
 
@@ -161,7 +163,7 @@
     <div><h2 id="h-byo">Bring your own plant</h2></div>
   </div>
   <p>Got a recording? A leaf, a dead stem, a dish of agar, your own forearm. One column of numbers, or time and value, comma or tab or whatever. Set the sample rate, set the bands, run it. Your browser reads the file and it goes nowhere else.</p>
-  <p>Calibrate your eye first on the three canned signals. The coupled one should burn. The noise should stay dark. The spiky one is the trap the note warns about: a slow wave with a sharp spike in it carries harmonics locked to itself, and those harmonics look exactly like a fast rhythm riding a slow one. It lights up with no coupling in it at all. Then spike removal takes the costume off.</p>
+  <p>Calibrate your eye first on the three canned signals. The coupled one should burn. The noise should stay dark. The spiky one is the trap the note warns about: a slow wave with a sharp spike in it carries harmonics locked to itself, and those harmonics look exactly like a fast rhythm riding a slow one. It lights up with no coupling in it at all. Spike removal takes most of the costume off. Usually not all of it, and the scraps that stay are why the note piles on more controls.</p>
 
   <div class="panel">
     <h3>The record</h3>
@@ -208,8 +210,8 @@
       <div class="fields">
         <label class="field"><span>Threshold k &times; MAD</span><input type="number" id="d-k" step="any" min="1" value="4"></label>
         <label class="field"><span>Spike window (s)</span><input type="number" id="d-win" step="any" min="0.01" value="1"></label>
-        <label class="field"><span>Method</span>
-          <select id="d-meth"><option value="template" selected>subtract the average spike</option><option value="clip">clip at the threshold</option></select>
+        <label class="field span2"><span>Method</span>
+          <select id="d-meth"><option value="template" selected>subtract average spike</option><option value="clip">clip at threshold</option></select>
         </label>
       </div>
     </fieldset>
@@ -223,14 +225,14 @@
 
     <div class="grid-2" style="margin-top:0.8rem">
       <div>
-        <div class="heat-title"><h3>As recorded</h3><span class="readout" id="byo-a-max"></span></div>
+        <h3 class="ht">As recorded</h3><div class="readout hr" id="byo-a-max">&nbsp;</div>
         <div class="heat-box">
           <canvas id="heat-byo-a" height="270" tabindex="0" aria-label="Comodulogram of the loaded record: phase bands across, amplitude bands up, colored by z-score. Use arrow keys to move between cells."></canvas>
           <div class="tip" id="tip-byo-a" aria-hidden="true"></div>
         </div>
       </div>
       <div id="byo-b-col" hidden>
-        <div class="heat-title"><h3>Spikes removed</h3><span class="readout" id="byo-b-max"></span></div>
+        <h3 class="ht">Spikes removed</h3><div class="readout hr" id="byo-b-max">&nbsp;</div>
         <div class="heat-box">
           <canvas id="heat-byo-b" height="270" tabindex="0" aria-label="Comodulogram of the same record after spike removal, same layout and color scale. Use arrow keys to move between cells."></canvas>
           <div class="tip" id="tip-byo-b" aria-hidden="true"></div>
@@ -505,7 +507,7 @@ function* comodulogramGen(x, fs, phaseBands, ampBands, nSurr, seed, opts) {
   }
   var mi = [], z = [], pv = [], prof = [], sMean = [], sSd = [];
   for (i = 0; i < nP; i++) { mi.push([]); z.push([]); pv.push([]); prof.push([]); sMean.push([]); sSd.push([]); }
-  var per = Math.max(1, Math.floor(CHUNK * 2 / Math.max(1, W))), acc = 0;
+  var per = Math.max(1, Math.floor(CHUNK / Math.max(1, W))), acc = 0;
   for (i = 0; i < nP; i++) {
     for (j = 0; j < nA; j++) {
       var p = new Float64Array(NB);
@@ -620,32 +622,79 @@ function* despikeSteps(x, fs, k, winSec, method) {
   }
   for (i = 0; i < L; i++) y[i] = x[i];
   if (!peaks.length) return { y: y, spikes: 0, threshold: thr, method: "template" };
-  var W = 2 * h + 1, T = new Float64Array(W), p, q;
+  var W = 2 * h + 1, T = new Float64Array(W), p, q, frac = peaks.map(function () { return 0; });
+  // a value at a fractional index, linearly interpolated
+  function at(arr, pos, len) {
+    var i0 = Math.floor(pos), f = pos - i0;
+    if (i0 < 0 || i0 >= len) return 0;
+    return i0 + 1 < len ? arr[i0] * (1 - f) + arr[i0 + 1] * f : arr[i0];
+  }
   function build() {
     var n = 0; T.fill(0);
     for (p = 0; p < peaks.length; p++) {
-      if (peaks[p] - h < 0 || peaks[p] + h >= L) continue;
-      for (j = 0; j < W; j++) T[j] += r[peaks[p] - h + j];
+      if (peaks[p] - h - 1 < 0 || peaks[p] + h + 1 >= L) continue;
+      for (j = 0; j < W; j++) T[j] += at(r, peaks[p] - h + j + frac[p], L);
       n++;
     }
     if (n) for (j = 0; j < W; j++) T[j] /= n;
     return n;
   }
   if (!build()) return { y: y, spikes: 0, threshold: thr, method: "template" };
+  // matched filter: slide the first template along the record and add any
+  // spike it fits at least half as well as the typical detected one, so a
+  // spike that peaked just under the threshold is not left behind
+  var tt0 = 0;
+  for (j = 0; j < W; j++) tt0 += T[j] * T[j];
+  if (tt0 > 0) {
+    var C = new Float32Array(L), amps = [];
+    for (i = h; i < L - h; i++) {
+      var cs = 0;
+      for (j = 0; j < W; j++) cs += r[i - h + j] * T[j];
+      C[i] = cs / tt0;
+      if ((i & 4095) === 4095) yield 0;
+    }
+    for (p = 0; p < peaks.length; p++) amps.push(C[peaks[p]]);
+    var floorC = 0.5 * medianOf(amps), taken = new Uint8Array(L);
+    for (p = 0; p < peaks.length; p++)
+      for (j = Math.max(0, peaks[p] - h); j <= Math.min(L - 1, peaks[p] + h); j++) taken[j] = 1;
+    var added = [];
+    for (i = h + 1; i < L - h - 1; i++) {
+      if (taken[i] || !(C[i] > floorC) || C[i] < C[i - 1] || C[i] < C[i + 1]) continue;
+      var top = true;
+      for (j = i - h; j <= i + h; j++) if (C[j] > C[i]) { top = false; break; }
+      if (!top) continue;
+      added.push(i);
+      for (j = i - h; j <= i + h; j++) taken[j] = 1;
+    }
+    if (added.length) {
+      peaks = peaks.concat(added).sort(function (a, b) { return a - b; });
+      frac = peaks.map(function () { return 0; });
+    }
+  }
   // re-align every spike to the template (a few samples either way), then
   // rebuild it: peak-picking on a noisy, round-topped spike jitters
-  var lag = Math.max(1, Math.round(0.08 * fs));
-  for (p = 0; p < peaks.length; p++) {
-    var bestL = 0, bestC = -Infinity;
-    for (var d = -lag; d <= lag; d++) {
-      var c0 = 0, s0 = peaks[p] + d - h;
-      if (s0 < 0 || s0 + W > L) continue;
-      for (j = 0; j < W; j++) c0 += r[s0 + j] * T[j];
-      if (c0 > bestC) { bestC = c0; bestL = d; }
+  // and to a fraction of a sample, from a parabola through the best three
+  // lags; a sample is a lot at 50 Hz
+  var lag = Math.max(1, Math.round(0.08 * fs)), cc = new Float64Array(2 * lag + 1);
+  for (var pass = 0; pass < 2; pass++) {
+    for (p = 0; p < peaks.length; p++) {
+      var bestL = 0, bestC = -Infinity;
+      for (var d = -lag; d <= lag; d++) {
+        var c0 = 0, s0 = peaks[p] + d - h;
+        if (s0 < 0 || s0 + W > L) { cc[d + lag] = -Infinity; continue; }
+        for (j = 0; j < W; j++) c0 += r[s0 + j] * T[j];
+        cc[d + lag] = c0;
+        if (c0 > bestC) { bestC = c0; bestL = d; }
+      }
+      var dl = 0, bi = bestL + lag;
+      if (bi > 0 && bi < 2 * lag && isFinite(cc[bi - 1]) && isFinite(cc[bi + 1])) {
+        var den = cc[bi - 1] - 2 * cc[bi] + cc[bi + 1];
+        if (den < 0) dl = Math.max(-0.5, Math.min(0.5, 0.5 * (cc[bi - 1] - cc[bi + 1]) / den));
+      }
+      peaks[p] += bestL; frac[p] = pass ? dl : 0;
     }
-    peaks[p] += bestL;
+    build();
   }
-  build();
   var tt = 0;
   for (j = 0; j < W; j++) {
     // Tukey taper on the outer quarter so the subtraction leaves no step
@@ -653,11 +702,15 @@ function* despikeSteps(x, fs, k, winSec, method) {
     var tap = e >= 1 ? 1 : 0.5 - 0.5 * Math.cos(Math.PI * e);
     T[j] *= tap; tt += T[j] * T[j];
   }
+  var Ts = new Float64Array(W);
   for (p = 0; p < peaks.length; p++) {
-    var st = peaks[p] - h, dot = 0;
-    for (j = 0; j < W; j++) { q = st + j; if (q >= 0 && q < L) dot += r[q] * T[j]; }
-    var amp = tt > 0 ? dot / tt : 0;
-    for (j = 0; j < W; j++) { q = st + j; if (q >= 0 && q < L) y[q] -= amp * T[j]; }
+    var st = peaks[p] - h, dot = 0, nn = 0;
+    for (j = 0; j < W; j++) {
+      Ts[j] = at(T, j - frac[p], W);
+      q = st + j; if (q >= 0 && q < L) { dot += r[q] * Ts[j]; nn += Ts[j] * Ts[j]; }
+    }
+    var amp = nn > 0 ? dot / nn : 0;
+    for (j = 0; j < W; j++) { q = st + j; if (q >= 0 && q < L) y[q] -= amp * Ts[j]; }
   }
   return { y: y, spikes: peaks.length, threshold: thr, method: "template" };
 }
@@ -712,7 +765,8 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
 
   function fmtHz(f) { return f >= 10 ? f.toFixed(0) : f >= 1 ? f.toFixed(1) : f >= 0.1 ? f.toFixed(2) : f >= 0.01 ? f.toFixed(3) : f.toPrecision(2); }
   function fmtBand(b) { return fmtHz(b[0]) + "–" + fmtHz(b[1]); }
-  function fmtP(p) { return p < 0.001 ? p.toExponential(1) : p.toFixed(3); }
+  function fmtP(p) { return p < 0.01 ? p.toPrecision(2) : p.toFixed(3); }
+  function pText(res, i, j) { var p = res.p[i][j]; return fmtP(p) + (Math.abs(p - 1 / (res.nSurr + 1)) < 1e-12 ? " (the floor: no surrogate reached it)" : ""); }
 
   // ══════════════════════════════════════════════════════════
   //  HEATMAP
@@ -758,8 +812,10 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
     function geom() {
       var f = Kit.fit(canvas);
       var nP = Math.max(1, st.pb.length), nA = Math.max(1, st.ab.length);
-      var narrow = f.w < 340;
-      M.l = narrow ? 46 : 58; M.b = 40;
+      f.g.font = "10px " + Kit.css("--mono");
+      var lw = 0;
+      st.ab.forEach(function (b) { lw = Math.max(lw, f.g.measureText(fmtBand(b)).width); });
+      M.l = Math.ceil(lw) + 28; M.b = 40;
       var cw = (f.w - M.l - M.r) / nP, ch = (f.h - M.t - M.b) / nA;
       G = { f: f, nP: nP, nA: nA, cw: cw, ch: ch };
       return G;
@@ -843,7 +899,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
         c.fillText(fmtBand(st.pb[i]), rx.x + rx.w / 2, H - M.b + 5);
       }
       c.fillText("phase band (Hz)", M.l + (W - M.l - M.r) / 2, H - 14);
-      c.save(); c.translate(10, M.t + (H - M.t - M.b) / 2); c.rotate(-Math.PI / 2);
+      c.save(); c.translate(8, M.t + (H - M.t - M.b) / 2); c.rotate(-Math.PI / 2);
       c.textBaseline = "middle"; c.fillText("amplitude band (Hz)", 0, 0); c.restore();
       c.strokeStyle = rule; c.lineWidth = 1;
       c.strokeRect(M.l + 0.5, M.t + 0.5, W - M.l - M.r - 1, H - M.t - M.b - 1);
@@ -900,7 +956,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
     var f = Kit.fit(canvas), c = f.g, W = f.w, H = f.h;
     var dim = Kit.css("--dim"), rule = Kit.css("--rule"), temper = Kit.css("--temper"), just = Kit.css("--just"), ink = Kit.css("--ink");
     c.clearRect(0, 0, W, H);
-    var L = 44, R = 8, T = 22, B = 26, pw = W - L - R, ph = H - T - B;
+    var L = 44, R = 16, T = 22, B = 26, pw = W - L - R, ph = H - T - B;
     c.font = "10px " + Kit.css("--mono"); c.fillStyle = dim;
     if (!prof) {
       c.textAlign = "center"; c.textBaseline = "middle";
@@ -930,7 +986,8 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
     }
     c.strokeStyle = rule; c.beginPath(); c.moveTo(L, y0 + 0.5); c.lineTo(L + pw, y0 + 0.5); c.stroke();
     c.fillStyle = dim; c.textAlign = "right"; c.textBaseline = "middle";
-    var tick = mx > 0.3 ? 0.2 : mx > 0.12 ? 0.1 : mx > 0.06 ? 0.05 : 0.02;
+    var tick = 0.01;
+    [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5].some(function (t) { tick = t; return mx / t <= 3; });
     for (var tv = -Math.floor(mx / tick) * tick; tv <= mx + 1e-9; tv += tick) {
       var ty = y0 - tv * sc;
       if (ty < T - 2 || ty > T + ph + 2) continue;
@@ -989,7 +1046,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
       var bench = Kit.bench(OMEGA, { mode: mode });
       var Lst = WASH + secs * FS;
       var sim = bench.makeSim(K, 1, Kit.makeInput(Lst));
-      while (!sim.step(2500)) yield 0;
+      while (!sim.step(1000)) yield 0;
       var x = new Float64Array(secs * FS), N = bench.N, NF = bench.NF;
       for (var t = 0; t < x.length; t++) {
         var s = 0, b = (t + WASH) * NF;
@@ -1032,7 +1089,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
     var K = +$("k-slider").value, secs = +$("len-sel").value, sur = $("sur-sel").value;
     bankRes = { add: null, mul: null };
     heatAdd.reset(PB, AB); heatMul.reset(PB, AB);
-    $("add-max").textContent = ""; $("mul-max").textContent = "";
+    $("add-max").innerHTML = "&nbsp;"; $("mul-max").innerHTML = "&nbsp;";
     setBusy(true);
     var meter = $("bank-meter"), status = $("bank-status");
     var t0 = performance.now();
@@ -1142,7 +1199,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
     var f = Kit.fit(cv), c = f.g, W = f.w, H = f.h;
     var dim = Kit.css("--dim"), rule = Kit.css("--rule"), just = Kit.css("--just"), temper = Kit.css("--temper"), panel = Kit.css("--panel");
     c.clearRect(0, 0, W, H);
-    var L = 36, R = 92, T = 12, B = 30, pw = W - L - R, ph = H - T - B;
+    var L = 36, R = 110, T = 12, B = 30, pw = W - L - R, ph = H - T - B;
     if (W < 420) R = 16;
     pw = W - L - R;
     var ymax = 6;
@@ -1380,7 +1437,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
     heatA.reset(b.pb, b.ab);
     $("byo-b-col").hidden = !useD;
     if (useD) heatB.reset(b.pb, b.ab);
-    $("byo-a-max").textContent = ""; $("byo-b-max").textContent = "";
+    $("byo-a-max").innerHTML = "&nbsp;"; $("byo-b-max").innerHTML = "&nbsp;";
     $("byo-dl").setAttribute("aria-disabled", "true");
     $("byo-run").disabled = true;
     var m = b.pb.length * b.ab.length;
@@ -1410,7 +1467,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
       var ma = maxCell(byo.resA), txt = byo.name + ": largest z " + ma.z.toFixed(2) + ", " + ma.nsig + " of " + m + " cells survive the correction";
       if (byo.resB) {
         var mb = maxCell(byo.resB);
-        txt += "; after spike removal (" + byo.despike.spikes + (byo.despike.method === "clip" ? " samples clipped" : " spikes") + ") largest z " + mb.z.toFixed(2) + ", " + mb.nsig + " survive";
+        txt += "; after spike removal (" + byo.despike.spikes + (byo.despike.method === "clip" ? " samples clipped" : " spikes") + ") largest z " + mb.z.toFixed(2) + ", " + mb.nsig + (mb.nsig === 1 ? " survives" : " survive");
         if (ma.nsig && !mb.nsig) txt += ". The coupling did not survive the control: treat it as the spike's own harmonics";
         else if (ma.nsig && mb.nsig) txt += ". Some cells survive the control; look at the trace before believing them";
       }
@@ -1430,7 +1487,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
     if (!res) { $("byo-cell").textContent = h.describe(i, j) + "."; drawProfile($("byo-prof"), null); return; }
     drawProfile($("byo-prof"), res.meanBinned[i][j], res.sig[i][j]);
     $("byo-cell").innerHTML = "<b>" + (which === "a" ? "As recorded" : "Spikes removed") + "</b>, phase " + fmtBand(res.phaseBands[i]) + " Hz &times; amplitude " + fmtBand(res.ampBands[j]) + " Hz<br>" +
-      "MI <b>" + res.mi[i][j].toExponential(2) + "</b> (surrogates " + res.surrMean[i][j].toExponential(2) + " &plusmn; " + res.surrSd[i][j].toExponential(2) + "), z <b>" + res.z[i][j].toFixed(2) + "</b>, p " + fmtP(res.p[i][j]) +
+      "MI <b>" + res.mi[i][j].toExponential(2) + "</b> (surrogates " + res.surrMean[i][j].toExponential(2) + " &plusmn; " + res.surrSd[i][j].toExponential(2) + "), z <b>" + res.z[i][j].toFixed(2) + "</b>, p " + pText(res, i, j) +
       ", " + (res.sig[i][j] ? "<b>survives</b>" : "does not survive") + " the correction";
     drawTrace();
   }

@@ -8,7 +8,7 @@ run at those errors, 0.37 to 8.63 Hz, and only a linear readout is trained,
 which makes them a reservoir computer. The main page is one HTML file with no
 dependencies, told in a plain-spoken first-person voice after Edward Abbey.
 Behind it, `lab/` holds eight more pages that take the idea further. A Node
-script reruns the simulations to check 37 claims, and a browser script drives
+script reruns the simulations to check 41 claims, and a browser script drives
 every page.
 
 **Status: working.** Every page runs from its files alone. Headless Chromium
@@ -111,7 +111,9 @@ psychoacoustic thresholds that estimate rests on.
 [notes/plant-comodulogram.md](notes/plant-comodulogram.md) is a protocol for
 measuring phase-amplitude coupling (whether the loudness of a fast rhythm
 follows the phase of a slow one) in plants, with a null result on this bank
-from a script that is not in the repository.
+from a script that is not in the repository. `lab/comodulogram.html` now runs
+that analysis in the open: over 600 seconds at K = 8 the page's additive bank
+shows no significant cell, and the multiplicative variant lights eight.
 
 ### The back country
 
@@ -233,7 +235,7 @@ does well alone and the bank adds nothing.
 ## Testing
 
 ```sh
-node tools/verify.mjs     # the arithmetic: 37 claims, about fifteen seconds
+node tools/verify.mjs     # the arithmetic: 41 claims, about fifteen seconds
 node tools/browser.mjs    # the pages: every page in headless Chromium
 ```
 
@@ -242,7 +244,7 @@ blocks (`[verify:intervals]`, `[verify:core]` and `[verify:bank]`) out of
 `index.html` and runs them, so it tests the code the browser runs. It then
 loads `lab/kit.js` and checks it against those blocks, re-measures every
 ordering and number the lab pages' prose states, and runs the marked analysis
-blocks inside the lab pages (the beat meter in `listen.html` and the Reed–Solomon code in `channel.html`). It prints PASS or FAIL
+blocks inside the lab pages (the beat meter in `listen.html`, the Reed–Solomon code in `channel.html` and the phase-amplitude analysis in `comodulogram.html`). It prints PASS or FAIL
 for each claim and exits with status 1 if any fails.
 
 `browser.mjs` needs Playwright with Chromium. It opens every page at 1280 and
