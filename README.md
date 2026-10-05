@@ -5,10 +5,15 @@ tuning errors into a reservoir computer and a storage register. Twelve pure
 fifths overshoot seven octaves by 23.46 cents; the piano's tuning spreads that
 gap and leaves every interval but the octave slightly off. Eleven oscillators
 run at those errors, 0.37 to 8.63 Hz, and only a linear readout is trained,
-which makes them a reservoir computer. It is one HTML file with no
-dependencies; a Node script reruns its simulation to check 14 claims.
+which makes them a reservoir computer. The main page is one HTML file with no
+dependencies, told in a plain-spoken first-person voice after Edward Abbey.
+Behind it, `lab/` holds eight more pages that take the idea further. A Node
+script reruns the simulations to check 37 claims, and a browser script drives
+every page.
 
-**Status: working.** It runs from the file alone, and no test drives it in a browser.
+**Status: working.** Every page runs from its files alone. Headless Chromium
+drives every page; no person has yet tested the audio or the microphone pages
+on real devices.
 
 Live: https://ampactor.dev/comma/
 
@@ -30,6 +35,8 @@ because a phone's small speaker reproduces the concert-pitch tones poorly;
 that also makes every beat four times as fast. Headphones plays at concert
 pitch. The Sound on and Stop buttons in the bottom-right corner mute the page
 or stop everything, and the Escape key also stops everything.
+
+The back country starts at `lab/index.html`, or at the end of the main page.
 
 ## How it works
 
@@ -106,6 +113,29 @@ measuring phase-amplitude coupling (whether the loudness of a fast rhythm
 follows the phase of a slow one) in plants, with a null result on this bank
 from a script that is not in the repository.
 
+### The back country
+
+The `lab/` pages share `lab/kit.js`, which carries the main page's bank with
+the detunings passed in instead of fixed, plus tunings, a frame-sliced
+experiment runner, the register step and the sound and canvas plumbing. Fed
+the piano's detunings it reproduces the main page bit for bit, which the
+verify script checks. `lab/lab.css` carries the main page's look.
+
+| Page                 | What it does                                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `ladder.html`        | The comma in fifths, leap years, the moon, Jupiter and Saturn, the golden ratio and π, drawn as a spiral whose spokes are the continued fraction's rungs. |
+| `bakeoff.html`       | Builds the bank from ten historical and equal tunings, from every equal division of 5 to 60 notes, from a blind search over eleven rates, and with up to 47 clocks. |
+| `metronomes.html`    | Metronomes on a plank on rollers (Pantaleone's model) with a letter written on each, erased as they fall into step. |
+| `fireflies.html`     | Pulse-coupled fireflies (Mirollo–Strogatz), and a mode in which two phones sync by chirping through the air.    |
+| `channel.html`       | Writes a message into a piano's tuning with a Reed–Solomon code over GF(32), then lets a humid summer and a tuner at it. |
+| `listen.html`        | Staircase tests that measure the two hearing thresholds the tuning-channel estimate rests on, and a microphone beat meter for a real piano. |
+| `instrument.html`    | The live bank driven by pointer, keys, MIDI or microphone, with readouts that replay your input and a drift clock. |
+| `comodulogram.html`  | A phase-amplitude coupling analysis with surrogates and a file reader, run on the bank with additive and multiplicative coupling. |
+
+[notes/breadboard.md](notes/breadboard.md) is a build sheet for the bank as
+op-amp resonators, with every component value computed from the detunings.
+Nobody has built it.
+
 ## Benchmarks
 
 These are simulation results from a seeded input, so every run gives the same
@@ -151,34 +181,87 @@ best-tuned intervals. At K = 2 every slot leaves its written level between 0.7
 and 14.9 seconds. In the script's model the best-tuned slots tend to go first,
 though not strictly in order of their error.
 
+### Which tuning thinks best
+
+Capacity summed over delays 0 to 300 at K = 0.12, from `lab/bakeoff.html`;
+the verify script checks the orderings.
+
+| Tuning                 | Capacity, delays 0 to 300 |
+| ---------------------- | ------------------------: |
+| Kirnberger III         |                     21.16 |
+| Vallotti               |                     20.60 |
+| 19 equal               |                     20.60 |
+| Pythagorean            |                     19.65 |
+| Equal temperament      |                     19.35 |
+| Werckmeister III       |                     19.21 |
+| Quarter-comma meantone |                     17.61 |
+| Five-limit just        |                     15.43 |
+| 31 equal               |                     14.48 |
+| 53 equal               |                     11.09 |
+
+Finer tunings make a weaker bank. Across equal divisions of 5 to 60 notes the
+best is 13 notes at 21.9, and the mean falls from 20.5 over 9 to 20 notes to
+15.2 over 26 to 60. Eleven evenly spaced rates in the piano's band hold 22.11,
+and a 160-step random search found 22.22, so the piano's fan reaches 87% of
+the best found. Banks of 11 to 47 clocks grow from 19.3 to 59.9 while the
+share of their ceiling they use falls from 57% to 42%.
+
+### Spoken digits
+
+`node tools/digits.mjs path/to/fsdd` runs the bank on the Free Spoken Digit
+Dataset (3,000 recordings of 0 to 9 by six speakers, not included; the
+script's header says how to fetch it), trained on recordings 5 to 49 and
+tested on 0 to 4. Speech reaches a 50-step-per-second bank as loudness
+envelopes. Every row uses the same ridge readout over thirds of the
+utterance; chance is 10%.
+
+| Front end and reservoir                         | Test accuracy |
+| ----------------------------------------------- | ------------: |
+| Loudness only, no bank                          |         25.7% |
+| Loudness only, no bank, 192 features            |         31.7% |
+| Loudness only, the piano's bank, K = 0.12       |         49.7% |
+| Loudness only, the bank with no errors          |         25.7% |
+| Loudness only, the piano's bank, K = 2          |         50.0% |
+| Eleven bands, no bank                           |         91.3% |
+| Eleven bands, the piano's bank, K = 0.12        |         90.0% |
+| Eleven bands, the bank with no errors           |         90.0% |
+
+Fed only loudness, the detunings double the readout's accuracy, and removing
+them takes it back to no bank at all. Fed eleven frequency bands, the readout
+does well alone and the bank adds nothing.
+
 ## Testing
 
 ```sh
-node tools/verify.mjs
+node tools/verify.mjs     # the arithmetic: 37 claims, about fifteen seconds
+node tools/browser.mjs    # the pages: every page in headless Chromium
 ```
 
-The script needs only Node (tested with 22.22.2). It cuts the three marked
+`verify.mjs` needs only Node (tested with 22.22.2). It cuts the three marked
 blocks (`[verify:intervals]`, `[verify:core]` and `[verify:bank]`) out of
-`index.html` and runs them, so it tests the code the browser runs. It prints
-PASS or FAIL for each of 14 claims and exits with status 1 if any fails. The
-claims cover the detunings, the coupling sweep, the delay-160 scores, the
-zero-detuning budget and the register's timing. No CI runs it.
+`index.html` and runs them, so it tests the code the browser runs. It then
+loads `lab/kit.js` and checks it against those blocks, re-measures every
+ordering and number the lab pages' prose states, and runs the marked analysis
+blocks inside the lab pages (the beat meter in `listen.html` and the Reed–Solomon code in `channel.html`). It prints PASS or FAIL
+for each claim and exits with status 1 if any fails.
 
-Nothing drives the page in a browser, so its buttons, audio, charts and job
-queue are unchecked, and no listening test backs its claims about sound. The
-script steps the register in fixed 0.02-second steps where the page steps once
-per animation frame, so the page's timings can differ a little. It does not
-check the page's arithmetic (such as the 23.46 cents), which slot slips first,
-or the order in which the register empties.
+`browser.mjs` needs Playwright with Chromium. It opens every page at 1280 and
+390 pixels wide in dark and light, presses the main buttons on the pages that
+have measurable results, and fails on any script error or sideways scroll.
+`.github/workflows/check.yml` runs both on every push.
+
+Neither script listens to anything, so no test backs the page's claims about
+sound. The register is stepped in fixed 0.02-second steps where the page steps
+once per animation frame, so the page's timings can differ a little.
 
 ## Limitations
 
 The oscillator bank is a demonstration and a weak computer: even at the
 strongest coupling its readout scores 0.115 out of 1 on a simple nonlinear
-task, and it uses under 60% of the memory its 34 readout numbers allow. Only
-the simulation is checked. A Node script reruns the page's simulation code,
-but nothing tests the page itself in a browser, and no listening test backs
-what the page says you will hear.
+task, and it uses under 60% of the memory its 34 readout numbers allow. The
+simulations are checked by a Node script and the pages by a headless browser,
+but no person has yet taken the listening test, and the microphone and
+two-phone modes have been tested only with simulated input.
 
 - The page presents the reservoir and the register as one bank read at two
   speeds. In the code they are two simulations that share the eleven rates and
