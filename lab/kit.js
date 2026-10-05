@@ -703,7 +703,11 @@
       var m = sound.isMuted();
       bm.setAttribute("aria-pressed", m ? "true" : "false");
       bm.textContent = m ? "Sound off" : "Sound on";
-      document.querySelectorAll("[data-needs-sound]").forEach(function (el) { el.disabled = m; });
+      // mute disables sound buttons; unmute re-enables only the ones mute disabled
+      document.querySelectorAll("[data-needs-sound]").forEach(function (el) {
+        if (m) { if (!el.disabled) { el.disabled = true; el.dataset.mutedOff = "1"; } }
+        else if (el.dataset.mutedOff) { el.disabled = false; delete el.dataset.mutedOff; }
+      });
     }
     sound.onChange(sync);
     bm.addEventListener("click", function () { sound.setMuted(!sound.isMuted()); });

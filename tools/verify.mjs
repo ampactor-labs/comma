@@ -288,6 +288,28 @@ console.log("— the breadboard (notes/breadboard.md) —");
     (RQ / 1e3).toFixed(0) + " kΩ, " + (Rmin / 1e3).toFixed(1) + " .. " + (Rmax / 1e3).toFixed(1) + " kΩ");
 }
 
+// blocks marked // [verify:name] begin ... end inside a lab page
+function labBlock(file, name, exportsList) {
+  const txt = readFileSync(join(root, "lab", file), "utf8");
+  const re = new RegExp("// \\[verify:" + name + "\\] begin([\\s\\S]*?)// \\[verify:" + name + "\\] end");
+  const m = txt.match(re);
+  if (!m) throw new Error("marker block not found: " + file + " " + name);
+  return new Function(m[1] + "\nreturn {" + exportsList.join(",") + "};")();
+}
+
+console.log("— the listening test's beat meter (lab/listen.html) —");
+{
+  const B = labBlock("listen.html", "beat", ["estimateBeat", "synthDyad"]);
+  const c4 = 261.6256, g4 = c4 * Math.pow(2, 7 / 12);
+  const truth = Math.abs(3 * c4 - 2 * g4);
+  const est = B.estimateBeat(B.synthDyad(c4, g4, 8000, 16, 8), 8000, 0.2, 20);
+  claim("the beat meter hears an equal-tempered fifth at C4 beat 0.886 times a second",
+    Math.abs(est.hz - truth) / truth < 0.01, est.hz.toFixed(4) + " Hz vs " + truth.toFixed(4));
+  const f1 = 220, f2 = (3 * f1 + 4.4) / 2;
+  const est2 = B.estimateBeat(B.synthDyad(f1, f2, 8000, 12, 8), 8000, 0.2, 20);
+  claim("and a fifth mistuned to beat 4.4 Hz", Math.abs(est2.hz - 4.4) / 4.4 < 0.01, est2.hz.toFixed(3) + " Hz");
+}
+
 console.log(failures.length
   ? "\n" + failures.length + " claim(s) FAILED"
   : "\nevery claim on the page and in the back country reproduces");
