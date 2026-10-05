@@ -38,20 +38,33 @@
   .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--rule); margin-right: 0.4rem; vertical-align: 0.05em; }
   .live-dot.on { background: var(--rose); }
   .privacy { border-left: 2px solid var(--just); padding-left: 0.9rem; }
+  ol.steps { max-width: var(--measure); margin: 0 0 1.1rem; padding-left: 1.4rem; }
+  ol.steps li { margin: 0.3rem 0; padding-left: 0.2rem; }
 </style>
 <body>
 <div class="wrap">
 
 <header class="hero">
-  <span class="eyebrow">Back country &middot; 06 &middot; A field test</span>
+  <span class="eyebrow">Lab &middot; 06</span>
   <h1>The Listening Test</h1>
-  <p class="lede">A note in this repo claims a piano's tuning can hide about 290 bits before anyone in the hall notices. The arithmetic is fine. The two numbers holding it up were guessed at a desk. This page puts your ears on the witness stand instead.</p>
-  <p>You hear the same thing twice and say which one somebody tampered with. That's the whole game. It takes ten minutes or so and wants a quiet room, headphones if you have them, and no dog barking at the mail truck. Nothing you do here leaves this browser unless you send it yourself.</p>
+  <p class="lede">The <a href="../notes/tuning-channel.md">tuning-channel note</a> estimates that a piano's tuning can hide about 290 bits of data before an audience notices. That figure rests on two listening thresholds that were estimated, not measured. This page measures them with your ears.</p>
+  <p>Each trial plays the same sound twice. One of the two has been altered, and you pick which one. The test takes about ten minutes. Use a quiet room, and headphones if you have them. Nothing leaves this browser unless you send it yourself.</p>
+  <ol class="steps">
+    <li>Set up your sound and do two practice trials (section 01).</li>
+    <li>Run Test A, an altered tuning (section 02).</li>
+    <li>Run Test B, a spread unison (section 03).</li>
+    <li>Read your results, and download them if you want to share them (section 04).</li>
+  </ol>
 </header>
 
 <section id="camp">
-  <div class="sec-head"><span class="sec-mark">01</span><div><h2>Set up camp</h2></div></div>
-  <p>First the gear. Tell the page how you're listening, then play the reference chord and set the level where you'd leave it for an evening by the fire: clearly there, nowhere near loud. Leave it there for both tests.</p>
+  <div class="sec-head"><span class="sec-mark">01</span><div><h2>Set up your sound</h2></div></div>
+  <p>Do these steps once, before the tests.</p>
+  <ol class="steps">
+    <li>Choose <b>Phone speaker</b> or <b>Headphones</b>.</li>
+    <li>Press <b>Play the reference chord</b>.</li>
+    <li>Set the volume so the chord is clear but quiet. Leave it there for both tests.</li>
+  </ol>
 
   <div class="panel">
     <h3>Output and level</h3>
@@ -59,7 +72,7 @@
       <button id="oct-hi" aria-pressed="true">Phone speaker</button>
       <button id="oct-lo" aria-pressed="false">Headphones</button>
     </div>
-    <p class="note" id="oct-note">Phone speaker plays everything two octaves above concert pitch, because a small speaker can't reproduce much below 500&nbsp;Hz. Every beat runs four times as fast up there, which probably makes both tests easier. The register goes into your results.</p>
+    <p class="note" id="oct-note">Phone speaker plays everything two octaves higher (four times the frequency), because a small speaker reproduces little below 500&nbsp;Hz. Beats run four times as fast up there, which probably makes both tests easier. Your choice is saved with your results.</p>
     <div class="slider-row">
       <label for="vol">Volume</label>
       <input type="range" id="vol" min="0" max="100" value="70" aria-describedby="vol-read">
@@ -70,7 +83,7 @@
     </div>
   </div>
 
-  <p>Then two practice trials, one of each test, with the tampering cranked so far that a raven on a fence post would notice. Miss these and check the cable before you blame your ears.</p>
+  <p>Next, press <b>Start practice</b>. You get one trial of each test with a very large alteration, so both should be easy. If you miss either one, check your volume and cable before you start the real tests.</p>
 
   <div class="panel" id="P-panel">
     <h3>Practice &middot; two trials</h3>
@@ -88,12 +101,18 @@
 </section>
 
 <section id="test-a">
-  <div class="sec-head"><span class="sec-mark">02</span><div><h2>A doctored temperament</h2></div></div>
-  <p>Equal temperament is a treaty signed in the eighteenth century and enforced ever since by men carrying tuning hammers. Here is a five-chord walk, C, A minor, F, G and back to C, played twice. One of the two runs on the treaty. In the other, six of the twelve pitch classes are pushed sharp by &Delta; cents and the other six flat by the same &Delta;, chosen fresh each trial. Which one was doctored?</p>
-  <p>Get two right in a row and &Delta; shrinks. Miss one and it grows. The staircase walks down the canyon until it's camped at the size you catch about 71 percent of the time, and that's your number.</p>
+  <div class="sec-head"><span class="sec-mark">02</span><div><h2>Test A: an altered tuning</h2></div></div>
+  <p>You hear a five-chord sequence (C, A minor, F, G, C) twice. One run uses equal temperament, the standard piano tuning that splits the octave into twelve equal semitones. In the other run, six of the twelve note names are raised by &Delta; cents and the other six are lowered by &Delta;. A cent is a hundredth of a semitone. Which six go up is chosen at random each trial.</p>
+  <ol class="steps">
+    <li>Press <b>Start test A</b>. The two runs play back to back. The <b>First</b> and <b>Second</b> buttons light up while each run plays.</li>
+    <li>Press <b>First</b> (key <kbd>1</kbd>) or <b>Second</b> (key <kbd>2</kbd>) for the run that sounded altered. You can answer once the second run starts.</li>
+    <li>Press <b>Replay</b> (<kbd>space</kbd>) to hear the pair again. If you're unsure, take your best guess.</li>
+    <li>Keep answering. The test ends on its own, after at most 40 trials.</li>
+  </ol>
+  <p>The size of &Delta; adjusts to your answers. Two right answers in a row make it smaller, and one wrong answer makes it larger. This method is called a staircase. Over the run, &Delta; settles at the size you pick correctly about 71 percent of the time. That size is your threshold.</p>
 
   <div class="panel" id="A-panel">
-    <h3>Test A &middot; which run was doctored?</h3>
+    <h3>Test A &middot; which run was altered?</h3>
     <div class="stat-row" id="A-stat"><span class="chip">not started</span></div>
     <div class="meter" aria-hidden="true"><i id="A-meter"></i></div>
     <div class="btn-row">
@@ -105,18 +124,19 @@
       <button class="lamp" id="A-2" disabled><span>Second</span><small>key 2</small></button>
     </div>
     <div class="fb" id="A-fb" aria-live="polite"></div>
-    <canvas id="A-cv" height="230" aria-label="Staircase for test A: the doctoring size in cents on a log scale against trial number. Filled dots are correct answers, hollow dots wrong ones, ringed dots are reversals."></canvas>
-    <p class="note" style="margin-top:0.6rem">Filled dots: right. Hollow: wrong. Rings: reversals, where the staircase changed direction. The green dashes are the note's guess of &plusmn;5 cents.</p>
+    <canvas id="A-cv" height="230" aria-label="Staircase for test A: the alteration size in cents on a log scale against trial number. Filled dots are right answers, hollow dots wrong ones, ringed dots are reversals."></canvas>
+    <p class="note" style="margin-top:0.6rem">Filled dots are right answers and hollow dots are wrong ones. A ring marks a reversal, a trial where the staircase changed direction. The green dashed line is the note's estimate of &plusmn;5 cents.</p>
   </div>
 </section>
 
 <section id="test-b">
-  <div class="sec-head"><span class="sec-mark">03</span><div><h2>Shaded unisons</h2></div></div>
-  <p>The tenor and treble notes on a piano each have three strings. A tuner can leave them a hair apart and the note blooms a little, the way a choir is warmer than one man singing in a canyon. The note bets you'll hear a spread of &plusmn;1.5 cents as warmth and not as error. Below, one A has its three strings dead level. The other has one string &Delta; cents flat, one in the middle, one &Delta; sharp. Which one was shaded?</p>
-  <p>Listen to the tail, not the strike. Whatever there is to hear lives in the slow swell as the note dies.</p>
+  <div class="sec-head"><span class="sec-mark">03</span><div><h2>Test B: a spread unison</h2></div></div>
+  <p>In the middle and upper range of a piano, each note has three strings. They are normally tuned to the same pitch, which is called a unison. A tuner can set them slightly apart, and the note sounds a little fuller, the way a choir sounds fuller than one voice. The note assumes a spread of &plusmn;1.5 cents is heard as warmth, not as a mistake.</p>
+  <p>You hear the note A twice. In one, all three strings are exactly together. In the other, one string is &Delta; cents flat, one is in tune, and one is &Delta; cents sharp. Pick the one that was spread. The buttons, keys and staircase work the same as in Test A.</p>
+  <p>Listen to the end of each note, not the attack. Close pitches produce beats, a slow rise and fall in loudness. Here the beats show up as the sound fades.</p>
 
   <div class="panel" id="B-panel">
-    <h3>Test B &middot; which note was shaded?</h3>
+    <h3>Test B &middot; which note was spread?</h3>
     <div class="stat-row" id="B-stat"><span class="chip">not started</span></div>
     <div class="meter" aria-hidden="true"><i id="B-meter"></i></div>
     <div class="btn-row">
@@ -129,13 +149,15 @@
     </div>
     <div class="fb" id="B-fb" aria-live="polite"></div>
     <canvas id="B-cv" height="230" aria-label="Staircase for test B: the unison spread in cents on a log scale against trial number, with reversals ringed."></canvas>
-    <p class="note" style="margin-top:0.6rem">Same marks as above. The green dashes are the note's &plusmn;1.5 cents.</p>
+    <p class="note" style="margin-top:0.6rem">The marks are the same as in Test A. The green dashed line is the note's estimate of &plusmn;1.5 cents.</p>
   </div>
 </section>
 
 <section id="results">
-  <div class="sec-head"><span class="sec-mark">04</span><div><h2>What your ears say the piano can hold</h2></div></div>
-  <p>A forced choice between two runs, back to back, with replays and your full attention, is a harder exam than any concert. Nobody in the fourth row is told that one of two things is wrong and asked to point at it. So the thresholds you get here are smaller than what an audience would catch, and the channel computed from them is a floor. If anything the piano holds more.</p>
+  <div class="sec-head"><span class="sec-mark">04</span><div><h2>Your results</h2></div></div>
+  <p>This section feeds your two thresholds into the note's formulas. The result is the channel size: how many bits a tuning could hide, where one bit is one yes-or-no choice. Until you finish a test, the note's estimate is used in its place.</p>
+  <p>The channel has three parts. Temperament comes from Test A. Unisons come from Test B. Per-key stretch is a small offset on each of the 88 keys. It sits on top of the usual stretch curve, which tunes high notes slightly sharp and low notes slightly flat. This test does not measure it.</p>
+  <p>Treat your numbers as a lower bound. Here you know one of two sounds is altered, you hear them back to back, and you can replay them. A concert audience has none of that help, so it would need larger alterations before noticing. The piano can probably hide more than the figure shown.</p>
 
   <div class="panel" id="res-panel">
     <h3>Results</h3>
@@ -143,12 +165,12 @@
       <div class="rbox">
         <h3>Temperament threshold, A</h3>
         <div class="big num" id="r-a">&mdash;</div>
-        <div class="readout" id="r-a-sub">Test A not run yet. The channel below uses the note's &plusmn;5 cents until it is.</div>
+        <div class="readout" id="r-a-sub">Test A not run yet. The table below uses the note's &plusmn;5 cents until you run it.</div>
       </div>
       <div class="rbox">
         <h3>Unison threshold, B</h3>
         <div class="big num" id="r-b">&mdash;</div>
-        <div class="readout" id="r-b-sub">Test B not run yet. The channel below uses the note's &plusmn;1.5 cents until it is.</div>
+        <div class="readout" id="r-b-sub">Test B not run yet. The table below uses the note's &plusmn;1.5 cents until you run it.</div>
       </div>
     </div>
     <p id="r-compare" class="wide"></p>
@@ -165,21 +187,29 @@
       <span><i class="sw t"></i>temperament</span><span><i class="sw s"></i>per-key stretch</span><span><i class="sw u"></i>unisons</span>
     </div>
     <canvas id="r-cv" height="150" aria-label="Bar chart comparing the note's estimated channel capacity in bits with the capacity recomputed from your thresholds, split into temperament, stretch and unisons."></canvas>
-    <div class="readout" id="r-hover" aria-live="polite">Hover or tap a bar segment for its numbers.</div>
+    <div class="readout" id="r-hover" aria-live="polite">Hover over or tap a bar segment to see its numbers.</div>
 
     <div class="btn-row">
       <button data-tone="just" id="dl-json">Download JSON</button>
       <button id="copy-sum">Copy summary</button>
     </div>
     <div class="readout" id="copy-msg" aria-live="polite"></div>
-    <p class="note privacy">Your answers stay in this tab. The page makes no network requests and saves nothing anywhere. The JSON holds every trial (test, &Delta;, which run was doctored, your answer, right or wrong, timestamp) plus the sample rate, your browser's user-agent string and your speaker choice. If you're willing, send it to whoever sent you this page. One listener is an anecdote; thirty is the start of a citation.</p>
+    <p class="note privacy">Your answers stay in this tab. The page makes no network requests. The only thing it stores is your speaker choice, which this browser remembers for next time. The JSON file holds every trial (test, &Delta;, which one was altered, your answer, right or wrong, timestamp). It also holds device details: sample rate, your browser's user-agent string, output choice, volume and screen size. To contribute, send the file to whoever shared this page with you. Results from many listeners are more useful than results from one.</p>
   </div>
 </section>
 
 <section id="piano">
   <div class="sec-head"><span class="sec-mark">05</span><div><h2>Measure a real piano</h2></div></div>
-  <p>If there's a real piano within reach, the kind in a church basement or a bar with sawdust on the floor, strike an interval and let it ring. Where a partial of the low note nearly lands on a partial of the high one, the two beat. For a fifth that's the low note's third partial against the high note's second. Count the beats and you have the tuning error, give or take what the strings get up to on their own.</p>
-  <p>The microphone feeds a loudness envelope a hundred times a second. The page looks for a slow, steady wobble in it and turns that wobble's rate into cents.</p>
+  <p>If you have a piano nearby, you can measure how far one of its intervals is from pure. An interval is two notes played together. It is pure when the two frequencies form an exact whole-number ratio, such as 3:2 for a fifth.</p>
+  <p>A piano note is a mix of partials: the main pitch plus fainter tones at about 2, 3, 4 and more times its frequency. When a partial of the low note nearly matches a partial of the high note, the two beat. For a fifth, the low note's third partial meets the high note's second. The beat rate gives the tuning error. The strings' own behavior adds some uncertainty.</p>
+  <p>The page measures the loudness of the microphone signal 100 times a second. This record is the loudness envelope. The page finds a slow, steady pulse in it and converts the pulse rate into cents.</p>
+  <ol class="steps">
+    <li>Choose the interval and the lower note below.</li>
+    <li>Press <b>Listen through the microphone</b> and allow access.</li>
+    <li>Strike both notes, hold the keys down, and stay quiet for about ten seconds.</li>
+    <li>Read the beat rate and the distance from pure. The confidence figure shows how clear the pulse was.</li>
+  </ol>
+  <p>No piano? Press <b>Test with a synthetic piano</b>. It runs the meter on a computer-made dyad (two notes sounded together) whose beat rate is known exactly. <b>Hear the synthetic dyad</b> plays it aloud.</p>
 
   <div class="panel" id="mic-panel">
     <h3>Beat meter</h3>
@@ -208,7 +238,7 @@
 
     <div class="grid-3" style="margin-top:1rem">
       <div><h3>Beat rate</h3><div class="big num" id="m-hz">&mdash;</div><div class="readout">confidence <span class="num" id="m-conf-t">&mdash;</span><span class="meter conf"><i id="m-conf"></i></span></div></div>
-      <div><h3>Distance from pure</h3><div class="big num" id="m-cents">&mdash;</div><div class="readout" id="m-cents-sub">sign unknown from beats alone</div></div>
+      <div><h3>Distance from pure</h3><div class="big num" id="m-cents">&mdash;</div><div class="readout" id="m-cents-sub">Beats can't tell sharp from flat.</div></div>
       <div><h3>Equal temperament says</h3><div class="big num" id="m-et">&mdash;</div><div class="readout" id="m-et-sub"></div></div>
     </div>
     <p class="formula" id="m-formula" style="margin-top:1rem"></p>
@@ -217,11 +247,11 @@
 </section>
 
 <div class="foot">
-  <p class="note"><strong>What was measured, and how.</strong> Test A plays C&ndash;Am&ndash;F&ndash;G&ndash;C voiced C3&nbsp;E4&nbsp;G4&nbsp;C5, A2&nbsp;E4&nbsp;A4&nbsp;C5, F2&nbsp;F4&nbsp;A4&nbsp;C5, G2&nbsp;D4&nbsp;G4&nbsp;B4, C3&nbsp;E4&nbsp;G4&nbsp;C5, chords 0.8&nbsp;s apart with the last left to ring 1.9&nbsp;s, through <code>Kit.sound.pluck</code>: six partials, each slightly sharp (the factor 1&nbsp;+&nbsp;0.0004h&sup2;, a token stiff-string stretch), with an exponential decay. The doctored run moves a random six of the twelve pitch classes up by &Delta; and the other six down by &Delta;. Seven pitch classes appear in the progression, so at least one always moves against the rest and the doctoring is never a plain transposition. Every doctored pitch class sits at the edge of a &plusmn;&Delta; window, so some intervals are off by as much as 2&Delta;. Test B is A4 (440&nbsp;Hz, or 1760&nbsp;Hz on the phone setting) as three plucks of 3.4&nbsp;s struck together in phase, at 0,&nbsp;0,&nbsp;0 or &minus;&Delta;,&nbsp;0,&nbsp;+&Delta; cents.</p>
-  <p class="note">Both tests are two-interval forced choice with the doctored run's position random, and a 2-down-1-up staircase (Levitt, 1971) that converges near 70.7% correct. &Delta; starts at 12 cents (A) or 4 cents (B), moves by a factor of 1.5, then 1.2 from the second reversal on, and is capped at 40 or 16 cents. A run stops at 8 reversals or 40 trials. The threshold is the geometric mean of the &Delta; at the last six reversals. A run that ends with fewer than two reversals reports the geometric mean of its last six levels and is flagged as unconverged.</p>
-  <p class="note">A forced choice measures discrimination: an alert listener, a reference next to the target, as many replays as wanted. An audience has none of that, so these thresholds sit below the audience detection window the note asks about, and the recomputed channel is conservative. The results also depend on the speaker or headphones, the register, the room, the level, practice and fatigue, and on one progression in one key. A real piano's partials are louder, longer and more inharmonic than these. One listener is one listener.</p>
-  <p class="note">The channel uses the note's own formulas with your thresholds rounded to 0.01 cent. Temperament: levels = &lfloor;2A/2&rfloor;&nbsp;+&nbsp;1 at the note's 2-cent strobe resolution, bits = 12&middot;log<sub>2</sub>(levels). Per-key stretch: the test doesn't measure it, so the page takes the note's 88&middot;log<sub>2</sub>3 &asymp; 139.5 bits and scales it linearly by A/5, capped at 1, because a stretch wiggle should be no bolder than the temperament window it hides inside. A good ear can shrink this term but never grow it. Unisons: levels = &lfloor;2B/1&rfloor;&nbsp;+&nbsp;1 at 1-cent resolution, two strings by 60 notes, halved for stability. The note's inputs (5 and 1.5 cents) give 31.0&nbsp;+&nbsp;139.5&nbsp;+&nbsp;120.0 = 290.5 bits.</p>
-  <p class="note">The beat meter takes a 40&nbsp;ms Hann-weighted RMS every 10&nbsp;ms. It starts 0.25&nbsp;s after the loudest point in the window (the strike), divides the envelope by a quadratic fit to its logarithm to take out the decay, applies a Hann window, and evaluates a direct Fourier transform from max(0.2&nbsp;Hz, 1.5/T) to 20&nbsp;Hz on a grid no coarser than min(0.02, 1/4T)&nbsp;Hz, then refines the tallest peak. T is the analyzed length. Confidence is the share of the band's power within &plusmn;2/T of the peak, times min(1, cycles/3), times min(1, depth/0.2%) where depth is the beat's modulation depth, and cut to 30% for a peak pinned to the bottom of the band. The cents figure assumes harmonic partials, c&nbsp;=&nbsp;1200&middot;log<sub>2</sub>(1&nbsp;+&nbsp;b/(p&middot;f<sub>low</sub>)), and treats the lower note as sitting at equal-tempered pitch with A4&nbsp;=&nbsp;440&nbsp;Hz. Beats can't tell sharp from flat. Real strings are stiff and their partials run sharp, which moves coincident partials and so the beat rate, more at the ends of the keyboard. Browsers may process the microphone signal even when asked not to. The synthetic test uses the same estimator on a dyad whose beat is known exactly.</p>
+  <p class="note"><strong>What was measured, and how.</strong> Test A plays C&ndash;Am&ndash;F&ndash;G&ndash;C voiced C3&nbsp;E4&nbsp;G4&nbsp;C5, A2&nbsp;E4&nbsp;A4&nbsp;C5, F2&nbsp;F4&nbsp;A4&nbsp;C5, G2&nbsp;D4&nbsp;G4&nbsp;B4, C3&nbsp;E4&nbsp;G4&nbsp;C5. Chords start 0.8&nbsp;s apart and the last rings for 1.9&nbsp;s. Each note is a <code>Kit.sound.pluck</code>: six partials, each slightly sharp by the factor 1&nbsp;+&nbsp;0.0004h&sup2; (a small stiff-string stretch), with exponential decay. The altered run moves a random six of the twelve pitch classes up by &Delta; and the other six down by &Delta;. Seven pitch classes appear in the progression, so at least one always moves against the rest, and the alteration is never a plain transposition. Every altered pitch class sits at the edge of a &plusmn;&Delta; window, so some intervals are off by as much as 2&Delta;. Test B plays A4 (440&nbsp;Hz, or 1760&nbsp;Hz on the phone setting) as three 3.4&nbsp;s plucks struck together in phase, at 0,&nbsp;0,&nbsp;0 or &minus;&Delta;,&nbsp;0,&nbsp;+&Delta; cents.</p>
+  <p class="note">Both tests are two-interval forced choice, with the altered sound's position random. Each uses a 2-down-1-up staircase (Levitt, 1971), which converges near 70.7% correct. &Delta; starts at 12 cents (A) or 4 cents (B). It moves by a factor of 1.5, then 1.2 from the second reversal on, and is capped at 40 or 16 cents. A run stops at 8 reversals or 40 trials. The threshold is the geometric mean of &Delta; at the last six reversals. A run that ends with fewer than two reversals reports the geometric mean of its last six levels and is flagged as unconverged.</p>
+  <p class="note">A forced choice measures discrimination: an alert listener, a reference next to the target, and unlimited replays. An audience has none of these, so these thresholds sit below the audience detection window the note asks about, and the recomputed channel is conservative. Results also depend on the speaker or headphones, the register, the room, the level, practice and fatigue, and on one progression in one key. A real piano's partials are louder, longer and more inharmonic than these synthetic ones. One listener's results do not generalize.</p>
+  <p class="note">The channel uses the note's own formulas with your thresholds rounded to 0.01 cent. Temperament: levels = &lfloor;2A/2&rfloor;&nbsp;+&nbsp;1 at the note's 2-cent strobe-tuner resolution, bits = 12&middot;log<sub>2</sub>(levels). Per-key stretch: not measured here. The page takes the note's 88&middot;log<sub>2</sub>3 &asymp; 139.5 bits and scales it linearly by A/5, capped at 1, because a per-key offset should be no larger than the temperament window it sits inside. A finer threshold can shrink this term but never grow it. Unisons: levels = &lfloor;2B/1&rfloor;&nbsp;+&nbsp;1 at 1-cent resolution, two strings by 60 notes, halved for stability. The note's inputs (5 and 1.5 cents) give 31.0&nbsp;+&nbsp;139.5&nbsp;+&nbsp;120.0 = 290.5 bits.</p>
+  <p class="note">The beat meter takes a 40&nbsp;ms Hann-weighted RMS every 10&nbsp;ms. It starts 0.25&nbsp;s after the loudest point in the window (the strike). It divides the envelope by a quadratic fit to its logarithm to remove the decay, applies a Hann window, and evaluates a direct Fourier transform from max(0.2&nbsp;Hz, 1.5/T) to 20&nbsp;Hz on a grid no coarser than min(0.02, 1/4T)&nbsp;Hz, then refines the tallest peak. T is the analyzed length. Confidence is the share of the band's power within &plusmn;2/T of the peak, times min(1, cycles/3), times min(1, depth/0.2%), where depth is the beat's modulation depth. It is cut to 30% for a peak pinned to the bottom of the band. The cents figure assumes harmonic partials, c&nbsp;=&nbsp;1200&middot;log<sub>2</sub>(1&nbsp;+&nbsp;b/(p&middot;f<sub>low</sub>)), and treats the lower note as sitting at equal-tempered pitch with A4&nbsp;=&nbsp;440&nbsp;Hz. Beats can't tell sharp from flat. Real strings are stiff and their partials run sharp, which shifts the coincident partials and so the beat rate, more at the ends of the keyboard. Browsers may process the microphone signal even when asked not to. The synthetic test runs the same estimator on a dyad whose beat is known exactly.</p>
 </div>
 
 </div>
@@ -461,7 +491,7 @@ function synthDyad(f1, f2, fs, seconds, partials) {
   var PROG = [[48, 64, 67, 72], [45, 64, 69, 72], [41, 65, 69, 72], [43, 62, 67, 71], [48, 64, 67, 72]];
   var TESTS = {
     A: {
-      name: "doctored temperament", start: 12, max: 40, assume: 5, len: 5.1, gap: 0.8,
+      name: "altered tuning", start: 12, max: 40, assume: 5, len: 5.1, gap: 0.8,
       ticks: [0.5, 1, 2, 5, 10, 20, 40], ymin: 0.3, ymax: 48,
       make: function (d) { return shuffle([1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1]).map(function (s) { return s * d; }); },
       play: function (t, stim, g) {
@@ -474,7 +504,7 @@ function synthDyad(f1, f2, fs, seconds, partials) {
       }
     },
     B: {
-      name: "shaded unisons", start: 4, max: 16, assume: 1.5, len: 3.4, gap: 0.7,
+      name: "spread unison", start: 4, max: 16, assume: 1.5, len: 3.4, gap: 0.7,
       ticks: [0.1, 0.2, 0.5, 1, 2, 5, 10], ymin: 0.08, ymax: 20,
       make: function (d) { return d; },
       play: function (t, stim, g) {
@@ -579,7 +609,7 @@ function synthDyad(f1, f2, fs, seconds, partials) {
     if (!this.running) return;
     this.running = false; this.cur = null; this.setAnswerable(false); this.lamps(0);
     this.el.replay.disabled = true;
-    this.el.fb.textContent = "Paused. Start again whenever you like; the run begins fresh.";
+    this.el.fb.textContent = "Paused. Press Start to begin again. The run starts over.";
     this.el.fb.className = "fb";
   };
   Runner.prototype.next = function () {
@@ -626,7 +656,7 @@ function synthDyad(f1, f2, fs, seconds, partials) {
     LOG.push(rec);
     (k === 1 ? this.el.a1 : this.el.a2).classList.add(correct ? "right" : "wrong");
     var which = tr.order === 1 ? "first" : "second";
-    var word = tr.test === "A" ? "doctored" : "shaded";
+    var word = tr.test === "A" ? "altered" : "spread";
     this.el.fb.textContent = (correct ? "Right. " : "Wrong. ") + "The " + which + " one was " + word + ", by " + fmt(tr.delta) + " cents.";
     this.el.fb.className = "fb " + (correct ? "ok" : "no");
     this.history.push({ delta: tr.delta, correct: correct, rev: false });
@@ -650,14 +680,14 @@ function synthDyad(f1, f2, fs, seconds, partials) {
     this.running = false; this.el.replay.disabled = true; ACTIVE = (ACTIVE === this) ? null : ACTIVE;
     if (this.cfg.practice) {
       var right = this.history.filter(function (h) { return h.correct; }).length;
-      this.el.fb.textContent += "  Practice done: " + right + " of 2." + (right === 2 ? " On to the real thing." : " Check your output and level, then try again.");
+      this.el.fb.textContent += "  Practice done: " + right + " of 2." + (right === 2 ? " You are ready for the tests." : " Check your output and volume, then try again.");
       this.el.start.textContent = "Run practice again";
       this.status(); return;
     }
     var th = this.sc.threshold(), key = this.cfg.test;
     RESULT[key] = { threshold: th.value, converged: th.converged, reversalsUsed: th.used, trials: this.sc.levels.length,
                     reversals: this.sc.revs.slice(), correct: this.history.filter(function (h) { return h.correct; }).length, output: outputName() };
-    this.el.fb.textContent += "  Done: threshold " + fmt(th.value) + " cents" + (th.converged ? "." : " (not converged; take it with salt).");
+    this.el.fb.textContent += "  Done: threshold " + fmt(th.value) + " cents" + (th.converged ? "." : " (not converged, so treat it as a rough estimate).");
     this.el.start.textContent = "Run test " + key + " again";
     this.status(); this.draw(); renderResults();
   };
@@ -730,7 +760,7 @@ function synthDyad(f1, f2, fs, seconds, partials) {
     var th = res ? res.threshold : (this.sc && this.sc.revs.length >= 2 ? this.sc.threshold().value : NaN);
     var noteAbove = !(isFinite(th) && th > T.assume), labels = [];
     labels.push(function () { g.textAlign = "right"; g.textBaseline = noteAbove ? "bottom" : "top";
-    pill(g, "note guesses ±" + T.assume, w - R - 2, ya + (noteAbove ? -4 : 4), sage, panel); });
+    pill(g, "note's estimate ±" + T.assume, w - R - 2, ya + (noteAbove ? -4 : 4), sage, panel); });
     if (isFinite(th)) {
       var yt = Y(th);
       g.setLineDash(res ? [] : [2, 4]); g.strokeStyle = temper; g.lineWidth = res ? 2 : 1;
@@ -764,7 +794,7 @@ function synthDyad(f1, f2, fs, seconds, partials) {
     labels.forEach(function (f) { f(); });
     if (!n && !this.running) {
       g.fillStyle = dim; g.textAlign = "center"; g.textBaseline = "middle";
-      g.fillText("The staircase draws itself as you answer.", L + pw / 2, Tp + ph / 2 + 22);
+      g.fillText("The staircase appears here as you answer.", L + pw / 2, Tp + ph / 2 + 22);
     }
   };
 
@@ -807,25 +837,25 @@ function synthDyad(f1, f2, fs, seconds, partials) {
       var r = RESULT[k], big = $("r-" + k.toLowerCase()), sub = $("r-" + k.toLowerCase() + "-sub");
       if (!r) {
         big.innerHTML = "&mdash;";
-        sub.textContent = "Test " + k + " not run yet. The channel below uses the note's ±" + (k === "A" ? "5" : "1.5") + " cents until it is.";
+        sub.textContent = "Test " + k + " not run yet. The table below uses the note's ±" + (k === "A" ? "5" : "1.5") + " cents until you run it.";
       } else {
         big.innerHTML = "±" + fmt(r.threshold) + " <small>cents</small>";
         sub.textContent = r.trials + " trials, " + r.correct + " right, " + r.reversals.length + " reversals" +
-          (r.converged ? "; geometric mean of the last " + r.reversalsUsed + "." : r.reversalsUsed ? "; only " + r.reversalsUsed + " reversals, so it's shaky." : "; no reversals, not converged.") +
-          " Listened on " + r.output + ".";
+          (r.converged ? ". Threshold is the geometric mean of the last " + r.reversalsUsed + " reversals." : r.reversalsUsed ? ". Only " + r.reversalsUsed + " reversals, so the estimate is rough." : ". No reversals, so the run did not converge.") +
+          " Output: " + r.output + ".";
       }
     });
     var words = [];
     function cmp(r, guess, what) {
       if (!r) return;
       var x = r.threshold, ratio = x / guess;
-      if (Math.abs(ratio - 1) < 0.1) words.push("On " + what + " you landed within a whisker of the note's guess, ±" + fmt(x) + " against ±" + guess + ".");
-      else if (ratio < 1) words.push("On " + what + " you caught tampering down to ±" + fmt(x) + " cents, " + fmt(1 / ratio, 1) + " times finer than the note's ±" + guess + ". Tighter ears than the desk assumed.");
-      else words.push("On " + what + " you needed ±" + fmt(x) + " cents before you could pick it, " + fmt(ratio, 1) + " times the note's ±" + guess + ". The desk was cautious.");
+      if (Math.abs(ratio - 1) < 0.1) words.push("On " + what + " your threshold came within 10% of the note's estimate: ±" + fmt(x) + " cents against ±" + guess + ".");
+      else if (ratio < 1) words.push("On " + what + " you detected alterations down to ±" + fmt(x) + " cents, " + fmt(1 / ratio, 1) + " times smaller than the note's ±" + guess + ". Your hearing is finer than the note assumed.");
+      else words.push("On " + what + " you needed ±" + fmt(x) + " cents to pick the altered one, " + fmt(ratio, 1) + " times the note's ±" + guess + ". The note's estimate was cautious.");
     }
     cmp(RESULT.A, 5, "temperament"); cmp(RESULT.B, 1.5, "unisons");
-    if (RESULT.A || RESULT.B) words.push("By the note's own arithmetic that's " + fmt(U.total, 0) + " bits against its " + fmt(NOTE.total, 0) + ". Remember this test is stricter than a concert hall, so read it as a floor.");
-    else words.push("Run either test and this paragraph will stop being polite and start being specific.");
+    if (RESULT.A || RESULT.B) words.push("With the note's formulas, your thresholds give " + fmt(U.total, 0) + " bits, compared with its " + fmt(NOTE.total, 0) + ". This test is stricter than a concert, so treat the figure as a lower bound.");
+    else words.push("Run either test to see how your thresholds compare with the note's estimates.");
     $("r-compare").textContent = words.join(" ");
 
     var rows = [
@@ -840,7 +870,7 @@ function synthDyad(f1, f2, fs, seconds, partials) {
       return "<tr><td>" + r[0] + "</td><td class=\"opt\">" + r[1] + "</td><td>" + fmt(r[2], 1) + "</td><td class=\"opt\">" + r[3] + "</td><td><b>" + fmt(r[4], 1) + "</b></td></tr>";
     }).join("");
     $("r-formulas").innerHTML = rows.map(function (r) { return r[0] + ": <b>" + r[5] + " = " + fmt(r[4], 1) + " bits</b>"; }).join("<br>") +
-      "<br>Thresholds rounded to 0.01 cent. Per-key stretch isn't measured here, so it scales with A and never exceeds the note's 139.5.";
+      "<br>Thresholds rounded to 0.01 cent. Per-key stretch is not measured here. It scales with A and is capped at the note's 139.5 bits.";
     html += "<tr class=\"total\"><td>Total</td><td class=\"opt\"></td><td>" + fmt(NOTE.total, 1) + "</td><td class=\"opt\">" +
       (RESULT.A || RESULT.B ? "" : "(note's values)") + "</td><td><b>" + fmt(U.total, 1) + "</b></td></tr>";
     $("r-table").querySelector("tbody").innerHTML = html;
@@ -850,7 +880,7 @@ function synthDyad(f1, f2, fs, seconds, partials) {
     var cv = $("r-cv"), f = Kit.fit(cv), g = f.g, w = f.w, h = f.h;
     var U = userChannel(), dim = Kit.css("--dim"), ink = Kit.css("--ink"), rule = Kit.css("--rule"), panel = Kit.css("--panel");
     var cols = [Kit.css("--temper"), Kit.css("--sage"), Kit.css("--just")];
-    var rows = [{ label: "The note's guesses", c: NOTE }, { label: (RESULT.A || RESULT.B) ? "Your ears" : "Your ears (not measured yet)", c: U }];
+    var rows = [{ label: "The note's estimates", c: NOTE }, { label: (RESULT.A || RESULT.B) ? "Your ears" : "Your ears (not measured yet)", c: U }];
     var mx = Math.max(NOTE.total, U.total) * 1.06, step = mx > 800 ? 200 : mx > 400 ? 100 : 50;
     mx = Math.ceil(mx / step) * step;
     var L = 4, R = 54, bh = 24, top = 18;
@@ -916,11 +946,11 @@ function synthDyad(f1, f2, fs, seconds, partials) {
   function summary() {
     var U = userChannel(), d = deviceInfo(), lines = ["The Listening Test: results", "Output: " + d.output + ", sample rate " + (d.sampleRate || "unknown") + " Hz"];
     ["A", "B"].forEach(function (k) {
-      var r = RESULT[k], nm = k === "A" ? "Test A (doctored temperament)" : "Test B (shaded unisons)";
+      var r = RESULT[k], nm = k === "A" ? "Test A (altered tuning)" : "Test B (spread unison)";
       lines.push(nm + ": " + (r ? "±" + fmt(r.threshold) + " cents, " + r.trials + " trials, " + r.reversals.length + " reversals" + (r.converged ? "" : ", not converged") : "not run"));
     });
-    lines.push("Channel by the note's formulas: temperament " + fmt(U.temp, 1) + " + stretch " + fmt(U.stretch, 1) + " + unisons " + fmt(U.uni, 1) + " = " + fmt(U.total, 1) + " bits (the note's guess: " + fmt(NOTE.total, 1) + ")");
-    lines.push("Forced-choice thresholds are stricter than audience detection, so this is a floor.");
+    lines.push("Channel by the note's formulas: temperament " + fmt(U.temp, 1) + " + stretch " + fmt(U.stretch, 1) + " + unisons " + fmt(U.uni, 1) + " = " + fmt(U.total, 1) + " bits (the note's estimate: " + fmt(NOTE.total, 1) + ")");
+    lines.push("Forced-choice thresholds are stricter than audience detection, so this is a lower bound.");
     return lines.join("\n");
   }
   $("dl-json").addEventListener("click", function () {
@@ -929,14 +959,14 @@ function synthDyad(f1, f2, fs, seconds, partials) {
     a.href = url; a.download = "listening-test-" + new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") + ".json";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-    $("copy-msg").textContent = "Saved " + LOG.length + " trials to your downloads. Nothing was sent anywhere.";
+    $("copy-msg").textContent = "Saved " + LOG.length + " trials to your downloads. Nothing was sent.";
   });
   $("copy-sum").addEventListener("click", function () {
-    var txt = summary(), done = function () { $("copy-msg").textContent = "Summary copied. Paste it wherever you like."; };
+    var txt = summary(), done = function () { $("copy-msg").textContent = "Summary copied to the clipboard."; };
     var fallback = function () {
       var ta = document.createElement("textarea"); ta.value = txt; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
       document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); done(); } catch (e) { $("copy-msg").textContent = "Couldn't reach the clipboard. Here it is:\n" + txt; }
+      try { document.execCommand("copy"); done(); } catch (e) { $("copy-msg").textContent = "Could not copy to the clipboard. Here is the summary:\n" + txt; }
       ta.remove();
     };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback);
@@ -991,24 +1021,24 @@ function synthDyad(f1, f2, fs, seconds, partials) {
   function showReadouts(r) {
     var I = ivInfo();
     $("m-et").innerHTML = fmt(I.bET) + " <small>Hz</small>";
-    $("m-et-sub").textContent = I.iv.name + " on " + NAMES[I.root % 12] + (Math.floor(I.root / 12) - 1) + ": " + fmt(I.cET) + " cents from pure" + (I.cET < 0.01 ? " (pure in ET; any beat is mistuning or string stiffness)" : "");
+    $("m-et-sub").textContent = I.iv.name + " on " + NAMES[I.root % 12] + (Math.floor(I.root / 12) - 1) + ": " + fmt(I.cET) + " cents from pure" + (I.cET < 0.01 ? " (pure in equal temperament, so any beat comes from mistuning or string stiffness)" : "");
     var p = I.iv.p, q = I.iv.q;
     var fml = "b = |" + p + "·f_low − " + q + "·f_high|.  c = 1200·log₂(1 + b / (" + p + " × " + fmt(I.fl) + " Hz))";
     if (!r || !isFinite(r.hz)) {
       $("m-hz").innerHTML = "&mdash;"; $("m-cents").innerHTML = "&mdash;"; $("m-conf-t").textContent = "—"; $("m-conf").style.width = "0%";
-      var why = r ? ({ short: "gathering envelope…", quiet: "too quiet: strike it harder or move closer", strike: "strike just landed; give it a few seconds", band: "window too short" })[r.why] || "" : "";
-      $("m-cents-sub").textContent = why || "sign unknown from beats alone";
+      var why = r ? ({ short: "Collecting signal…", quiet: "Too quiet. Play louder or move the microphone closer.", strike: "Note just struck. Wait a few seconds.", band: "Analysis window too short." })[r.why] || "" : "";
+      $("m-cents-sub").textContent = why || "Beats can't tell sharp from flat.";
       $("m-formula").innerHTML = "<b>" + fml + "</b>";
       return;
     }
     var c = centsFromBeat(r.hz, I);
     $("m-hz").innerHTML = fmt(r.hz) + " <small>Hz</small>";
-    $("m-conf-t").textContent = Math.round(r.confidence * 100) + "% " + (r.confidence > 0.5 ? "steady" : r.confidence > 0.25 ? "shaky" : "probably noise");
+    $("m-conf-t").textContent = Math.round(r.confidence * 100) + "% " + (r.confidence > 0.5 ? "steady" : r.confidence > 0.25 ? "weak" : "probably noise");
     $("m-conf").style.width = (100 * r.confidence).toFixed(0) + "%";
     $("m-cents").innerHTML = fmt(c) + " <small>cents</small>";
     var diffSame = Math.abs(c - I.cET), diffOpp = c + I.cET;
-    $("m-cents-sub").textContent = "sign unknown from beats alone. vs ET: within " + fmt(diffSame) + "¢ if tempered the usual way, " + fmt(diffOpp) + "¢ if the other.";
-    $("m-formula").innerHTML = "<b>" + fml + " = " + fmt(c, 3) + " cents</b>, using b = " + fmt(r.hz, 3) + " Hz from the tallest peak over " + fmt(r.T, 1) + " s of envelope.";
+    $("m-cents-sub").textContent = "Beats can't tell sharp from flat. Versus equal temperament: " + fmt(diffSame) + "¢ off if it leans the same way, " + fmt(diffOpp) + "¢ if the opposite way.";
+    $("m-formula").innerHTML = "<b>" + fml + " = " + fmt(c, 3) + " cents</b>. The beat rate b = " + fmt(r.hz, 3) + " Hz is the tallest peak in " + fmt(r.T, 1) + " s of envelope.";
   }
 
   // canvases
@@ -1130,9 +1160,9 @@ function synthDyad(f1, f2, fs, seconds, partials) {
   $("m-mic").addEventListener("click", function () {
     if (live.mode === "mic") { S.stop("mic"); stopMic(); return; }
     var msg = $("m-msg");
-    if (!window.isSecureContext) { msg.textContent = "This page isn't in a secure context, so the browser won't hand over a microphone. Open it over https or from localhost."; return; }
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { msg.textContent = "This browser offers no microphone API here. The synthetic piano still works."; return; }
-    msg.textContent = "Asking for the microphone…";
+    if (!window.isSecureContext) { msg.textContent = "Browsers allow the microphone only on secure pages. Open this page over https or from localhost."; return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { msg.textContent = "This browser gives no microphone access here. The synthetic piano still works."; return; }
+    msg.textContent = "Requesting microphone access…";
     navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: false }).then(function (stream) {
       if (live.mode === "synth") abortSynth();
       var c = S.audio();
@@ -1145,13 +1175,13 @@ function synthDyad(f1, f2, fs, seconds, partials) {
       live.src.connect(live.node); live.node.connect(mute); mute.connect(c.destination);
       S.register("mic", mute, [], stopMic);
       setMode("mic", "microphone, " + c.sampleRate + " Hz");
-      msg.textContent = "Listening. Strike the interval, hold the keys down and keep quiet for a good ten seconds.";
+      msg.textContent = "Listening. Strike the interval, hold the keys down, and stay quiet for about ten seconds.";
       kick();
     }, function (err) {
       var n = err && err.name;
-      msg.textContent = n === "NotAllowedError" || n === "SecurityError" ? "Microphone denied. Fair enough. The synthetic piano below needs no permission."
-        : n === "NotFoundError" ? "No microphone found on this machine. The synthetic piano still works."
-        : "The microphone wouldn't open (" + (n || "unknown error") + ").";
+      msg.textContent = n === "NotAllowedError" || n === "SecurityError" ? "Microphone access was denied. The synthetic piano needs no permission."
+        : n === "NotFoundError" ? "No microphone found. The synthetic piano still works."
+        : "The microphone could not be opened (" + (n || "unknown error") + ").";
     });
   });
 
@@ -1196,9 +1226,9 @@ function synthDyad(f1, f2, fs, seconds, partials) {
     var cT = centsFromBeat(sp.truth, sp.I), cE = centsFromBeat(r.hz, sp.I);
     live.lastSynth = { truth: sp.truth, estimate: r.hz, confidence: r.confidence, relErr: err };
     $("m-synth-out").innerHTML = "<b>Synthetic " + sp.I.iv.name + " on " + NAMES[sp.I.root % 12] + (Math.floor(sp.I.root / 12) - 1) +
-      (sp.detuned ? " (upper note nudged 1.2¢ so there is something to hear)" : ", equal tempered") + ".</b> Truth " + fmt(sp.truth, 3) + " Hz (" + fmt(cT, 3) +
-      "¢); estimate over the whole 14 s buffer " + fmt(r.hz, 3) + " Hz (" + fmt(cE, 3) + "¢), off by " + fmt(100 * err, 2) + "%, confidence " + Math.round(100 * r.confidence) + "%." +
-      (sp.truth > 20 ? " That beat is above the 20 Hz band, so the estimate is meaningless here; pick a lower note." : "");
+      (sp.detuned ? " (upper note raised 1.2¢ so there is a beat to measure)" : ", equal tempered") + ".</b> True beat " + fmt(sp.truth, 3) + " Hz (" + fmt(cT, 3) +
+      "¢). Measured over the whole 14 s recording: " + fmt(r.hz, 3) + " Hz (" + fmt(cE, 3) + "¢), off by " + fmt(100 * err, 2) + "%, confidence " + Math.round(100 * r.confidence) + "%." +
+      (sp.truth > 20 ? " This beat is above the meter's 20 Hz limit, so the measurement is not valid. Pick a lower note." : "");
     live.res = r; live.res.trend = null; showReadouts(r);
     live.synth = null; setMode(null, "synthetic, done");
     drawMeter();
@@ -1209,13 +1239,13 @@ function synthDyad(f1, f2, fs, seconds, partials) {
     var sp = synthSpec();
     delete document.body.dataset.synthDone;
     $("m-msg").textContent = "";
-    $("m-synth-out").textContent = "Striking the synthetic piano…";
+    $("m-synth-out").textContent = "Generating the synthetic notes…";
     var mine = live.synthTok = (live.synthTok || 0) + 1;
     offMain({ f1: sp.fl, f2: sp.fh, fs: sp.fs, seconds: sp.seconds, partials: sp.partials, estimate: true }, function (samples, res) {
       if (mine !== live.synthTok || live.mode === "mic") return;
       resetLive(sp.fs);
       live.synth = { samples: samples, pos: 0, fs: sp.fs, spec: sp, res: res };
-      $("m-synth-out").textContent = "Feeding the synthetic dyad through the meter at four times real speed…";
+      $("m-synth-out").textContent = "Running the synthetic notes through the meter at four times real speed…";
       setMode("synth", "synthetic, " + sp.fs + " Hz");
       kick();
     });

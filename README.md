@@ -6,8 +6,9 @@ fifths overshoot seven octaves by 23.46 cents; the piano's tuning spreads that
 gap and leaves every interval but the octave slightly off. Eleven oscillators
 run at those errors, 0.37 to 8.63 Hz, and only a linear readout is trained,
 which makes them a reservoir computer. The main page is one HTML file with no
-dependencies, told in a plain-spoken first-person voice after Edward Abbey.
-Behind it, `lab/` holds eight more pages that take the idea further. A Node
+dependencies, written to be followed by anyone, with the technical detail
+layered underneath. Behind it, `lab/` holds eight more pages that take the
+idea further. A Node
 script reruns the simulations to check 41 claims, and a browser script drives
 every page.
 
@@ -36,7 +37,7 @@ that also makes every beat four times as fast. Headphones plays at concert
 pitch. The Sound on and Stop buttons in the bottom-right corner mute the page
 or stop everything, and the Escape key also stops everything.
 
-The back country starts at `lab/index.html`, or at the end of the main page.
+The lab starts at `lab/index.html`, or at the end of the main page.
 
 ## How it works
 
@@ -115,7 +116,7 @@ from a script that is not in the repository. `lab/comodulogram.html` now runs
 that analysis in the open: over 600 seconds at K = 8 the page's additive bank
 shows no significant cell, and the multiplicative variant lights eight.
 
-### The back country
+### The lab
 
 The `lab/` pages share `lab/kit.js`, which carries the main page's bank with
 the detunings passed in instead of fixed, plus tunings, a frame-sliced

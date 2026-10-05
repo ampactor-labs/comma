@@ -41,7 +41,7 @@ const ACTIONS = {
     check("main page: the register takes a message", store.includes("I␣LOVE␣YOU"), store.slice(0, 60));
     await p.$eval("#wander", (e) => { e.value = "0"; e.dispatchEvent(new Event("input")); });
     const mail = await p.$eval("#mail-read", (e) => e.textContent);
-    check("main page: a textbook piano mails for nothing", /textbook, 0\. Against the key before, 0\./.test(mail), mail.slice(0, 80));
+    check("main page: a textbook piano mails for nothing", /Against the textbook: 0 bits\. Against the previous key: 0 bits\./.test(mail), mail.slice(0, 80));
   },
   "lab/ladder.html": async (p) => {
     await p.click("[data-key=golden]");

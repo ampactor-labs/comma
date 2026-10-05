@@ -24,22 +24,22 @@
 <div class="wrap">
 
 <header class="hero">
-  <span class="eyebrow">Back country &middot; 03 &middot; Wood</span>
+  <span class="eyebrow">Lab &middot; 03</span>
   <h1>Metronomes on a Plank</h1>
-  <p class="lede">Set eleven metronomes ticking on a board, each one a hair off from its neighbors, and they go about their business like ravens on a fence, every bird for itself. Now put the board on a couple of soda cans. Inside half a minute they are swinging together like a high school band on the Fourth of July. Nobody ordered it. The board did it, by giving a little under every one of them, and what it spent to bring them into line was the difference between them. I had written a message in that difference.</p>
-  <p>This is the coupling knob from the main page, built out of pine and two cans of cheap beer.</p>
+  <p class="lede">Eleven metronomes sit on a wooden plank. Each one ticks at a slightly different tempo. With the plank on the floor, each keeps its own time. Put the plank on two soda cans so it can roll, and the metronomes fall into step in well under half a minute. The plank causes this: every swing pushes it a little, and its motion pushes back on all of them at once. This page writes a message into the small timing differences between the metronomes, then shows the plank erasing it.</p>
+  <p>The plank on rollers is a physical version of the Coupling slider on the main page. An oscillator is anything that repeats a cycle, like a pendulum. Coupling means each oscillator's motion pushes on the others.</p>
 </header>
 
 <section aria-labelledby="h-plank">
   <div class="sec-head">
     <span class="sec-mark">01</span>
-    <div><h2 id="h-plank">The plank</h2></div>
+    <div><h2 id="h-plank">Watch the metronomes fall into step</h2></div>
   </div>
 
   <div class="panel">
-    <h3>Eleven metronomes, one board</h3>
+    <h3>Eleven metronomes, one plank</h3>
     <div class="stage-wrap">
-      <canvas id="stage" height="360" role="img" aria-label="Side view of a wooden plank resting on soda-can rollers, carrying a row of metronomes. Each metronome's arm swings; its letter is painted on its face, cyan while the letter is intact and amber once it has slipped. Interval names are carved into the front edge of the plank."></canvas>
+      <canvas id="stage" height="360" role="img" aria-label="Side view of a wooden plank on soda-can rollers, carrying a row of metronomes. Each arm swings. Each metronome shows its letter, cyan while the letter holds and amber once it has slipped. Interval names are printed on the plank's front edge."></canvas>
     </div>
 
     <div class="btn-row" role="group" aria-label="Simulation controls">
@@ -74,7 +74,7 @@
 
     <div class="msg-row">
       <label for="msg" class="vh">Message, up to ten characters</label>
-      <input type="text" id="msg" value="SLICKROCK" maxlength="10" spellcheck="false" autocomplete="off">
+      <input type="text" id="msg" value="METRONOMES" maxlength="10" spellcheck="false" autocomplete="off">
       <button id="b-write" data-tone="just">Write</button>
       <button id="b-reset">Reset</button>
     </div>
@@ -83,19 +83,20 @@
     <div class="vh" aria-live="polite" id="r-live"></div>
   </div>
 
-  <p class="note">How to run it. The page opens with the plank on rollers and SLICKROCK painted into the phases, one letter to a metronome; the one on the left is the anchor and carries none. Watch the letters go amber. Watch the arms come around until they lean together. Then press <b>On the floor</b>, <b>Reset</b>, <b>Write</b>, and leave it alone: the message keeps as long as you care to watch. Each metronome's tempo comes from one of the piano's intervals: the faster that interval beats on a piano, the faster its metronome runs, and the second slider sets how far apart the slowest and fastest are. The name under each one is carved into the plank's edge.</p>
+  <p class="note">How to use it. The page opens with the plank on rollers and the word METRONOMES already written, one letter per metronome. The leftmost metronome, marked with a diamond, carries no letter. Watch the letters turn from cyan to amber as they slip. Then watch the arms gradually swing together. Next, press <b>On the floor</b>, then <b>Reset</b>, then <b>Write</b>, and leave it running. With the plank on the floor, the message holds for as long as you watch.</p>
+  <p class="note">The first slider sets how freely the plank moves. Its readout is the mass ratio: the metronomes' total mass divided by the mass of metronomes and plank together. Zero means the plank sits on the floor and cannot move. The second slider sets how far apart the slowest and fastest metronomes run. Each metronome's tempo comes from one musical interval, named on the plank's front edge (P5 is a perfect fifth, M3 a major third, h7 the harmonic seventh, M2 a major second, M7 a major seventh; the others are numbered harmonics). A piano plays each interval slightly out of tune, so the two notes beat: they make a slow pulse, like two guitar strings slightly out of tune. The faster an interval beats on a piano, the faster its metronome runs.</p>
 
   <div class="panel">
     <div class="grid-2">
       <div>
         <h3>Phase wheel</h3>
-        <canvas id="wheel" height="300" role="img" aria-label="Phase wheel. Each metronome is a dot on a circle at its current phase, sized by how wrong its interval is on a piano; a hollow ring marks where its free-running ghost would be. The arrow from the center is the mean field: its length is the order parameter R."></canvas>
-        <p class="note" style="margin-top:0.6rem">Solid dot: the metronome. Hollow ring: its ghost, the same metronome on a plank nailed to the floor. The gap between them is the letter. Thirty-two notches, one per letter. The arrow is the plank's opinion.</p>
+        <canvas id="wheel" height="300" role="img" aria-label="Phase wheel. Each metronome is a dot on a circle at its current phase, sized by how far its interval is out of tune on a piano. A hollow ring marks its ghost, an uncoupled copy of the same metronome. The arrow from the center is the mean field, and its length is the order parameter R."></canvas>
+        <p class="note" style="margin-top:0.6rem">Phase is where a metronome is in its swing, drawn as an angle. One full swing, there and back, is one trip around the circle. The circle turns at the metronomes' average rate, so a metronome running at the average tempo stays in place. Each solid dot is a metronome. Each hollow ring is its ghost: a copy that runs on a fixed plank, unaffected by the others. The angle from ghost to dot is the letter, and the inner arcs show that angle, one arc per metronome. The 32 notches around the edge are the 32 possible letters. Larger dots belong to intervals that are further out of tune on a piano. The arrow from the center is the mean field, the average of all the phases.</p>
       </div>
       <div>
         <h3>Agreement and memory</h3>
-        <canvas id="chart" height="300" role="img" aria-label="Strip chart over the last sixty seconds of simulated time: the order parameter R from 0 to 1, and the number of letters still intact."></canvas>
-        <p class="note" style="margin-top:0.6rem"><span class="sage-t">R</span>, the order parameter, is 1 when every arm swings as one and near 0 when they scatter. <span class="just-t">Letters intact</span> counts the ones that have never slipped.</p>
+        <canvas id="chart" height="300" role="img" aria-label="Strip chart of the last sixty seconds of simulated time: the order parameter R from 0 to 1, and the number of letters still intact."></canvas>
+        <p class="note" style="margin-top:0.6rem"><span class="sage-t">R</span>, the order parameter, measures how closely the arms agree. It is 1 when every arm swings together and near 0 when they are scattered. It equals the length of the arrow on the phase wheel. The dashed line is R = 0.95, which this page counts as in step. <span class="just-t">Letters intact</span> counts the letters that have not slipped since you pressed Write.</p>
       </div>
     </div>
   </div>
@@ -104,28 +105,28 @@
 <section aria-labelledby="h-knob">
   <div class="sec-head">
     <span class="sec-mark">02</span>
-    <div><h2 id="h-knob">Same knob, made of wood</h2></div>
+    <div><h2 id="h-knob">How the plank couples the metronomes</h2></div>
   </div>
-  <p>The main page has a slider marked K. Turn it up and eleven oscillators get pulled toward their average, the mean field, and the message they hold comes apart letter by letter. People hear that and figure it for a math trick. It is not a trick. It is what a board does.</p>
-  <p>Every metronome on the plank shoves the board a little each swing. The board answers by sliding the opposite way, by an amount set by the sum of all eleven swings at once, and every metronome feels that slide as a nudge at its base. That sum is the mean field. Nobody had to program it in. Pine supplies it free of charge.</p>
-  <p>On the floor, the plank cannot move, the sum goes nowhere, and K is zero. Each metronome keeps its own time and its own secret. On rollers the board gets a say, and the board, like every committee I ever sat through, wants consensus. The metronomes give it consensus. The ticks that rattled along like hail on a tin roof close up into one clack, and it is a satisfying sound, right up until you remember what it cost.</p>
-  <p>The message was never in any single metronome. It lived in how far each one stood from where it would have been alone, which is the only place a message can live in a row of clocks. Agreement pulls every one of them to the same place, and the distances go to zero, and so does what was written in them. The more they agree, the less there is to say.</p>
+  <p>The main page has a Coupling slider, labeled K. Turning it up pulls eleven oscillators toward their average, called the mean field. As they come into agreement, the message stored in them comes apart one letter at a time. A plank on rollers does the same thing physically, with nothing programmed in.</p>
+  <p>Each swing of a metronome pushes the plank slightly sideways. The plank moves by an amount set by all eleven swings added together. Every metronome then feels that motion as a small push at its base. That shared push is the mean field.</p>
+  <p>On the floor, the plank cannot move, so there is no shared push. This is the same as K = 0. Each metronome keeps its own time and its own letter. On rollers, the plank's push draws the metronomes toward the same phase, the way a crowd's clapping drifts into one rhythm. Turn on the ticks to hear it: the scattered ticks close up into a single click.</p>
+  <p>The message is not stored in any single metronome. It is stored in how far each metronome has moved from where it would be if it ran alone, which is its ghost. Agreement pulls every metronome to the same phase. Those distances shrink to zero, and the message goes with them. The more the metronomes agree, the less information their differences can hold.</p>
 </section>
 
 <section aria-labelledby="h-first">
   <div class="sec-head">
     <span class="sec-mark">03</span>
-    <div><h2 id="h-first">The letters go before the tune does</h2></div>
+    <div><h2 id="h-first">The letters slip before the arms line up</h2></div>
   </div>
-  <p>Here is the part that surprised me. The arms take a good while to line up. The letters do not wait for them. Each letter has one thirty-second of a circle to rattle around in, a little over eleven degrees, and a plank that hardly seems to move is enough to shove a metronome that far in a few swings. The slip log under the plank keeps the times.</p>
+  <p>The arms take a while to line up. The letters are lost much sooner. Each letter owns one of 32 slots around the circle, each 11.25 degrees wide. A letter slips once its phase drifts more than half a slot, about 5.6 degrees, from where it was written. A plank that barely seems to move can push a metronome that far within a few swings. The slip log under the plank records when each letter slipped.</p>
   <p id="p-measured" class="note">&nbsp;</p>
-  <p>So you do not need a dam to kill a river. A few cans under a board will do it, and the river will thank you for the steady beat while it dries up.</p>
+  <p>So the coupling erases the stored message well before it makes the metronomes swing together.</p>
 </section>
 
 <div class="foot">
-  <p><strong>What this is.</strong> A simulation, not a recording; no real metronomes were harmed or consulted. The model is the one in James Pantaleone, <a href="https://doi.org/10.1119/1.1501118">&ldquo;Synchronization of metronomes,&rdquo; Am. J. Phys. 70, 992 (2002)</a>. Each metronome is a pendulum, &theta;&Prime; + &omega;&sup2; sin&thinsp;&theta; + &mu;[(&theta;/&theta;<sub>v</sub>)&sup2; &minus; 1]&thinsp;&theta;&prime; = &minus;(x&Prime;/l)&thinsp;cos&thinsp;&theta;, where the van der Pol term stands in for the escapement and settles the swing near 0.75&nbsp;rad (&theta;<sub>v</sub> = 0.375&nbsp;rad, &mu; = 0.4&nbsp;s<sup>&minus;1</sup>). The plank obeys x&Prime;/l = &minus;&beta;&thinsp;&Sigma; d&sup2;(sin&thinsp;&theta;<sub>j</sub>)/dt&sup2; &minus; &gamma;x&prime;/l &minus; &kappa;x/l with &beta; = m/(M + Nm), roller friction &gamma; = 0.3&nbsp;s<sup>&minus;1</sup>, and a weak centering spring &kappa; = 0.2&nbsp;s<sup>&minus;2</sup> that keeps the board from wandering off the cans (it is far below the swing rate). Because the plank's acceleration depends on every arm's, the accelerations are solved together each step, a rank-one system done with Sherman&ndash;Morrison. Integration is fourth-order Runge&ndash;Kutta at a fixed 1&nbsp;ms of simulated time.</p>
-  <p><strong>Parameters.</strong> A swing of 0.75&nbsp;rad runs slower than the small-angle rate, so the base small-angle rate &omega;/2&pi; = <span id="f-lin" class="num">&hellip;</span>&nbsp;Hz is chosen at load so that a free metronome, measured, swings at <span id="f-swing" class="num">&hellip;</span>&nbsp;Hz. It ticks twice per swing: <span id="f-bpm" class="num">&hellip;</span> ticks a minute on the dial. Each metronome's rate is offset in proportion to its interval's beat rate against the piano (Kit.intervals of 12-EDO, the same table as the main page), centred on the mean, with the spread slider setting the full range from slowest to fastest. The looseness slider is the mass ratio Nm/(M + Nm), from 0 (on the floor) to 0.16; I capped it there because in my scans of this model at 0.2 with eleven metronomes the in-phase state sometimes failed to win inside 150&nbsp;s. The plank's motion on screen is drawn four times larger than the model's so you can see it (two and a half times on a narrow screen); the rollers turn at the rate rolling without slipping would give for the drawn motion, and the sliding weights sit higher on the slower metronomes by an exaggerated amount. The arms swing at their true angles.</p>
-  <p><strong>The message.</strong> Phase is read as atan2 of &minus;&theta;&prime;/&Omega; and &theta;, with &Omega; the measured swing rate. Every metronome has a ghost, an uncoupled copy that starts from its state at the moment you press Write. Writing advances each metronome along its own cycle by the letter's phase (letter index &times; 2&pi;/32); the ghost is not advanced. A letter reads as the phase gap to its ghost, rounded to 32 levels, and it is marked slipped the first time that rounding disagrees with what was written. With the plank on the floor, metronome and ghost obey identical equations and the gap only wobbles by the small non-uniformity of the phase estimate, which in my tests never passed 1.7 degrees against a margin of 5.6. Times in the slip log and the chart are simulated seconds. Sound is a filtered noise click at each centre crossing, scheduled to the simulated time.</p>
+  <p><strong>What this is.</strong> A simulation, not a recording. The model follows James Pantaleone, <a href="https://doi.org/10.1119/1.1501118">&ldquo;Synchronization of metronomes,&rdquo; Am. J. Phys. 70, 992 (2002)</a>. Each metronome is a pendulum, &theta;&Prime; + &omega;&sup2; sin&thinsp;&theta; + &mu;[(&theta;/&theta;<sub>v</sub>)&sup2; &minus; 1]&thinsp;&theta;&prime; = &minus;(x&Prime;/l)&thinsp;cos&thinsp;&theta;. The van der Pol term (the &mu; term) stands in for the escapement, the mechanism that gives a real metronome a small push each swing. It settles the swing near 0.75&nbsp;rad (&theta;<sub>v</sub> = 0.375&nbsp;rad, &mu; = 0.4&nbsp;s<sup>&minus;1</sup>). The plank obeys x&Prime;/l = &minus;&beta;&thinsp;&Sigma; d&sup2;(sin&thinsp;&theta;<sub>j</sub>)/dt&sup2; &minus; &gamma;x&prime;/l &minus; &kappa;x/l, with &beta; = m/(M + Nm), roller friction &gamma; = 0.3&nbsp;s<sup>&minus;1</sup>, and a weak centering spring &kappa; = 0.2&nbsp;s<sup>&minus;2</sup> that keeps the plank from drifting off the rollers. The spring's rate is far below the swing rate. The plank's acceleration depends on every arm's acceleration, so all accelerations are solved together each step. That is a rank-one linear system, solved with the Sherman&ndash;Morrison formula. Integration is fourth-order Runge&ndash;Kutta with a fixed step of 1&nbsp;ms of simulated time.</p>
+  <p><strong>Parameters.</strong> A 0.75&nbsp;rad swing runs slower than the small-angle rate. So the base small-angle rate &omega;/2&pi; = <span id="f-lin" class="num">&hellip;</span>&nbsp;Hz is chosen at load so that a free metronome, measured, swings at <span id="f-swing" class="num">&hellip;</span>&nbsp;Hz. It ticks twice per swing, which is <span id="f-bpm" class="num">&hellip;</span> ticks a minute on the dial. Each metronome's rate is offset in proportion to its interval's beat rate in 12-tone equal temperament (12-EDO, standard piano tuning), using the same interval table as the main page. Offsets are centered on the mean, and the spread slider sets the full range from slowest to fastest. The looseness slider sets the mass ratio Nm/(M + Nm), from 0 (on the floor) to 0.16. It is capped at 0.16 because in scans of this model at 0.2 with eleven metronomes, the in-phase state sometimes did not take over within 150&nbsp;s. On screen, the plank's motion is drawn four times larger than in the model so it is visible (two and a half times on a narrow screen). The rollers turn at the rate that rolling without slipping would give for the drawn motion. The sliding weights sit higher on slower metronomes, with the offset exaggerated. The arms swing at their true angles.</p>
+  <p><strong>The message.</strong> Phase is atan2(&minus;&theta;&prime;/&Omega;, &theta;), where &Omega; is the measured swing rate. Every metronome has a ghost, an uncoupled copy that starts from the metronome's state at the moment you press Write. Writing advances each metronome along its own cycle by the letter's phase (letter index &times; 2&pi;/32). The ghost is not advanced. A letter is read as the phase gap to its ghost, rounded to one of 32 levels. It is marked slipped the first time that rounded value differs from what was written. With the plank on the floor, metronome and ghost obey identical equations. The gap then wobbles only by the small unevenness of the phase estimate, which in tests stayed under 1.7 degrees, against a slip margin of 5.6 degrees. Times in the slip log and the chart are simulated seconds. Sound is a filtered noise click at each center crossing, scheduled to the simulated time.</p>
 </div>
 
 </div>
@@ -815,7 +816,7 @@ function limitCycle(omega, P, h) {
     g.textAlign = "left"; g.textBaseline = "top"; g.fillStyle = C.dim;
     g.fillText("R = " + o.R.toFixed(2), 6, 4);
     g.textAlign = "right";
-    g.fillText("frame turns at the mean rate", w - 6, 4);
+    g.fillText("circle turns at the average rate", w - 6, 4);
   }
   function dotR(i) { return 3 + 6 * Math.abs(IV[i].err) / ERR_MAX; }
   function colorFor(i) {
@@ -901,8 +902,8 @@ function limitCycle(omega, P, h) {
     var html = parts.join(" &middot; ");
     if (html !== lastMain) { lastMain = html; document.getElementById("r-main").innerHTML = html; }
     var lg;
-    if (!msg) lg = "Write a message and the slip log starts here.";
-    else if (!logLines.length) lg = "Slip log: <i>nothing has slipped</i> in " + (sim.t - msg.tWrite).toFixed(0) + " s.";
+    if (!msg) lg = "Press Write to start the slip log.";
+    else if (!logLines.length) lg = "Slip log: <i>no letter has slipped</i> in " + (sim.t - msg.tWrite).toFixed(0) + " s.";
     else lg = "Slip log, seconds after writing: " + logLines.map(function (e) {
       return "<b>" + SHORT[IV[e.i].n] + "</b> " + e.t.toFixed(1);
     }).join(", ") + ".";
@@ -991,7 +992,7 @@ function limitCycle(omega, P, h) {
   // a few simulated seconds per frame, and reports what it saw
   (function measure() {
     var out = $("p-measured");
-    out.textContent = "Measuring the default case with this page's own integrator…";
+    out.textContent = "Measuring the default setup with this page's simulation…";
     var seeds = [1, 2, 3], res = [];
     function* job() {
       for (var si = 0; si < seeds.length; si++) {
@@ -1025,12 +1026,12 @@ function limitCycle(omega, P, h) {
       window.__plankMeasured = res;
       function rng2(k) {
         var v = res.map(function (r) { return r[k]; }).filter(function (x) { return x !== null; });
-        if (!v.length) return "never, inside 120 s";
+        if (!v.length) return "never within 120 s";
         var lo = Math.min.apply(null, v), hi = Math.max.apply(null, v);
         return lo.toFixed(1) + " to " + hi.toFixed(1) + " s";
       }
-      out.innerHTML = "Measured at load, by this page's own integrator, on three scatterings of the default plank (eleven metronomes, mass ratio 0.081, spread 1.5%) with ten letters written at the start: the first letter slipped after <b>" + rng2("first") +
-        "</b>, the last after <b>" + rng2("last") + "</b>, and the arms got in step (R above 0.95 and staying there) after <b>" + rng2("lock") + "</b>.";
+      out.innerHTML = "Measured when this page loaded, with the same simulation you see above. Setup: the default plank (eleven metronomes, mass ratio 0.081, spread 1.5%), ten letters written at the start, and three different random starting positions. The first letter slipped after <b>" + rng2("first") +
+        "</b>. The last letter slipped after <b>" + rng2("last") + "</b>. The arms got in step (R rose above 0.95 and stayed there) after <b>" + rng2("lock") + "</b>.";
     }, null, 6);
   })();
 

@@ -1,4 +1,4 @@
-/* lab/kit.js: the shared bench for the back-country pages.
+/* lab/kit.js: the shared bench for the lab pages.
 
    A classic script, so it loads from file:// as well as from a server.
    It defines window.Kit. tools/verify.mjs loads this same file in Node
@@ -105,11 +105,11 @@
   var q = PYTH_COMMA / 4, s6 = PYTH_COMMA / 6, sc4 = SYNT_COMMA / 4;
   var SCHISMA = PYTH_COMMA - SYNT_COMMA;
   var TEMPERAMENTS = {
-    "equal":        { label: "Equal temperament", year: 1917, note: "Every fifth narrowed by a twelfth of the comma. The piano you know.",
+    "equal":        { label: "Equal temperament", year: 1917, note: "Every fifth narrowed by a twelfth of the comma. This is the modern piano.",
                       fifths: [1,1,1,1,1,1,1,1,1,1,1,1].map(function () { return PYTH_COMMA / 12; }) },
-    "pythagorean":  { label: "Pythagorean", year: -500, note: "Eleven pure fifths. The twelfth, G♯ to E♭, eats the whole comma and howls.",
+    "pythagorean":  { label: "Pythagorean", year: -500, note: "Eleven pure fifths. The twelfth, G♯ to E♭, absorbs the whole comma and sounds badly out of tune (the \"wolf\" fifth).",
                       fifths: [0,0,0,0,0,0,0,0,null,0,0,0] },
-    "meantone":     { label: "Quarter-comma meantone", year: 1523, note: "Pure major thirds, bought with narrow fifths and a wolf.",
+    "meantone":     { label: "Quarter-comma meantone", year: 1523, note: "Pure major thirds, made possible by narrower fifths and one very wide wolf fifth.",
                       fifths: [sc4,sc4,sc4,sc4,sc4,sc4,sc4,sc4,null,sc4,sc4,sc4] },
     "werckmeister": { label: "Werckmeister III", year: 1691, note: "Four fifths take a quarter comma each; the rest are pure.",
                       fifths: [q,q,q,0,0,q,0,0,0,0,0,0] },
@@ -132,7 +132,7 @@
   function justIntonation() {
     var r = [1, 16/15, 9/8, 6/5, 5/4, 4/3, 45/32, 3/2, 8/5, 5/3, 9/5, 15/8];
     var f = fromPitchClasses(r.map(cents), "Five-limit just");
-    f.note = "Every ratio on the page that it contains, it plays exactly. Watch what that does to the bank.";
+    f.note = "It plays several of the page's intervals exactly, so their oscillators stand still and add nothing to the bank.";
     return f;
   }
 
@@ -732,9 +732,9 @@
     if (!isBrowser) return;
     var el = document.createElement("nav");
     el.className = "lab-nav";
-    el.setAttribute("aria-label", "The back country");
+    el.setAttribute("aria-label", "The lab");
     var html = '<a href="../index.html" class="home">&larr; The comma</a><span class="sep">/</span>' +
-      '<a href="index.html"' + (current === "index.html" ? ' aria-current="page"' : "") + '>Back country</a>';
+      '<a href="index.html"' + (current === "index.html" ? ' aria-current="page"' : "") + '>Lab</a>';
     html += '<span class="trail">';
     PAGES.forEach(function (p, i) {
       html += '<a href="' + p.href + '" title="' + p.title + '"' +

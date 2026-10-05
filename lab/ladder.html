@@ -35,21 +35,21 @@
 <div class="wrap">
 
 <header class="hero">
-  <span class="eyebrow">Back country &middot; 01</span>
+  <span class="eyebrow">Lab &middot; 01</span>
   <h1>Every clock has a comma.</h1>
-  <p class="lede">Musicians think the comma is their private misery. It isn't. Any time two cycles refuse to divide into each other, one of them leaves a little remainder on the floor, and somebody has to decide what to do about it. Calendar makers have been sweeping up after the sun and the moon since before anybody wrote music down.</p>
-  <p>Below, pick a pair of clocks. Each dot is one more tick of the first clock, laid around the face of the second. If the two ever lined up exactly, the dots would stack into a few straight spokes and stop making anything new. They never do.</p>
+  <p class="lede">The Pythagorean comma is one example of a general problem. Whenever two repeating cycles don't divide evenly into each other, some remainder is always left over. Calendars face the same problem with days, months and years, and so do planets and growing plants.</p>
+  <p>Pick a pair of cycles below. Each dot is one more step of the first cycle, placed around a circle that stands for the second. If the two cycles ever matched exactly, the dots would stack up on a few straight spokes. With these pairs they never quite do.</p>
 </header>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">01</span>
-    <div><h2>The spiral never closes.</h2></div>
+    <div><h2>A spiral that never closes</h2></div>
   </div>
 
   <div class="panel">
-    <h3>Pick two clocks</h3>
-    <div class="preset-row" id="presets" role="group" aria-label="Which pair of clocks"></div>
+    <h3>Pick two cycles</h3>
+    <div class="preset-row" id="presets" role="group" aria-label="Which pair of cycles"></div>
     <div class="custom">
       <label for="custom-x" class="readout">or any number</label>
       <input type="text" id="custom-x" inputmode="decimal" placeholder="e.g. 2.71828" spellcheck="false">
@@ -60,27 +60,27 @@
       <span class="corner-tag" id="spiral-tag"></span>
     </div>
     <div class="slider-row">
-      <label for="npts">How many ticks</label>
+      <label for="npts">Number of dots</label>
       <input type="range" id="npts" min="0" max="1000" value="620">
       <span class="readout num" id="npts-val">1,000</span>
     </div>
     <div class="btn-row">
-      <button id="grow" aria-pressed="false">Grow it from nothing</button>
+      <button id="grow" aria-pressed="false">Grow it from the start</button>
       <button id="arms" aria-pressed="true">Trace the spokes</button>
     </div>
     <div class="readout" id="spiral-read"></div>
   </div>
 
-  <p class="wide">Watch the spokes. With few dots the eye finds a handful of arms. Add more and those arms twist, smear, and give way to a larger count, then a larger one still. Each count is a near miss: that many steps of the first clock come <em>almost</em> back to the start of the second. Almost is the whole story. Every count fails eventually, and a new one takes over.</p>
+  <p class="wide">Watch the spokes as the dots are added. At first you see a few arms. As more dots appear, those arms curve and blur, and a larger number of arms takes over. Each arm count is a near miss: that many steps of the first cycle come <em>almost</em> back to the start. Every near miss eventually fails, and a better one replaces it.</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">02</span>
-    <div><h2>The ladder of near misses.</h2></div>
+    <div><h2>The ladder of near misses</h2></div>
   </div>
 
-  <p class="wide">The near misses aren't random. They're the rungs of a continued fraction, the oldest trick there is for approximating a number that won't come out even. Each rung is the best you can do with cycles that short, and each leaves a remainder, which is that rung's comma. Pick one to put its spokes on the spiral.</p>
+  <p class="wide">The near misses follow a pattern. They are the steps of the number's <strong>continued fraction</strong>, a standard method for finding the best fractions that approximate a number. Each step, or rung, is the most accurate fit possible for cycles that short, and each leaves a remainder: that rung's comma. Pick a rung to draw its spokes on the spiral.</p>
 
   <div class="panel">
     <h3 id="ladder-title">Rungs</h3>
@@ -92,16 +92,16 @@
     <div class="readout" id="ladder-read"></div>
   </div>
 
-  <p class="wide">For the musician, rung 12 is the piano: twelve fifths against seven octaves, off by 23.46 cents. Rung 53 is the one the Chinese theorist Jing Fang found around 40 BC and Nicholas Mercator wrote up in the 1600s: fifty-three fifths against thirty-one octaves, off by 3.6 cents. For the calendar maker, rung 4 is Julius Caesar's leap year, and the 19-year rung of the moon is the Metonic cycle that still sets the date of Easter. Same arithmetic, different arguments.</p>
+  <p class="wide">Some rungs are famous. For fifths, rung 12 is the piano: twelve fifths against seven octaves, off by 23.46 cents. Rung 53 was found by the Chinese theorist Jing Fang around 40 BC and studied by Nicholas Mercator in the 1600s: fifty-three fifths against thirty-one octaves, off by 3.6 cents. For the year, rung 4 is Julius Caesar's leap year. For the moon, the 19-year rung is the Metonic cycle, still used to set the date of Easter. All of them come from the same arithmetic.</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">03</span>
-    <div><h2>How far down can you read?</h2></div>
+    <div><h2>How fine can you tell?</h2></div>
   </div>
 
-  <p class="wide">The ladder goes down forever. Nobody can use all of it, because nobody can tell apart differences smaller than their own noise. Set how fine your instrument is and see which rung is the first one good enough to fool it.</p>
+  <p class="wide">The ladder never ends, but no one can use all of it. Every ear and every instrument has a smallest difference it can detect. Set that resolution below and the chart shows the first rung whose error per step is too small for you to notice.</p>
 
   <div class="panel">
     <h3>Your resolution</h3>
@@ -114,21 +114,21 @@
     <div class="readout" id="res-read"></div>
   </div>
 
-  <p class="wide">That is what the note on the tuning channel means when it says the spiral is infinite and your resolution isn't, and capacity is the quotient. The dots never run out. What runs out is your ability to tell one from the next. It's a good thing to remember the next time somebody sells you infinite anything.</p>
+  <p class="wide">This is the point the tuning-channel notes make: the spiral contains infinitely many distinct positions, but you can only use the ones you can tell apart. Usable capacity depends on your resolution, not on the number of positions that exist.</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">04</span>
-    <div><h2>The sunflower picked the worst number on purpose.</h2></div>
+    <div><h2>Why sunflowers use the golden ratio</h2></div>
   </div>
 
-  <p class="wide">Press the golden ratio up top and look at what grows. That's a sunflower head, near enough. A sunflower lays down each new seed a fixed turn past the last one, about 137.5 degrees, and that turn is built from the golden ratio, the number with the slowest ladder of all. Its continued fraction is nothing but ones, so every rung is as poor an approximation as a rung can be, and the seeds never settle into a few spokes that would waste the space between them. The arms you do see come in Fibonacci counts, 21 and 34 and 55, because those are the golden ratio's rungs.</p>
+  <p class="wide">Choose <em>The golden ratio</em> at the top and watch the pattern grow. It looks like a sunflower head, because it is the same rule. A sunflower places each new seed about 137.5 degrees around from the last one, an angle based on the golden ratio. The golden ratio is the hardest number to approximate with fractions: its continued fraction is all ones, so every rung is as poor as a rung can be. As a result the seeds never line up on a few spokes with wasted space between them. The arms you do see come in Fibonacci numbers, such as 21, 34 and 55, because those are the golden ratio's rungs.</p>
 
-  <p class="wide">A piano wants the opposite. It wants a rung good enough to close the circle, and it settles for twelve. The sunflower wants a circle that never closes, so it can keep packing seeds forever without any two lining up. Plants worked out the comma's other use a few hundred million years before Pythagoras, and nobody had to hold a meeting about it.</p>
+  <p class="wide">A piano needs the opposite. It needs a rung good enough to close the circle, and twelve is the one it uses. A sunflower benefits from a circle that never closes, because then it can keep packing seeds without any two lining up. Both are uses of the same remainder.</p>
 
   <div class="foot">
-    <p class="note"><strong>How it's drawn.</strong> Dot n sits at angle 2&pi;&middot;n&middot;x and radius proportional to &radic;n (Vogel's model of a sunflower head), where x is the ratio of the two clocks; only its fractional part matters for the angle. The rungs are the convergents p/q of x's continued fraction, computed in double precision, so the deepest rungs of very long expansions stop being trustworthy after about twelve terms; the page stops there. A rung's miss is |q&middot;x &minus; p| in the second clock's units, converted to cents, minutes, days, or years where that means something, and to degrees of the circle otherwise. The resolution panel asks for the first rung whose error per step, the miss divided by q, falls below your resolution. Astronomical values: tropical year 365.24219 days, synodic month 29.530589 days, Jupiter's period 11.862 years, Saturn's 29.457 years. The Gregorian calendar's 97 leap days in 400 years is not a rung of the year's continued fraction; it is a committee's compromise that sits between rungs and is easy to count on fingers, which is a perfectly good reason.</p>
+    <p class="note"><strong>How it's drawn.</strong> Dot n sits at angle 2&pi;&middot;n&middot;x and radius proportional to &radic;n (Vogel's model of a sunflower head), where x is the ratio of the two clocks; only its fractional part matters for the angle. The rungs are the convergents p/q of x's continued fraction, computed in double precision, so the deepest rungs of very long expansions stop being trustworthy after about twelve terms; the page stops there. A rung's miss is |q&middot;x &minus; p| in the second clock's units, converted to cents, minutes, days, or years where that means something, and to degrees of the circle otherwise. The resolution panel asks for the first rung whose error per step, the miss divided by q, falls below your resolution. Astronomical values: tropical year 365.24219 days, synodic month 29.530589 days, Jupiter's period 11.862 years, Saturn's 29.457 years. The Gregorian calendar's 97 leap days in 400 years is not a rung of the year's continued fraction; it sits between rungs and was chosen because it is easy to apply.</p>
   </div>
 </section>
 
@@ -340,12 +340,12 @@
       document.getElementById("b-climb").textContent = "Climb " + r.q + " true fifths";
       document.getElementById("b-climb").disabled = S.isMuted() || r.q > 120;
     }
-    if (curKey === "year" && r.q === 4) t += " Julius Caesar's rule, 46 BC. It slips a day against the seasons every 128 years, which is why Pope Gregory had to cancel ten days in October 1582.";
+    if (curKey === "year" && r.q === 4) t += " Julius Caesar's leap year, 46 BC. It drifts one day against the seasons every 128 years, which is why ten days were skipped in October 1582 when the Gregorian calendar replaced it.";
     if (curKey === "year" && r.q === 33) t += " Omar Khayyam's calendar used a 33-year cycle much like this one.";
-    if (curKey === "moon" && r.q === 19) t += " The Metonic cycle, 432 BC, still behind the date of Easter and the Hebrew calendar.";
-    if (curKey === "planets" && r.q === 2) t += " The near-resonance astronomers call the Great Inequality, worked out by Laplace in 1785.";
-    if (curKey === "pi" && r.q === 113) t += " Zu Chongzhi's 355/113, around AD 480. Nobody did better for about eight hundred years.";
-    if (curKey === "golden") t += " Fibonacci numbers, every one: the golden ratio's rungs are ratios of neighbors in that sequence.";
+    if (curKey === "moon" && r.q === 19) t += " The Metonic cycle, from 432 BC, still used for the date of Easter and in the Hebrew calendar.";
+    if (curKey === "planets" && r.q === 2) t += " Astronomers call this near-match the Great Inequality; Laplace explained it in 1785.";
+    if (curKey === "pi" && r.q === 113) t += " Zu Chongzhi's 355/113, around AD 480. It stayed the most accurate known value for about eight hundred years.";
+    if (curKey === "golden") t += " These are all Fibonacci numbers: the golden ratio's rungs are ratios of neighboring Fibonacci numbers.";
     document.getElementById("ladder-read").innerHTML = t;
   }
 
@@ -412,7 +412,7 @@
     }
 
     g.fillStyle = dimC; g.font = "10px " + css("--mono"); g.textAlign = "right";
-    g.fillText(n.toLocaleString() + " ticks" + (q && armsOn ? " · spokes for rung " + q : ""), w - 8, h - 10);
+    g.fillText(n.toLocaleString() + " dots" + (q && armsOn ? " · spokes for rung " + q : ""), w - 8, h - 10);
 
     document.getElementById("npts-val").textContent = n.toLocaleString();
     document.getElementById("spiral-read").innerHTML = spiralText(n);
@@ -422,18 +422,18 @@
     // which rung dominates what the eye sees: the largest q that is still well under n
     var vis = null;
     L.rungs.forEach(function (r) { if (r.q >= 2 && r.q * 3 <= n) vis = r; });
-    if (!vis) return "Too few dots yet to see any spokes.";
+    if (!vis) return "Not enough dots yet to see spokes.";
     var nxt = null;
     L.rungs.forEach(function (r) { if (!nxt && r.q > vis.q) nxt = r; });
-    return "At " + n.toLocaleString() + " ticks the eye picks out about <b class='temp-t'>" + vis.q +
-      "</b> spokes, the rung " + vis.p + "/" + vis.q + "." +
-      (nxt ? " Keep adding and they'll twist over into <b>" + nxt.q + "</b>." : "");
+    return "At " + n.toLocaleString() + " dots you can see about <b class='temp-t'>" + vis.q +
+      "</b> spokes, from the rung " + vis.p + "/" + vis.q + "." +
+      (nxt ? " Add more dots and they turn into <b>" + nxt.q + "</b> spokes." : "");
   }
 
   nSlider.addEventListener("input", function () { if (growing) stopGrow(); drawSpiral(); });
 
   var bGrow = document.getElementById("grow");
-  function stopGrow() { growing = false; bGrow.setAttribute("aria-pressed", "false"); bGrow.textContent = "Grow it from nothing"; }
+  function stopGrow() { growing = false; bGrow.setAttribute("aria-pressed", "false"); bGrow.textContent = "Grow it from the start"; }
   function restartGrowIfOn() { if (growing) { growN = 1; growStart = performance.now(); } }
   bGrow.addEventListener("click", function () {
     if (growing) { stopGrow(); drawSpiral(); return; }
@@ -512,13 +512,13 @@
     g.fillText("error per step (log)", 0, 0); g.restore();
 
     var read = document.getElementById("res-read");
-    if (first < 0) read.innerHTML = "Nothing on the ladder this page computes is fine enough for you. You have remarkable equipment.";
+    if (first < 0) read.innerHTML = "None of the rungs this page computes is fine enough to get below that resolution.";
     else {
       var z = rungs[first];
       read.innerHTML = "At " + cur.resFmt(r) + ", <b class='sage-t'>rung " + z.q + "</b> is " + cur.resWhat +
         ": it errs by " + cur.unit(per[first]) + " per step." +
-        (first > 0 ? " Every rung before it is coarse enough that you'd catch it." : " Even the first rung fools you.") +
-        (cur.music && z.q === 12 ? " That's the piano, and that's why it won." : "");
+        (first > 0 ? " Every rung before it has an error large enough to notice." : " Even the first rung is below your resolution.") +
+        (cur.music && z.q === 12 ? " That is the piano's tuning." : "");
     }
   }
 
@@ -537,9 +537,9 @@
     S.register("dyad", out, nodes);
     S.later(function () { S.stop("dyad"); }, 6000);
     var beat = Math.abs(3 * root - 2 * g5);
-    document.getElementById("ladder-read").innerHTML = "A true fifth first, then rung " + sel.q +
-      "'s. Its coincident partials beat <b>" + beat.toFixed(2) + "</b> times a second at this pitch" +
-      (beat < 0.05 ? ", which is to say they don't, as far as a person can tell." : ".");
+    document.getElementById("ladder-read").innerHTML = "A pure fifth first, then rung " + sel.q +
+      "'s fifth. Their shared overtones beat <b>" + beat.toFixed(2) + "</b> times per second at this pitch" +
+      (beat < 0.05 ? ", too slowly to hear." : ".");
   });
 
   document.getElementById("b-climb").addEventListener("click", function () {
@@ -562,8 +562,8 @@
     S.later(function () { S.stop("climb"); }, (t2 - t + 3.5) * 1000);
     var missC = Math.abs(1200 * Math.log2(landing / root));
     var near = Math.min(missC, 1200 - missC);
-    document.getElementById("ladder-read").innerHTML = "Climbing " + q + " pure fifths, folding back into the octave as it goes. It lands " +
-      fmtCents(near) + " off home, and the last chord beats against the start. Every rung misses. The good ones miss by less.";
+    document.getElementById("ladder-read").innerHTML = "Climbing " + q + " pure fifths, folding each back into one octave. It lands " +
+      fmtCents(near) + " away from the starting note, so the final chord beats. Every rung misses; better rungs miss by less.";
   });
 
   S.onChange(function () { if (cur && cur.music) describeRung(); });

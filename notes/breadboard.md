@@ -1,11 +1,11 @@
 # The bank on a breadboard
 
-The oscillator bank on the main page is eleven equations in a browser. It
-doesn't have to be. Every term in those equations is something an op-amp
-does for a living, and the whole bank fits on two breadboards for the price
-of a nice dinner. This note is the build sheet: circuit, component values
-computed from the piano's actual detunings, the coupling knob, and how to
-read the thing out and check it against the simulation.
+The oscillator bank on the main page is eleven equations simulated in a
+browser. Every term in those equations can be built with op-amps, and the
+whole bank fits on two breadboards for roughly fifty to eighty dollars of
+parts. This note is the build sheet: the circuit, component values computed
+from the piano's actual detunings, the coupling control, and how to record
+the circuit and check it against the simulation.
 
 Nobody has built it yet. The values below are arithmetic, not measurements.
 
@@ -16,8 +16,8 @@ interval's *detuning*, 0.37 to 8.63 Hz, not at the interval's 220-odd Hz.
 So the breadboard builds those slow oscillators directly. (The acoustic
 version, eleven resonators at the real pitches beating against a reference,
 would need a quality factor near 1,150 at 220 Hz to get the same 1.7-second
-memory. Tuning forks manage that; breadboards don't. The forks are a
-different and better weekend.)
+memory. Tuning forks can reach that; breadboard circuits can't, so the
+acoustic version would be a separate project.)
 
 Each oscillator is a damped resonator with two outputs a quarter-cycle
 apart. Those two outputs are the real and imaginary parts of z, which is
@@ -63,7 +63,7 @@ The detunings and DRIVE weights come straight from `lab/kit.js`, which
 reproduces `index.html`. E24 rounding and 5% capacitors will move each
 frequency by a few percent. That's harmless: the bank's behaviour depends on
 the fan having many different speeds, not on any one speed being exact. Use
-1% resistors and don't lose sleep.
+1% resistors.
 
 **Direction of turning.** A physical resonator doesn't care which way its
 phasor turns; that's a matter of which output you call the imaginary part.
@@ -88,8 +88,8 @@ bank's average with strength K.
    parallel with R_Q.
 
 With C = 1 µF, the page's default K = 0.12 is R_K = 8.3 MΩ, and its maximum
-K = 8 is 125 kΩ. One master knob is a 22-gang pot, which you will not find,
-so use a voltage-controlled gain (an OTA such as the LM13700, or a
+K = 8 is 125 kΩ. A single knob would need a 22-gang potentiometer, which
+isn't practical, so use a voltage-controlled gain (an OTA such as the LM13700, or a
 multiplying DAC) after each summing amplifier and drive all of them from one
 control voltage.
 
@@ -125,7 +125,7 @@ features, |z|², are computed after sampling, not in hardware.
 Eleven oscillators × three op-amps = 33, plus two for the averages: nine
 TL074 quads. Twenty-two 1 µF film capacitors, about seventy resistors, eleven
 OTAs or a multiplying DAC, one DAC, three ADCs, a microcontroller, ±12 V.
-Two full-size breadboards. Call it fifty to eighty dollars, most of it in
+Two full-size breadboards. Expect fifty to eighty dollars, mostly for the
 film capacitors.
 
 ## What would be worth finding out

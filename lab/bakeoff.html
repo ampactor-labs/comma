@@ -14,29 +14,29 @@
 <div class="wrap">
 
 <header class="hero">
-  <span class="eyebrow">Back country &middot; 02</span>
+  <span class="eyebrow">Lab &middot; 02</span>
   <h1>Which tuning thinks best?</h1>
-  <p class="lede">The main page builds its machine out of the piano's errors. But the piano is only one way of being wrong. For five hundred years tuners fought over how to spread the comma around, and every one of their answers leaves a different fan of mistakes. So hold a contest. Build the bank out of each tuning's errors and see which one remembers the most.</p>
-  <p>Nobody in those arguments was thinking about memory. They were thinking about whether the organ in church sounded like a sack of cats in E-flat. The results don't care what they were thinking.</p>
+  <p class="lede">The main page builds its oscillator bank from the piano's tuning errors. But equal temperament is only one way to spread the comma around. Over five centuries, musicians used many different tunings, and each one leaves a different set of errors. This page builds the bank from each tuning's errors and measures which one remembers the most.</p>
+  <p>None of these tunings was designed with memory in mind. They were designed to make music sound good in certain keys. The bank simply measures what their errors happen to provide.</p>
 </header>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">01</span>
-    <div><h2>The contestants.</h2></div>
+    <div><h2>Ten tunings compared</h2></div>
   </div>
 
-  <p class="wide">Each card is one tuning's bank: eleven clocks, one per interval from the main page, each turning at the rate that tuning misses its interval by, slowed down six times so you can follow them. A clock that stands still is an interval the tuning gets exactly right. Exactly right means it has nothing to spend.</p>
+  <p class="wide">Each card shows one tuning's bank: eleven oscillators, one per interval from the main page, each turning at the rate by which that tuning misses its interval. They are shown at one sixth of real speed so you can follow them. An oscillator that stands still marks an interval the tuning plays exactly. An exact interval has no error, so its oscillator adds nothing.</p>
 
   <div class="panel">
-    <h3>Eleven clocks per tuning</h3>
-    <canvas id="cards" height="560" aria-label="One card per tuning showing eleven clocks turning at that tuning's detunings, with its measured capacity"></canvas>
+    <h3>Eleven oscillators per tuning</h3>
+    <canvas id="cards" height="560" aria-label="One card per tuning showing eleven oscillators turning at that tuning's detunings, with its measured capacity"></canvas>
     <div class="meter" aria-hidden="true"><i id="m1"></i></div>
     <div class="btn-row">
-      <button id="b-contest" data-tone="temper">Hold the contest</button>
+      <button id="b-contest" data-tone="temper">Run the comparison</button>
       <button id="b-sound" data-tone="just" data-needs-sound>Hear the selected bank</button>
     </div>
-    <div class="readout" id="contest-read">Each tuning gets the same experiment the main page runs: the same input, the same coupling of 0.12, the same readout, scored on data it never saw. Tap a card for its numbers.</div>
+    <div class="readout" id="contest-read">Each tuning gets the same experiment as the main page: the same input, coupling 0.12, the same readout, scored on data it was not trained on. Tap a card for its numbers.</div>
   </div>
 
   <div class="panel">
@@ -55,16 +55,16 @@
     </div>
   </div>
 
-  <p class="wide">Look at who wins. Equal temperament, the tuning that won the actual war, lands in the middle of the pack. Two of the well-temperaments of the 1700s, Kirnberger's and Vallotti's, give the bank more to work with than the modern piano does. They spread their errors unevenly, and none of their clocks freeze. Meantone, which bought pure thirds by hammering its fifths flat, does worse. And just intonation, the purist's dream, freezes four of its eleven clocks dead and pays for every one of them.</p>
+  <p class="wide">Equal temperament, the tuning modern pianos use, finishes in the middle. Two well-temperaments from the 1700s, Kirnberger III and Vallotti, give the bank more to work with. They spread their errors unevenly, and none of their oscillators stands still. Quarter-comma meantone, which makes thirds pure by narrowing the fifths further, does worse. Five-limit just intonation plays four of the eleven intervals exactly, so four oscillators stand still, and it scores lower still.</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">02</span>
-    <div><h2>The better the tuning, the dumber the machine.</h2></div>
+    <div><h2>More accurate tunings make a weaker bank</h2></div>
   </div>
 
-  <p class="wide">Now forget history and walk the ladder of equal divisions of the octave, from five notes up to sixty. More notes means every interval can be matched more closely. That's the dream of every microtonal reformer since Mercator. Here's what it does to the bank.</p>
+  <p class="wide">Next, set history aside and try every equal division of the octave from 5 notes to 60. More notes per octave means every interval can be matched more closely, which is the goal of most microtonal tuning systems. Here is what that does to the bank.</p>
 
   <div class="panel">
     <h3>Equal divisions, five to sixty</h3>
@@ -76,21 +76,21 @@
     </div>
     <div class="meter" aria-hidden="true"><i id="m2"></i></div>
     <div class="btn-row">
-      <button id="b-ladder">Walk the ladder</button>
+      <button id="b-ladder">Measure all 56 divisions</button>
     </div>
-    <div class="readout" id="ladder-read">Fifty-six experiments. They land one at a time.</div>
+    <div class="readout" id="ladder-read">Fifty-six experiments, plotted as each one finishes.</div>
   </div>
 
-  <p class="wide">As the errors shrink, capacity sinks. The curve is jagged, because each division happens to land near some intervals and far from others, but the trend is plain: the best banks come from somewhere between nine and twenty notes, and past about twenty-five it's downhill. Up at fifty-three, Mercator's beautiful near-perfect tuning, the bank holds a little over half what the piano's does. Reach goes the other way, because slow clocks hold the past longer, but they hold less of it, and they hold it as near-copies of each other. You can have a tuning so accurate that the machine built from its errors barely notices anything happened. Perfection is a fine thing to aim at. It is a poor place to live.</p>
+  <p class="wide">As the errors shrink, capacity falls. The curve is jagged, because each division happens to land close to some intervals and far from others, but the trend is clear: the best banks come from about 9 to 20 notes, and capacity declines past about 25. At 53 notes, a tuning whose fifths and thirds are within a few cents of pure, the bank holds a little over half of what the piano's bank holds. Reach moves the other way, because slower oscillators hold the past longer, but they hold less of it and hold nearly the same information. A tuning can be so accurate that its errors give the bank almost nothing to work with.</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">03</span>
-    <div><h2>Can anybody beat the piano?</h2></div>
+    <div><h2>Can a search beat the piano?</h2></div>
   </div>
 
-  <p class="wide">Throw away tuning altogether. Keep the band the piano lives in, 0.37 to 8.63 Hz, and let a search pick any eleven rates it likes inside it. The search here is the simplest one that works, the kind a desert rat could run on a pocket calculator: change the rates a little at random, keep the change if the bank holds more, repeat.</p>
+  <p class="wide">Now drop tuning entirely. Keep the piano's band of speeds, 0.37 to 8.63 Hz, and let a search choose any eleven speeds inside it. The search is deliberately simple: change the speeds a little at random, keep the change if the bank holds more, and repeat.</p>
 
   <div class="panel">
     <h3>A blind search over eleven rates</h3>
@@ -100,32 +100,32 @@
     <div class="btn-row">
       <button id="b-search" data-tone="temper">Start the search</button>
     </div>
-    <div class="readout" id="search-read">It measures the piano, an even spacing, and an even spacing on a log scale first, then starts from the piano and wanders.</div>
+    <div class="readout" id="search-read">It first measures the piano, an even spacing, and an even spacing on a logarithmic scale, then starts from the piano and searches.</div>
   </div>
 
-  <p class="wide">The search does beat the piano, but not by much, and the plainest fan you could draw with a ruler, eleven rates evenly spaced, does nearly as well as the search does. The piano's fan is lopsided, with four clocks crowded below 0.7 Hz, and crowding is redundancy. Still, an instrument designed by monks, merchants, and committees for a completely different purpose gets most of the way to the best this machine allows. Accidents are like that sometimes.</p>
+  <p class="wide">The search beats the piano by a modest margin, and eleven evenly spaced speeds do almost as well as the search. The piano's set is lopsided: four of its oscillators sit below 0.7 Hz, and oscillators that close together duplicate each other. Even so, a tuning designed for a completely different purpose gets most of the way to the best this bank allows.</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">04</span>
-    <div><h2>A bigger bank.</h2></div>
+    <div><h2>Larger banks</h2></div>
   </div>
 
-  <p class="wide">The main page stops at eleven intervals, the harmonics up to 23. Keep going up the harmonic series and every new harmonic brings a new error, a new clock, and three more numbers for the readout. Does the bank keep up with its own ceiling?</p>
+  <p class="wide">The main page uses eleven intervals, the harmonics up to the 23rd. Continuing up the harmonic series adds more intervals, each with its own error, so each adds an oscillator and three more values for the readout. Does capacity keep pace with the larger ceiling?</p>
 
   <div class="panel">
-    <h3>Eleven to forty-seven clocks</h3>
-    <canvas id="big" height="240" aria-label="Capacity against ceiling for banks of 11, 16, 23, 32 and 47 clocks"></canvas>
+    <h3>Eleven to forty-seven oscillators</h3>
+    <canvas id="big" height="240" aria-label="Capacity against ceiling for banks of 11, 16, 23, 32 and 47 oscillators"></canvas>
     <div class="meter" aria-hidden="true"><i id="m4"></i></div>
-    <div class="btn-row"><button id="b-big">Grow the bank</button></div>
+    <div class="btn-row"><button id="b-big">Measure larger banks</button></div>
     <div class="readout" id="big-read">Each bank uses the odd harmonics 3, 5, 7, and on up, folded into one octave above A3 and measured against the piano.</div>
   </div>
 
-  <p class="wide">More clocks hold more, but each new one is worth a little less, because the new clocks have to squeeze into the same narrow band of speeds as the old ones. The ceiling grows by three with every clock. Capacity grows slower. Crowd enough tuning forks into a small room and they start finishing each other's sentences.</p>
+  <p class="wide">Larger banks hold more, but each added oscillator is worth a little less, because the new ones must fit into the same narrow band of speeds as the old ones. The ceiling grows by three with every oscillator; capacity grows more slowly.</p>
 
   <div class="foot">
-    <p class="note"><strong>Method.</strong> Every bar on this page is the main page's experiment, run by <code>lab/kit.js</code>, which carries the same equations and constants and reproduces the main page's numbers exactly when given the piano's fan (<code>node tools/verify.mjs</code> checks this, and checks the orderings this page's prose claims). Coupling K = 0.12, seeded random input, 3,500 steps to fit and 3,500 to score. Capacity here is summed over delays 0 to 300, the main page's "longer window", because the 0-to-30 window hides most of what slow banks remember; the cards also report the 0-to-30 figure. Reach is the last delay probed in tens from 40 to 260 steps whose held-out score is at least 0.01. A tuning's detuning for each interval is the frequency gap at A3 = 220 Hz between the just interval and the nearest note that tuning has, with the temperaments rooted on A. Historical temperaments are defined by how much each fifth around the circle is narrowed: Werckmeister III and Vallotti in fractions of the Pythagorean comma, quarter-comma meantone and Kirnberger III in fractions of the syntonic comma and the schisma, with the leftover in meantone and Pythagorean going to the wolf between G&sharp; and E&flat;. The search is a (1+1) evolution strategy over log-rates with a step that grows on success and shrinks on failure, signs kept from the piano, capped at 160 experiments; another run with another seed would find a slightly different fan. The bank never sees anything but random input here, so "thinks best" means "holds the most of a random signal", one narrow kind of thinking.</p>
+    <p class="note"><strong>Method.</strong> Every bar on this page is the main page's experiment, run by <code>lab/kit.js</code>, which carries the same equations and constants and reproduces the main page's numbers exactly when given the piano's fan (<code>node tools/verify.mjs</code> checks this, and checks the orderings this page's prose claims). Coupling K = 0.12, seeded random input, 3,500 steps to fit and 3,500 to score. Capacity here is summed over delays 0 to 300, the main page's "longer window", because the 0-to-30 window hides most of what slow banks remember; the cards also report the 0-to-30 figure. Reach is the last delay probed in tens from 40 to 260 steps whose held-out score is at least 0.01. A tuning's detuning for each interval is the frequency gap at A3 = 220 Hz between the just interval and the nearest note that tuning has, with the temperaments rooted on A. Historical temperaments are defined by how much each fifth around the circle is narrowed: Werckmeister III and Vallotti in fractions of the Pythagorean comma, quarter-comma meantone and Kirnberger III in fractions of the syntonic comma and the schisma, with the leftover in meantone and Pythagorean going to the wolf between G&sharp; and E&flat;. The search is a (1+1) evolution strategy over log-rates with a step that grows on success and shrinks on failure, signs kept from the piano, capped at 160 experiments; another run with another seed would find a slightly different fan. The bank only ever receives random input here, so "thinks best" means "retains the most of a random signal", which is one narrow measure.</p>
   </div>
 </section>
 
@@ -155,7 +155,7 @@
     { id: "edo53", t: Kit.edo(53), name: "53 equal", year: "c. 40 BC" }
   ];
   var NOTES = {
-    equal: "Every fifth narrowed by a twelfth of the Pythagorean comma. The piano you know. (*Standard in piano tuning by about the time of the first World War; proposed centuries earlier.)",
+    equal: "Every fifth narrowed by a twelfth of the Pythagorean comma: the modern piano. (*Standard in piano tuning by about the time of the first World War; proposed centuries earlier.)",
     edo19: "Nineteen equal steps, proposed by Francisco de Salinas in 1558. Better thirds than the piano, worse fifths.",
     edo31: "Thirty-one equal steps, championed by Christiaan Huygens in 1661. Nearly quarter-comma meantone, without the wolf.",
     edo53: "Fifty-three equal steps, Jing Fang's and Mercator's. Fifths and thirds within a few cents of pure. Too good for this bank's own good."
@@ -286,7 +286,7 @@
     document.getElementById("detail-read").innerHTML = r
       ? "Capacity <b class='just-t'>" + r.total.toFixed(2) + "</b> of " + r.ceiling + " over delays 0 to 300 (<b>" + r.c31.toFixed(2) +
         "</b> over 0 to 30) · reach <b>" + r.reachSec.toFixed(1) + " s</b> · mixing <b class='temp-t'>" + (100 * r.nl).toFixed(1) + "%</b>"
-      : "Not measured yet. Hold the contest.";
+      : "Not measured yet. Press Run the comparison.";
   }
 
   // ── the contest ──
@@ -329,7 +329,7 @@
       "<b class='just-t'>" + top.name + "</b> holds the most, <b>" + top.res.total.toFixed(2) + "</b> of " + top.res.ceiling +
       ". Equal temperament comes in <b>" + ordinal(place) + "</b> of " + C.length + " at " + eq.res.total.toFixed(2) +
       ". Last is <b class='temp-t'>" + bottom.name + "</b> at " + bottom.res.total.toFixed(2) +
-      ". The cards have sorted themselves, best first. Tap one for its numbers.";
+      ". The cards are now sorted, best first. Tap one for its numbers.";
     showDetail();
   }
   function ordinal(n) { return n + (n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"); }
@@ -409,7 +409,7 @@
     [0, 2, 4, 6].forEach(function (v) { g.fillText(v + "s", pad.l + pw + 5, pad.t + ph * (1 - v / REACHMAX) + 3); });
     if (!ladderPts.length) {
       g.fillStyle = css("--dim"); g.textAlign = "center"; g.font = "10px " + css("--mono");
-      g.fillText("walk the ladder", pad.l + pw / 2, pad.t + ph / 2);
+      g.fillText("press Measure all 56 divisions", pad.l + pw / 2, pad.t + ph / 2);
       return;
     }
     var pts = ladderPts.slice().sort(function (a, b) { return a.n - b.n; });
@@ -575,7 +575,7 @@
         if (done === sizes.length) {
           busy(false);
           var a = bigPts[0], z = bigPts[bigPts.length - 1];
-          document.getElementById("big-read").innerHTML = "From 11 clocks to 47, capacity grows <b class='just-t'>" + a.total.toFixed(1) +
+          document.getElementById("big-read").innerHTML = "From 11 oscillators to 47, capacity grows <b class='just-t'>" + a.total.toFixed(1) +
             " → " + z.total.toFixed(1) + "</b>, but the share of the ceiling it uses falls from <b>" + (100 * a.total / a.ceiling).toFixed(0) +
             "%</b> to <b class='temp-t'>" + (100 * z.total / z.ceiling).toFixed(0) + "%</b>.";
         }
@@ -591,7 +591,7 @@
     g.strokeStyle = css("--rule"); g.beginPath(); g.moveTo(pad.l, pad.t); g.lineTo(pad.l, pad.t + ph); g.lineTo(pad.l + pw, pad.t + ph); g.stroke();
     g.fillStyle = css("--dim"); g.font = "9px " + css("--mono"); g.textAlign = "right";
     [0, 50, 100].forEach(function (v) { g.fillText(String(v), pad.l - 5, pad.t + ph * (1 - v / MAX) + 3); });
-    if (!bigPts.length) { g.textAlign = "center"; g.font = "10px " + css("--mono"); g.fillText("grow the bank", pad.l + pw / 2, pad.t + ph / 2); return; }
+    if (!bigPts.length) { g.textAlign = "center"; g.font = "10px " + css("--mono"); g.fillText("press Measure larger banks", pad.l + pw / 2, pad.t + ph / 2); return; }
     var bw = pw / 5;
     bigPts.forEach(function (p, i) {
       var x = pad.l + i * bw + bw * 0.2, bwi = bw * 0.6;
@@ -600,7 +600,7 @@
       g.fillStyle = css("--just"); g.fillRect(x, yt, bwi, pad.t + ph - yt);
       g.fillStyle = css("--ink"); g.textAlign = "center";
       g.fillText(p.total.toFixed(1) + " / " + p.ceiling, x + bwi / 2, yc - 5);
-      g.fillStyle = css("--dim"); g.fillText(p.n + " clocks", x + bwi / 2, h - 10);
+      g.fillStyle = css("--dim"); g.fillText(p.n + " oscillators", x + bwi / 2, h - 10);
     });
   }
 

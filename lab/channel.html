@@ -41,43 +41,45 @@
 <div class="wrap">
 
 <header class="hero">
-  <span class="eyebrow">Back country &middot; 05 &middot; The tuning channel</span>
+  <span class="eyebrow">Lab &middot; 05</span>
   <h1>A Letter in a Piano</h1>
-  <p class="lede">Every piano in every church basement between here and Moab is a little out of tune, and nobody calls the sheriff about it. That slack is room. You can hide a letter in it, thirty characters, written in cents, where only somebody with a strobe tuner and a bad attitude would ever think to look.</p>
-  <p>The <a href="../notes/tuning-channel.md">tuning-channel note</a> did the arithmetic on paper. This page goes ahead and does it. Type a letter and the page bends the piano's tuning away from the official curve, a cent here and two there. Then a humid summer gets its turn, then a man with a tuning hammer, and then you read back whatever is left.</p>
+  <p class="lede">Every real piano is slightly out of tune, and small differences go unnoticed. This page uses that slack to store a 30-character message in a piano's tuning. Each character becomes a few small pitch shifts, measured in cents. A cent is a hundredth of a piano semitone.</p>
+  <p>The <a href="../notes/tuning-channel.md">tuning-channel note</a> worked out the numbers on paper. This page runs them. Type a message and the page shifts the tuning away from the reference curve by a cent or two per key. Then you can disturb it with a humid summer or a visit from a piano tuner, and read back what is left.</p>
 </header>
 
 <section>
-  <div class="sec-head"><span class="sec-mark">01</span><div><h2>Thirty characters, in cents</h2></div></div>
+  <div class="sec-head"><span class="sec-mark">01</span><div><h2>Write a message into the tuning</h2></div></div>
 
-  <p>The official tuning is public. Equal temperament, every fifth shaved by the same sliver, plus the stretch: treble a little sharp, bass a little flat, because real strings are stiff and their overtones run sharp. Any tuner can recite it. The message is whatever you do that the official version didn't ask for.</p>
-  <p>There are three places to put it. Each of the twelve pitch classes can lean a few cents, the way the old well temperaments did, and nobody fainted. Each of the 88 keys can sit 2 cents sharp or flat of where the curve wants it. And on the 60 notes that carry three strings, the third string can sit a cent or so off its two partners. The ear takes that for warmth, if it notices at all.</p>
+  <p>Start from the reference tuning, the standard tuning any piano tuner can look up. It has two parts. Equal temperament splits the octave into twelve equal semitones. Stretch adjusts for real strings: they are stiff, so their overtones run slightly sharp, and tuners compensate by setting the treble a little sharp and the bass a little flat. Any difference between this piano and the reference can carry information.</p>
+  <p>The page uses three places to store bits. First, each of the twelve pitch classes (all the A's, all the A&sharp;'s, and so on) can shift a few cents as a group. Historical well temperaments shifted pitch classes this way on purpose, so it sounds normal. Second, each of the 88 keys can sit 2 cents sharp or flat of the curve. Third, on the 60 notes that use three strings, the third string can sit about a cent away from the other two. A listener who notices at all hears that as a slightly warmer tone.</p>
+  <p>The page also adds an error-correcting code. It appends extra check symbols, computed from the message, to the end of the message. If a few characters are read back wrong, the reader uses the check symbols to find which ones are wrong and fix them. Here the message is split into two blocks, called codewords. Each holds 15 characters plus 8 check symbols, and each can fix up to 4 wrong symbols. The code is a Reed&ndash;Solomon code, the same family used on CDs and QR codes. Full details are in the notes at the bottom.</p>
+  <p>Type up to 30 characters and press Write. Then press Add summer humidity or Send in a tuner to disturb the tuning. Press Read back to decode what is left.</p>
 
   <div class="panel" id="bench">
     <h3>The piano</h3>
     <div class="msg-input-row">
-      <label for="msg">Letter</label>
+      <label for="msg">Message</label>
       <input type="text" id="msg" maxlength="30" spellcheck="false" autocomplete="off" value="THE ERROR IS THE MACHINE.">
       <span class="readout num" id="msg-count">25 / 30</span>
     </div>
     <canvas id="dials" height="132" aria-label="Twelve strobe dials, one per pitch class, showing each pitch class's temperament offset in cents and whether it reads back the written level"></canvas>
     <div class="canvas-wrap">
-      <canvas id="piano" height="352" aria-label="An 88-key piano. Above each key a needle shows its pitch offset in cents from the public reference, cyan where it reads back the written level and amber where it does not; hairlines show the three strings of each trichord; two lanes under the keys show the two interleaved codewords"></canvas>
+      <canvas id="piano" height="352" aria-label="An 88-key piano. Above each key a needle shows its pitch offset in cents from the reference tuning, cyan where it reads back the written level and amber where it does not. Thin lines show the three strings of each three-string note. Two lanes under the keys show the two interleaved codewords"></canvas>
     </div>
     <div class="legend" aria-hidden="true">
-      <span><i style="background:var(--just)"></i>reads what was written</span>
-      <span><i style="background:var(--temper)"></i>reads something else</span>
-      <span><i style="background:var(--dim)"></i>where the letter put it</span>
-      <span><i style="background:var(--sage)"></i>the reader's guess at the weather</span>
+      <span><i style="background:var(--just)"></i>reads back correctly</span>
+      <span><i style="background:var(--temper)"></i>reads back wrong</span>
+      <span><i style="background:var(--dim)"></i>where the message set it</span>
+      <span><i style="background:var(--sage)"></i>reader's estimate of the drift</span>
     </div>
-    <div class="readout key-detail" id="key-detail">Tap a key to see its strings, and hear them if sound is on.</div>
+    <div class="readout key-detail" id="key-detail">Tap a key to see its strings. If sound is on, you also hear them.</div>
 
     <div class="btn-row">
-      <button id="b-write" data-tone="just">Write it in</button>
-      <button id="b-summer">A humid summer</button>
-      <button id="b-tuner">The tuner comes</button>
-      <button id="b-read" data-tone="just">Read it back</button>
-      <button id="b-reset">Blank piano</button>
+      <button id="b-write" data-tone="just">Write</button>
+      <button id="b-summer">Add summer humidity</button>
+      <button id="b-tuner">Send in a tuner</button>
+      <button id="b-read" data-tone="just">Read back</button>
+      <button id="b-reset">Reset piano</button>
     </div>
     <div class="slider-row">
       <label for="sev">Summer severity</label>
@@ -85,7 +87,7 @@
       <span class="readout num" id="sev-val">45%</span>
     </div>
     <div class="slider-row">
-      <label for="visit">How far the tuner got</label>
+      <label for="visit">How much of the visit</label>
       <input type="range" id="visit" min="0" max="1000" value="1000">
       <span class="readout num" id="visit-val">100%</span>
     </div>
@@ -95,62 +97,63 @@
       <div class="msg-row"><span class="lab">Read, raw</span><span class="chars" id="row-raw"></span></div>
       <div class="msg-row"><span class="lab">Decoded</span><span class="chars" id="row-dec"></span></div>
     </div>
-    <div class="readout status" id="status" aria-live="polite">The piano is tuned to the reference. Nothing is written in it yet.</div>
-    <p class="note" style="margin-top:0.8rem">Needles are each key's pitch in cents from the public reference, equal temperament plus stretch; the faint dashes are where the letter put them. The hairlines are the three strings of each trichord: in perfect unison they lie on top of one another, and the letter fans the third one out. The dials on top are the twelve pitch classes, read across all their octaves; the stripes stand still when a dial reads exactly what was written. The two lanes under the keys are the two codewords, alternating symbol by symbol, with the letter's characters in them and dots for parity.</p>
+    <div class="readout status" id="status" aria-live="polite">The piano is tuned to the reference. No message is written yet.</div>
+    <p class="note" style="margin-top:0.8rem">How to read the display. Each needle shows one key's pitch in cents from the reference tuning. The faint dashes show where the message set each key. Under the needles, thin lines show the strings of each note. On a three-string note the lines overlap when the strings agree, and the message fans the third one out. The twelve dials at the top are the pitch classes, each averaged across all its octaves. They work like a strobe tuner, a precise tuning instrument whose striped ring stands still when the pitch is exactly on target. Here a ring stands still when the dial reads exactly what was written. The two lanes under the keys are the two codewords, alternating symbol by symbol. Each lane shows the message character stored there, or a dot for a check symbol. In the rows below the piano, Read, raw is what the strobe reads before correction, and Decoded is the result after correction. Characters the code repaired are highlighted in cyan. Struck-through characters belong to a codeword the code could not repair.</p>
   </div>
 </section>
 
 <section>
-  <div class="sec-head"><span class="sec-mark">02</span><div><h2>The paved road and the shoulder</h2></div></div>
-  <p>Every road the government builds comes with a map, and so does this one. The reference is the pavement: twelve equal semitones bent into a long lazy S by the stretch, flat down in the bass, sharp up in the treble. The letter is a line of boot prints a few feet off the shoulder, out where the tumbleweeds are. Close enough to the road that nobody pulls over.</p>
+  <div class="sec-head"><span class="sec-mark">02</span><div><h2>The reference curve and the bit budget</h2></div></div>
+  <p>The chart below shows the reference tuning across the keyboard. It is twelve equal semitones bent into a gentle S-shape by the stretch: flat in the bass, sharp in the treble. The message sits a few cents off this curve, close enough that it does not stand out.</p>
 
   <div class="panel">
-    <h3>The public reference</h3>
+    <h3>The reference tuning</h3>
     <canvas id="stretch" height="230" aria-label="The stretch curve in cents across the 88 keys, flat in the bass and sharp in the treble, with the current piano's keys plotted as dots around it"></canvas>
-    <div class="readout" style="margin-top:0.5rem">The cyan curve is the reference stretch this page assumes, a Railsback-like shape running from about &minus;25 cents at the bottom A to +25 at the top C. It is drawn to look like the published curves, not measured from a piano. Dots are the keys as the piano stands right now, the same numbers as the needles above, at true scale.</div>
+    <div class="readout" style="margin-top:0.5rem">The cyan curve is the stretch this page assumes. It follows the shape of the Railsback curve, the classic measurement of how far tuned pianos depart from equal temperament. It runs from about &minus;25 cents at the lowest A to +25 at the top C. It is drawn to look like the published curves, not measured from a piano. The dots are the keys as the piano stands now, the same values as the needles above, at true scale.</div>
   </div>
 
-  <p>The note guessed about 290 raw bits, at six levels per pitch class and three per key. Six and three are not powers of two, and I wasn't about to do arithmetic coding by headlamp, so this page rounds down to levels that pack: four, two and four. The table is built from the page's own layout.</p>
+  <p>The note estimated about 290 raw bits, using six levels per pitch class and three per key. A level is one of the allowed offsets a setting can take; four levels store 2 bits. Six and three are not powers of two, so storing them efficiently needs a more complex packing method (arithmetic coding). This page rounds down to level counts that pack into whole bits: four per pitch class, two per key and four per third string. The table is computed from the page's own layout.</p>
 
   <div class="panel">
     <h3>The budget</h3>
     <div class="table-scroll">
-      <table class="budget" id="budget"><thead><tr><th>Where</th><th>Cells</th><th>Levels</th><th>Spacing</th><th>Bits</th><th>Note's guess</th></tr></thead><tbody></tbody></table>
+      <table class="budget" id="budget"><thead><tr><th>Where</th><th>Cells</th><th>Levels</th><th>Spacing</th><th>Bits</th><th>Note's estimate</th></tr></thead><tbody></tbody></table>
     </div>
     <div class="readout" id="budget-read"></div>
   </div>
 </section>
 
 <section>
-  <div class="sec-head"><span class="sec-mark">03</span><div><h2>A humid summer</h2></div></div>
-  <p>Humidity swells the soundboard and the pitch climbs, but not everywhere at once and not evenly. It goes a region at a time, the way a thunderstorm walks across a mesa and leaves the next one dry. In coding terms that is burst noise, errors that come in bunches, and Reed&ndash;Solomon codes eat bunches. Each five-bit symbol lives in neighbouring strings, and neighbouring symbols go to different codewords, so a storm over one octave spends its damage on two codewords instead of one.</p>
-  <p>The reader isn't a fool either. It knows summers move whole regions, so before it commits to anything it guesses the drift, subtracts it and guesses again. After a read, the thin green line across the needles is that guess.</p>
+  <div class="sec-head"><span class="sec-mark">03</span><div><h2>What a humid summer does</h2></div></div>
+  <p>Humidity makes the soundboard swell, which raises the pitch. It does not raise every note equally. It moves one region of the keyboard at a time, so neighbouring keys drift together. In coding terms this is burst noise: errors that arrive in clusters rather than one at a time. Reed&ndash;Solomon codes handle bursts well. Each symbol is a 5-bit chunk, so a cluster of bad bits often lands inside one or two symbols and counts as only one or two errors.</p>
+  <p>The page stores each symbol in neighbouring strings, and sends alternate symbols to different codewords. This is called interleaving. A drift over one octave therefore splits its damage between the two codewords instead of overloading one.</p>
+  <p>The reader also corrects for drift before decoding. It knows summer moves whole regions, so it estimates the drift, subtracts it and reads again. After a read, the thin green line across the needles shows that estimate. To try it, set the severity slider, press Add summer humidity, then press Read back.</p>
 
   <div class="panel">
-    <h3>How many summers it lives through</h3>
-    <canvas id="surv-season" height="230" aria-label="Fraction of simulated summers the letter survives, against summer severity, with and without the code"></canvas>
+    <h3>How often the message survives a summer</h3>
+    <canvas id="surv-season" height="230" aria-label="Fraction of simulated summers the message survives, against summer severity, with and without the code"></canvas>
     <div class="readout" id="surv-season-read" style="margin-top:0.5rem">Measuring&hellip;</div>
     <div class="meter" aria-hidden="true"><i id="surv-meter"></i></div>
   </div>
 </section>
 
 <section>
-  <div class="sec-head"><span class="sec-mark">04</span><div><h2>The coupling constant with a face</h2></div></div>
-  <p>Weather is not the enemy. Weather is dumb, and dumb noise is exactly what codes are for. The enemy is the piano tuner, who is the coupling constant with a face: a decent, competent professional whose whole craft is getting everything to agree. He shows up with a tuning hammer and a felt mute and a thermos of bad coffee and he relaxes every deviation back to the consensus. The ones that were nearly right go first, because a string a hair off takes one tap.</p>
-  <p>The tuner here works the keyboard in sixteen passes, back and forth, and on each pass moves every string at most half a cent toward where the reference wants it. That is a bounded pull, the same shape as the coupling on the main page. Send him in and watch the counts in the readout.</p>
+  <div class="sec-head"><span class="sec-mark">04</span><div><h2>What a piano tuner does</h2></div></div>
+  <p>Weather is random, and error-correcting codes are built for random noise. A piano tuner is a different kind of problem. The tuner's job is to pull every string back to the reference, which erases exactly the offsets that carry the message. This is coupling: a pull that makes the parts of a system agree. Offsets the message set close to the reference go first, because a string that is barely off needs only one small adjustment.</p>
+  <p>The simulated tuner works across the keyboard in sixteen passes, alternating direction. On each pass, every string moves at most half a cent toward its target. That is a bounded pull, the same shape as the coupling on the main page. To try it, set how much of the visit to run, press Send in a tuner, and watch the counts in the status line.</p>
 
   <div class="panel">
-    <h3>How far into the visit it lasts</h3>
-    <canvas id="surv-tuner" height="230" aria-label="Fraction of simulated tuner visits the letter survives, against how far through the visit the tuner got"></canvas>
+    <h3>How much of a visit the message survives</h3>
+    <canvas id="surv-tuner" height="230" aria-label="Fraction of simulated tuner visits the message survives, against how far through the visit the tuner got"></canvas>
     <div class="readout" id="surv-tuner-read" style="margin-top:0.5rem">Measuring&hellip;</div>
   </div>
 
-  <p>A message in a tuning lasts exactly as long as nobody qualified listens to the instrument with intent to fix it. <span id="tuner-verdict">He doesn't even have to finish.</span></p>
+  <p>A message stored in a tuning lasts only until someone tunes the piano. <span id="tuner-verdict">The tuner does not need to finish the visit.</span></p>
 </section>
 
 <section>
-  <div class="sec-head"><span class="sec-mark">05</span><div><h2>Can you hear it?</h2></div></div>
-  <p>Five chords, played two ways: once on the reference, once on the piano as it stands right now, letter and summer and tuner and all. Then a blind round, because you're as suggestible as I am and so is everybody you know.</p>
+  <div class="sec-head"><span class="sec-mark">05</span><div><h2>Listen for the message</h2></div></div>
+  <p>The page plays five chords two ways. The first uses the reference tuning. The second uses the piano as it stands now, including the message and any summer or tuner changes. Then try the blind round: you hear two versions, A and B, without knowing which holds the message, and you guess. The test is blind because knowing the answer changes what people think they hear.</p>
 
   <div class="panel">
     <h3>Listen</h3>
@@ -158,10 +161,10 @@
       <button id="oct-hi" aria-pressed="true">Phone speaker</button>
       <button id="oct-lo" aria-pressed="false">Headphones</button>
     </div>
-    <p class="note" style="margin:0 0 0.6rem" id="oct-note">Phone speaker plays everything two octaves up, where a small speaker can produce it. The cents are the same; beats run four times as fast.</p>
+    <p class="note" style="margin:0 0 0.6rem" id="oct-note">Phone speaker plays everything two octaves up, where a small speaker can reproduce it. The offsets in cents stay the same, but beats (the slow pulse two close tones make) run four times as fast.</p>
     <div class="btn-row">
       <button id="b-play-ref" data-tone="just" data-needs-sound>Play the reference piano</button>
-      <button id="b-play-let" data-tone="temper" data-needs-sound>Play the lettered piano</button>
+      <button id="b-play-let" data-tone="temper" data-needs-sound>Play the piano with the message</button>
     </div>
     <div class="ab-grid">
       <div>
@@ -171,26 +174,26 @@
           <button id="b-ab-b" data-needs-sound>Play B</button>
         </div>
         <div class="btn-row">
-          <button id="b-guess-a">A has the letter</button>
-          <button id="b-guess-b">B has the letter</button>
+          <button id="b-guess-a">A has the message</button>
+          <button id="b-guess-b">B has the message</button>
           <button id="b-ab-new">New round</button>
         </div>
       </div>
       <div>
-        <div class="readout ab-result" id="ab-result" aria-live="polite">Play both, then guess which piano has the letter in it.</div>
+        <div class="readout ab-result" id="ab-result" aria-live="polite">Play both, then guess which one has the message.</div>
         <div class="readout" id="ab-tally">No guesses yet.</div>
       </div>
     </div>
   </div>
-  <p>I can't tell you whether you'll hear it. Nobody has measured it, which is the soft spot in the whole note. The <a href="listen.html">listening test</a> exists to measure exactly that.</p>
+  <p>Nobody knows yet whether people can hear the message. It has not been measured, and it is the weakest point in the note's argument. The <a href="listen.html">listening test</a> is there to measure it.</p>
 </section>
 
 <div class="foot">
-  <p class="note"><strong>The code.</strong> Reed&ndash;Solomon over GF(32) with primitive polynomial x<sup>5</sup>+x<sup>2</sup>+1, so one symbol is one character of the register's alphabet. Generator roots &alpha;<sup>0</sup>&hellip;&alpha;<sup>7</sup>; two shortened codewords of 23 symbols, 15 data and 8 parity each, RS(23,15), each correcting up to four wrong symbols. Decoding is syndromes, Berlekamp&ndash;Massey, Chien search and Forney. The decoder supports erasures, but the reader doesn't use them: in this model most wrong readings are confidently wrong, because whole regions drift together, and in offline tests marking doubtful symbols as erasures raised miscorrections without raising successes. <span id="rs-selftest">A self-test runs when the page loads.</span></p>
-  <p class="note"><strong>The layout.</strong> Temperament: each pitch class offset by &minus;4.5, &minus;1.5, +1.5 or +4.5 cents (2 bits, Gray-coded). Lean: each key &plusmn;2 cents from its pitch class and the stretch (1 bit). Unisons: on keys 29&ndash;88 (C&sharp;3 to C8, taken as the trichords; makers differ) the third string sits &minus;1.5, &minus;0.5, +0.5 or +1.5 cents from its pair (2 bits). The bit stream runs temperament first, then key by key from the bass, cut into 5-bit symbols in that order; symbol <i>i</i> goes to codeword <i>i</i> mod 2. The letter's character <i>i</i> is symbol <i>i</i>, so the letter reads left to right up the keyboard and the parity sits in the treble. The last two bits, on the top C's third string, are spare.</p>
-  <p class="note"><strong>The reader.</strong> It reads each key's pitch as the mean of its pair of strings and each third string against that pair. It decides each pitch class's temperament jointly over that class's seven or eight keys, then each key's lean, then each unison to the nearest level. Before deciding it tracks drift: four rounds of read, smooth the leftovers across the keyboard with a Gaussian five keys wide, subtract.</p>
-  <p class="note"><strong>The weather and the tuner.</strong> A summer at severity <i>s</i> adds <i>s</i> &times; 6 cents times a seeded smooth random field (six Gaussian bumps, a swell in the middle of the compass and a tilt, scaled so its largest value is 1), plus independent jitter of <i>s</i> &times; 0.45 cents standard deviation on every string. Each press is a new summer. The tuner makes 16 passes, moving each string at most 0.5 cent toward its target per pass and landing within 0.2 cent once there. Neither model is fitted to a real piano. Because the tuner's pull is bounded, cells written close to the reference are bound to go first; the page shows the note's claim working under that assumption, and doesn't test it.</p>
-  <p class="note"><strong>What is assumed and not measured.</strong> The two numbers the whole budget rests on are unmeasured: how far a tuning can wander before a listener notices (taken here as &plusmn;4.5 cents on temperament plus &plusmn;2 per key and &plusmn;1.5 on a unison), and how finely a strobe can read a string that has been drifting (taken as a 1-cent level spacing on unisons). Tighten or loosen them and the budget moves with them. The sound is synthetic, six harmonics per string with a little inharmonicity from <code>Kit.sound.pluck</code>, not a recorded piano, and the reference piano here has perfect unisons, which no real one does; a real piano's own spread would hide the letter better. The <a href="listen.html">listening test</a> is where the first of those thresholds gets measured.</p>
+  <p class="note"><strong>The code.</strong> An error-correcting code adds check symbols computed from the message, so the reader can locate and repair a limited number of wrong symbols. This page uses Reed&ndash;Solomon over GF(32), a finite field of 32 elements, with primitive polynomial x<sup>5</sup>+x<sup>2</sup>+1. One symbol is one character of the page's 32-character alphabet (A&ndash;Z, space and . , ! ? '). Generator roots are &alpha;<sup>0</sup>&hellip;&alpha;<sup>7</sup>. There are two shortened codewords of 23 symbols, 15 data and 8 parity each, RS(23,15). Each corrects up to four wrong symbols. Decoding uses syndromes, Berlekamp&ndash;Massey, Chien search and Forney's algorithm. The decoder supports erasures (positions marked as doubtful in advance), but the reader does not use them. In this model most wrong readings are confidently wrong, because whole regions drift together. In offline tests, marking doubtful symbols as erasures raised miscorrections without raising successes. <span id="rs-selftest">A self-test runs when the page loads.</span></p>
+  <p class="note"><strong>The layout.</strong> Temperament: each pitch class is offset by &minus;4.5, &minus;1.5, +1.5 or +4.5 cents (2 bits, Gray-coded, so neighbouring levels differ by one bit). Lean: each key sits &plusmn;2 cents from its pitch class plus the stretch (1 bit). Unisons: on keys 29&ndash;88 (C&sharp;3 to C8, treated as the three-string notes, called trichords; makers differ) the third string sits &minus;1.5, &minus;0.5, +0.5 or +1.5 cents from its pair (2 bits). The bit stream runs temperament first, then key by key from the bass. It is cut into 5-bit symbols in that order, and symbol <i>i</i> goes to codeword <i>i</i> mod 2. Message character <i>i</i> is symbol <i>i</i>, so the message reads left to right up the keyboard and the parity sits in the treble. The last two bits, on the top C's third string, are unused.</p>
+  <p class="note"><strong>The reader.</strong> It reads each key's pitch as the mean of its pair of strings, and each third string against that pair. It decides each pitch class's temperament jointly over that class's seven or eight keys, then each key's lean, then each unison to the nearest level. Before deciding, it tracks drift in four rounds: read, smooth the leftover error across the keyboard with a Gaussian five keys wide, and subtract.</p>
+  <p class="note"><strong>The weather and the tuner.</strong> A summer at severity <i>s</i> adds <i>s</i> &times; 6 cents times a seeded smooth random field (six Gaussian bumps, a swell in the middle of the keyboard and a tilt, scaled so its largest value is 1). It also adds independent jitter of <i>s</i> &times; 0.45 cents standard deviation on every string. Each press is a new summer. The tuner makes 16 passes, moving each string at most 0.5 cent toward its target per pass and landing within 0.2 cent once there. Neither model is fitted to a real piano. Because the tuner's pull is bounded, cells written close to the reference are bound to go first. The page shows the note's claim working under that assumption, and does not test the assumption.</p>
+  <p class="note"><strong>What is assumed and not measured.</strong> The whole budget rests on two unmeasured numbers. The first is how far a tuning can wander before a listener notices, taken here as &plusmn;4.5 cents on temperament, plus &plusmn;2 per key and &plusmn;1.5 on a unison. The second is how finely a strobe tuner can read a string that has been drifting, taken as a 1-cent level spacing on unisons. Tighten or loosen them and the budget moves with them. The sound is synthetic: six harmonics per string with a little inharmonicity, from <code>Kit.sound.pluck</code>, not a recorded piano. The reference piano here has perfect unisons, which no real piano does. A real piano's own spread would hide the message better. The <a href="listen.html">listening test</a> is where the first of those thresholds gets measured.</p>
 </div>
 
 </div>
@@ -712,11 +715,11 @@
     clearRead(); showWritten();
     if (instant) {
       S.cur = cloneStrings(S.written.target); S.disp = cloneStrings(S.cur); S.anim = null;
-      setStatus("Written. " + MSG_LEN + " characters became " + LAY.nSym + " symbols, about 230 bits, in " + LAY.cells.length + " cells of the tuning.");
+      setStatus("Written. " + MSG_LEN + " characters became " + LAY.nSym + " symbols (" + LAY.usedBits + " bits), stored in " + LAY.cells.length + " cells of the tuning. Press Add summer humidity or Send in a tuner to disturb it, then Read back.");
       drawStretch(); kick(); return;
     }
     S.anim = { kind: "write", t: 0, dur: spd(2.6), done: 0 };
-    setStatus("Writing: the needles leave the reference one key at a time.");
+    setStatus("Writing. The needles move away from the reference one key at a time.");
     kick();
   }
   function stepWrite(a, dt) {
@@ -728,7 +731,7 @@
     a.cursor = f * (NKEYS + 6);
     if (f >= 1) {
       S.anim = null; drawStretch();
-      setStatus("Written. " + MSG_LEN + " characters became " + LAY.nSym + " symbols, " + LAY.usedBits + " bits, in " + LAY.cells.length + " cells of the tuning. The piano still sounds like a piano, more or less.");
+      setStatus("Written. " + MSG_LEN + " characters became " + LAY.nSym + " symbols (" + LAY.usedBits + " bits), stored in " + LAY.cells.length + " cells of the tuning. Press Add summer humidity or Send in a tuner to disturb it, then Read back.");
     }
   }
 
@@ -739,7 +742,7 @@
     S.drift.fill(0); S.driftAlpha = 0; clearRead();
     var seed = 7000 + S.summerNo;
     S.anim = { kind: "summer", t: 0, dur: spd(3.4), base: cloneStrings(S.cur), delta: seasonDelta(seed, sev), sev: sev, field: seasonField(seed).F };
-    setStatus("Summer No. " + S.summerNo + ", severity " + Math.round(sev * 100) + "%: regional drift up to " + (sev * DRIFT_MAX).toFixed(1) + " cents, string jitter " + (sev * JITTER).toFixed(2) + " cents.");
+    setStatus("Summer " + S.summerNo + ", severity " + Math.round(sev * 100) + "%. Regional drift up to " + (sev * DRIFT_MAX).toFixed(1) + " cents, plus random jitter of " + (sev * JITTER).toFixed(2) + " cents on each string.");
     kick();
   }
   function summerFrac(a, k) {
@@ -755,7 +758,7 @@
     }
     if (a.t >= a.dur) {
       S.anim = null; drawStretch();
-      setStatus("Summer No. " + S.summerNo + " is over. Regional drift up to " + (a.sev * DRIFT_MAX).toFixed(1) + " cents, string jitter " + (a.sev * JITTER).toFixed(2) + " cents. Amber needles are the ones the strobe now reads wrong, before the reader has had a go at the weather.");
+      setStatus("Summer " + S.summerNo + " is over. Regional drift up to " + (a.sev * DRIFT_MAX).toFixed(1) + " cents, string jitter " + (a.sev * JITTER).toFixed(2) + " cents. Amber needles are keys the strobe now reads wrong, before the reader corrects for drift. Press Read back to decode.");
     }
   }
 
@@ -808,17 +811,17 @@
     var c = countsByBucket();
     var pass = Math.min(PASSES, Math.floor(a.done / NKEYS) + (a.done % NKEYS ? 1 : 0));
     var head = done
-      ? "The tuner packed up after " + (a.p * 100).toFixed(1) + "% of the visit (pass " + Math.max(pass, 0) + " of " + PASSES + ")."
-      : "The tuner, pass " + Math.max(pass, 1) + " of " + PASSES + ".";
-    return head + " Misread now: " + c.bad[0] + " of " + c.tot[0] + " cells written within a cent of the reference, " +
+      ? "The tuner stopped after " + (a.p * 100).toFixed(1) + "% of the visit (pass " + Math.max(pass, 0) + " of " + PASSES + ")."
+      : "Tuner at work, pass " + Math.max(pass, 1) + " of " + PASSES + ".";
+    return head + " Now misread: " + c.bad[0] + " of " + c.tot[0] + " cells written within 1 cent of the reference, " +
       c.bad[1] + " of " + c.tot[1] + " written 1 to 3 cents off, " + c.bad[2] + " of " + c.tot[2] + " written more than 3 cents off.";
   }
 
   function startRead() {
-    if (!S.written) { setStatus("Nothing written yet. Write a letter first."); return; }
+    if (!S.written) { setStatus("Nothing is written yet. Press Write first."); return; }
     S.anim = { kind: "read", t: 0, dur: spd(1.2) };
     clearRead();
-    setStatus("Reading every string with the strobe&hellip;".replace("&hellip;", "…"));
+    setStatus("Reading every string with the strobe tuner…");
     kick();
   }
   function stepRead(a, dt) {
@@ -850,14 +853,14 @@
     var msg;
     if (res.ok && nDecWrong === 0) {
       msg = nWrongSym === 0
-        ? "Read all " + LAY.nSym + " symbols and every one was right. The letter came back exactly, and the code had nothing to do."
-        : "Read all " + LAY.nSym + " symbols; " + nWrongSym + (nWrongSym === 1 ? " was" : " were") + " wrong before decoding (" + (nRawChar === nWrongSym ? (nWrongSym === 1 ? "in" : "all in") + " the letter itself" : nRawChar === 0 ? "all in the parity" : nRawChar + " in the letter itself, the rest in parity") + "). The code found and fixed " + (res.fixed.length === 1 ? "it" : res.fixed.length === 2 ? "both" : "all " + res.fixed.length) + ". The letter came back exactly.";
+        ? "Read all " + LAY.nSym + " symbols and every one was correct. The message came back exactly, with no correction needed."
+        : "Read all " + LAY.nSym + " symbols. " + nWrongSym + (nWrongSym === 1 ? " was" : " were") + " wrong before decoding (" + (nRawChar === nWrongSym ? (nWrongSym === 1 ? "in" : "all in") + " the message itself" : nRawChar === 0 ? "all in the check symbols" : nRawChar + " in the message itself, the rest in the check symbols") + "). The code found and fixed " + (res.fixed.length === 1 ? "it" : res.fixed.length === 2 ? "both" : "all " + res.fixed.length) + ". The message came back exactly.";
     } else if (res.ok) {
-      msg = "The decoder reported success and was wrong: with " + nWrongSym + " bad symbols it found a different codeword close enough to believe. This is the rare failure that doesn't announce itself.";
+      msg = "The decoder reported success, but the result is wrong. With " + nWrongSym + " wrong symbols, it matched a different valid codeword. This failure is rare and gives no warning.";
     } else {
-      msg = (res.failedCw.length > 1 ? "Codewords A and B each" : "Codeword " + cwName(res.failedCw[0])) + " had more than four wrong symbols (" + nWrongSym + " wrong in all) and the decoder refused " +
-        (res.failedCw.length > 1 ? "both" : "it") + ". Struck-through characters are the raw guesses, not a decoding. " +
-        (res.fixed.length ? "The other codeword was repaired (" + res.fixed.length + " fixed). " : "") + "As far as this reader is concerned, the letter is gone.";
+      msg = (res.failedCw.length > 1 ? "Codewords A and B each" : "Codeword " + cwName(res.failedCw[0])) + " had more than four wrong symbols (" + nWrongSym + " wrong in total), so the decoder refused to decode " +
+        (res.failedCw.length > 1 ? "both" : "it") + ". Struck-through characters are raw readings, not decoded ones. " +
+        (res.fixed.length ? "The other codeword was repaired (" + res.fixed.length + " fixed). " : "") + "This reader cannot recover the message.";
     }
     setStatus(msg);
     drawStretch();
@@ -871,7 +874,7 @@
   function resetPiano() {
     S.anim = null; S.written = null; S.cur = blankStrings(); S.drift.fill(0); S.driftAlpha = 0;
     clearRead(); showWritten();
-    setStatus("The piano is tuned to the reference. Nothing is written in it yet.");
+    setStatus("The piano is tuned to the reference. No message is written yet.");
     drawStretch(); kick();
   }
 
@@ -1275,7 +1278,7 @@
     // the curve
     g.strokeStyle = col.just; g.lineWidth = 2;
     g.beginPath(); for (var k2 = 1; k2 <= 88; k2++) { if (k2 === 1) g.moveTo(X(k2), Y(stretch(k2))); else g.lineTo(X(k2), Y(stretch(k2))); } g.stroke();
-    g.fillStyle = col.just; g.fillText("stretch (the public reference)", X(52), Y(stretch(80)) - 4);
+    g.fillStyle = col.just; g.fillText("stretch", X(52), Y(stretch(80)) - 4);
     // the keys as they stand
     for (var k3 = 1; k3 <= 88; k3++) {
       var P = pairPitch(S.cur, k3);
@@ -1298,18 +1301,18 @@
     var raw = bT + bW + bU;
     var rows = [
       ["Temperament", nT + " pitch classes", T_LV.length, "3¢, ±4.5", bT, "≈30 (6 levels)"],
-      ["Lean off the stretch", nW + " keys", W_LV.length, "±2¢", bW, "≈140 (3 levels)"],
-      ["Third string of a trichord", nU + " notes", U_LV.length, "1¢, ±1.5", bU, "≈120 (after halving)"]
+      ["Per-key lean", nW + " keys", W_LV.length, "±2¢", bW, "≈140 (3 levels)"],
+      ["Third string", nU + " three-string notes", U_LV.length, "1¢, ±1.5", bU, "≈120 (after halving)"]
     ];
     var tb = $("budget").querySelector("tbody"), html = "";
     rows.forEach(function (r) { html += "<tr><td>" + r[0] + "</td><td>" + r[1] + "</td><td>" + r[2] + "</td><td>" + r[3] + "</td><td>" + r[4] + "</td><td class=\"note-est\">" + r[5] + "</td></tr>"; });
     html += "<tr class=\"total\"><td>Raw total</td><td>" + LAY.cells.length + " cells</td><td></td><td></td><td>" + raw + "</td><td class=\"note-est\">≈290</td></tr>";
     html += "<tr><td>5-bit symbols</td><td colspan=\"3\">" + LAY.nSym + " symbols, " + (raw - LAY.usedBits) + " bits spare</td><td>" + LAY.usedBits + "</td><td class=\"note-est\"></td></tr>";
-    html += "<tr><td>Reed–Solomon parity</td><td colspan=\"3\">" + CW + " × RS(" + CW_N + "," + CW_K + "), " + (CW * CW_P) + " symbols</td><td>" + (CW * CW_P * 5) + "</td><td class=\"note-est\">a third</td></tr>";
-    html += "<tr class=\"pay\"><td>Payload</td><td colspan=\"3\">" + MSG_LEN + " characters</td><td>" + (MSG_LEN * 5) + "</td><td class=\"note-est\">≈190 (38 characters)</td></tr>";
+    html += "<tr><td>Check symbols (parity)</td><td colspan=\"3\">" + CW + " × RS(" + CW_N + "," + CW_K + "), " + (CW * CW_P) + " symbols</td><td>" + (CW * CW_P * 5) + "</td><td class=\"note-est\">a third</td></tr>";
+    html += "<tr class=\"pay\"><td>Message</td><td colspan=\"3\">" + MSG_LEN + " characters</td><td>" + (MSG_LEN * 5) + "</td><td class=\"note-est\">≈190 (38 characters)</td></tr>";
     tb.innerHTML = html;
-    $("budget-read").innerHTML = "That is <b>" + raw + "</b> raw bits against the note's 290, and <b>" + MSG_LEN + "</b> characters of payload against its 38. Parity takes " +
-      Math.round(100 * CW * CW_P / LAY.nSym) + "% of the symbols, close to the note's third, and buys the right to be wrong on up to " + (CW_P / 2) + " symbols in each codeword. The difference from the note is the price of honest packing, plus rounding the unisons down to one adjustable string per note, as it said to.";
+    $("budget-read").innerHTML = "That is <b>" + raw + "</b> raw bits, against the note's 290, and <b>" + MSG_LEN + "</b> characters of message, against its 38. Check symbols take " +
+      Math.round(100 * CW * CW_P / LAY.nSym) + "% of the symbols, close to the note's estimate of a third. In return, each codeword can have up to " + (CW_P / 2) + " wrong symbols and still decode. The gap from the note comes from packing into whole bits, plus using only one adjustable string per three-string note, as the note proposed.";
   }
 
   // ══════════════════════════════════════════════════════════
@@ -1360,18 +1363,18 @@
     var at30 = se[3], half = null, lastFull = null;
     for (var i = 0; i < se.length; i++) { if (se[i].exact === se[i].n) lastFull = se[i]; if (half === null && se[i].exact * 2 < se[i].n) half = se[i]; }
     var mis = 0, nn = 0; se.concat(tu).forEach(function (p) { mis += p.mis; nn += p.n; });
-    $("surv-season-read").innerHTML = "Each point is " + TRIALS + " seeded summers on random 30-character letters, run in your browser when the page loaded. " +
-      "At 30% severity (drift up to " + (0.3 * DRIFT_MAX).toFixed(1) + " cents) the letter came back exactly in <b>" + at30.exact + " of " + at30.n + "</b>; without the code it survived untouched in " + at30.raw + ". " +
+    $("surv-season-read").innerHTML = "Each point is " + TRIALS + " simulated summers, each on a random 30-character message, run in your browser when the page loaded. " +
+      "At 30% severity (drift up to " + (0.3 * DRIFT_MAX).toFixed(1) + " cents) the message came back exactly in <b>" + at30.exact + " of " + at30.n + "</b>. Without the code, the raw message was intact in " + at30.raw + ". " +
       (lastFull ? "Every summer up to " + Math.round(lastFull.x * 100) + "% severity decoded exactly. " : "") +
       (half ? "At " + Math.round(half.x * 100) + "% (drift up to " + (half.x * DRIFT_MAX).toFixed(1) + " cents) fewer than half did. " : "") +
-      "Across all " + nn + " trials on this page the decoder was confidently wrong " + mis + " times; every other failure, it said so.";
+      "Across all " + nn + " trials on this page, the decoder reported success with a wrong answer " + mis + " times. Every other time it failed, it reported the failure.";
     var tHalf = null, tLastFull = null;
     for (var j = 0; j < tu.length; j++) { if (tu[j].exact === tu[j].n) tLastFull = tu[j]; if (tHalf === null && tu[j].exact * 2 < tu[j].n) tHalf = tu[j]; }
     var passFrac = 1 / PASSES;
-    $("surv-tuner-read").innerHTML = "Each point is " + TRIALS + " seeded visits to a freshly lettered piano, with no summer. One pass of the keyboard is " + (100 * passFrac).toFixed(2) + "% of the visit. " +
-      (tLastFull ? "The letter decoded exactly every time up to " + (tLastFull.x * 100).toFixed(1) + "% of the visit, while he was still down in the bass. " : "") +
-      (tHalf ? "By " + (tHalf.x * 100).toFixed(1) + "% fewer than half survived." : "");
-    if (tHalf) $("tuner-verdict").textContent = "In this model he doesn't even finish the first pass: by " + (tHalf.x * 100).toFixed(1) + "% of the visit, " + Math.round(tHalf.x * PASSES * NKEYS) + " keys into the first of sixteen passes, most letters are gone.";
+    $("surv-tuner-read").innerHTML = "Each point is " + TRIALS + " simulated visits to a freshly written piano, with no summer. One pass over the keyboard is " + (100 * passFrac).toFixed(2) + "% of the visit. " +
+      (tLastFull ? "The message decoded exactly every time up to " + (tLastFull.x * 100).toFixed(1) + "% of the visit, while the tuner was still working in the bass. " : "") +
+      (tHalf ? "By " + (tHalf.x * 100).toFixed(1) + "%, fewer than half survived." : "");
+    if (tHalf) $("tuner-verdict").textContent = "In this model the tuner does not even need to finish the first pass. By " + (tHalf.x * 100).toFixed(1) + "% of the visit, " + Math.round(tHalf.x * PASSES * NKEYS) + " keys into the first of sixteen passes, most messages are gone.";
   }
 
   var cvSS = $("surv-season"), cvST = $("surv-tuner");
@@ -1407,7 +1410,7 @@
     line("exact", col.just);
     g.textAlign = "left"; g.textBaseline = "alphabetic";
     g.fillStyle = col.just; g.fillText("decoded exactly", L + 10, Y(0.42));
-    g.fillStyle = col.dim; g.fillText("raw letter intact, no code", L + 10, Y(0.42) + 14);
+    g.fillStyle = col.dim; g.fillText("raw message intact, no code", L + 10, Y(0.42) + 14);
   }
   function drawSurv() {
     drawSurvOne(cvSS, SURV.season, "summer severity (largest drift in cents)", function (x) { return Math.round(x * 100) + "% · " + (x * DRIFT_MAX).toFixed(1); }, 1, +$("sev").value / 100);
@@ -1491,10 +1494,10 @@
     if (AB.guessed) return;
     AB.guessed = true; AB.n++;
     var right = which === AB.letterIs; if (right) AB.right++;
-    $("ab-result").textContent = (right ? "Right. " : "Wrong. ") + "The letter was in " + AB.letterIs + "." +
-      (AB.played.A && AB.played.B ? "" : " (You guessed without hearing both, which is either confidence or a coin.)");
+    $("ab-result").textContent = (right ? "Right. " : "Wrong. ") + "The message was in " + AB.letterIs + "." +
+      (AB.played.A && AB.played.B ? "" : " (You guessed before hearing both, so this guess tells you little.)");
     var p = binomTail(AB.right, AB.n);
-    $("ab-tally").textContent = "You've picked the lettered piano " + AB.right + " of " + AB.n + " times. A coin would do at least that well " + (100 * p).toFixed(p < 0.1 ? 1 : 0) + "% of the time.";
+    $("ab-tally").textContent = "You have picked the piano with the message " + AB.right + " of " + AB.n + " times. Random guessing would do at least that well " + (100 * p).toFixed(p < 0.1 ? 1 : 0) + "% of the time.";
   }
   function abNew() {
     AB.letterIs = Math.random() < 0.5 ? "A" : "B"; AB.guessed = false; AB.played = {};
@@ -1539,8 +1542,8 @@
     $("oct-hi").setAttribute("aria-pressed", v === 4 ? "true" : "false");
     $("oct-lo").setAttribute("aria-pressed", v === 1 ? "true" : "false");
     $("oct-note").textContent = v === 4
-      ? "Phone speaker plays everything two octaves up, where a small speaker can produce it. The cents are the same; beats run four times as fast."
-      : "Headphones plays at concert pitch. Richer, and the unison beats are slower and easier to miss.";
+      ? "Phone speaker plays everything two octaves up, where a small speaker can reproduce it. The offsets in cents stay the same, but beats (the slow pulse two close tones make) run four times as fast."
+      : "Headphones plays at concert pitch. The sound is fuller, but the unison beats are slower and easier to miss.";
   }
   $("oct-hi").addEventListener("click", function () { setOct(4); });
   $("oct-lo").addEventListener("click", function () { setOct(1); });
@@ -1557,14 +1560,14 @@
     if (!best) return;
     var st = S.cur[best], P = pairPitch(S.cur, best);
     var txt = keyName(best) + " (key " + best + ", " + nStrings(best) + (nStrings(best) > 1 ? " strings" : " string") + "): pitch " + (P >= 0 ? "+" : "−") + Math.abs(P).toFixed(2) + "¢ from the reference";
-    if (st.length === 3) txt += ", third string " + ((st[0] - P) >= 0 ? "+" : "−") + Math.abs(st[0] - P).toFixed(2) + "¢ off its pair";
+    if (st.length === 3) txt += ", third string " + ((st[0] - P) >= 0 ? "+" : "−") + Math.abs(st[0] - P).toFixed(2) + "¢ from the other two";
     if (S.written) {
       var lv = S.written.levels, kc = LAY.keyCells[best];
       txt += ". Written: " + PC_NAMES[pcOf(best)] + " temperament " + (T_LV[lv[pcOf(best)]] > 0 ? "+" : "−") + Math.abs(T_LV[lv[pcOf(best)]]) + ", lean " + (W_LV[lv[kc.W.id]] > 0 ? "+2" : "−2") +
-        (kc.U ? (kc.U.spare ? ", third string spare" : ", third string " + (U_LV[lv[kc.U.id]] > 0 ? "+" : "−") + Math.abs(U_LV[lv[kc.U.id]])) : "") + ".";
+        (kc.U ? (kc.U.spare ? ", third string unused" : ", third string " + (U_LV[lv[kc.U.id]] > 0 ? "+" : "−") + Math.abs(U_LV[lv[kc.U.id]])) : "") + ".";
     } else txt += ".";
     var fac = playKey(best);
-    if (fac !== undefined && fac < OCT) txt += " (Played " + (fac >= 1 ? "lower than the register setting" : "an octave or two down") + ", so its overtones fit under what the audio can reproduce.)";
+    if (fac !== undefined && fac < OCT) txt += " (Played " + (fac >= 1 ? "lower than the playback setting" : "an octave or two down") + ", so its overtones stay within what the audio can reproduce.)";
     $("key-detail").textContent = txt;
   });
 
@@ -1600,8 +1603,8 @@
     q.push(rsSelfTestGen(selfTest), function () {
       var lo = selfTest.filter(function (r) { return r.e <= CW_P / 2; }), hi = selfTest.filter(function (r) { return r.e > CW_P / 2; });
       var okLo = 0, nLo = 0; lo.forEach(function (r) { okLo += r.ok; nLo += r.ok + r.fail + r.mis; });
-      $("rs-selftest").textContent = "When this page loaded it ran 300 random RS(23,15) codewords at each error count from 0 to 6: with 0 to 4 wrong symbols, " + okLo + " of " + nLo + " decoded exactly; " +
-        hi.map(function (r) { return "with " + r.e + ", " + r.fail + " were refused and " + r.mis + " miscorrected"; }).join("; ") + ".";
+      $("rs-selftest").textContent = "When this page loaded, it tested 300 random RS(23,15) codewords at each error count from 0 to 6. With 0 to 4 wrong symbols, " + okLo + " of " + nLo + " decoded exactly. " +
+        hi.map(function (r) { return "With " + r.e + ", " + r.fail + " were refused and " + r.mis + " miscorrected (decoded to the wrong message)."; }).join(" ");
     });
     q.push(survivalGen(), function () { SURV.done = true; $("surv-meter").parentNode.style.visibility = "hidden"; survSummary(); drawSurv(); },
       function (p) { $("surv-meter").style.width = (100 * p).toFixed(0) + "%"; if (Math.random() < 0.08) drawSurv(); });

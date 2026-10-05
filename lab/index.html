@@ -2,7 +2,7 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Back Country</title>
+<title>The Comma Lab</title>
 <link rel="stylesheet" href="lab.css">
 <style>
   .trailgrid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin: 2rem 0 3rem; }
@@ -28,10 +28,10 @@
 <div class="wrap">
 
 <header class="hero">
-  <span class="eyebrow">The comma &middot; past the end of the pavement</span>
-  <h1>The back country.</h1>
-  <p class="lede">The main page is the paved overlook: park, look at the view, read the sign, drive home. These pages are the trails behind it. They're rougher, they go further, and a couple of them go places nobody has bothered to go before. Bring water.</p>
-  <p>Every one of them runs in your browser with nothing to install, the same as the main page. None of them sends anything anywhere. The bank they share is the main page's bank, checked to the last digit by the same script that checks the main page.</p>
+  <span class="eyebrow">The comma &middot; more experiments</span>
+  <h1>The lab.</h1>
+  <p class="lede">The main page explains the idea: the piano's tuning errors can be used as a small memory and computer. These eight pages test that idea further, connect it to other fields, and measure things the main page only states.</p>
+  <p>Each page runs in your browser with nothing to install, and none of them sends data anywhere. They all use the same oscillator bank as the main page, and a test script checks that their results match it exactly.</p>
 </header>
 
 <div class="trailgrid" id="trails"></div>
@@ -39,17 +39,17 @@
 <section>
   <div class="sec-head">
     <span class="sec-mark">&mdash;</span>
-    <div><h2>Trails not yet cut.</h2></div>
+    <div><h2>Not built yet</h2></div>
   </div>
-  <p class="wide">Some of the best ideas need things a web page doesn't have: hands, solder, a piano, a sunflower, an afternoon. Here's what's waiting, and how far each one got.</p>
+  <p class="wide">Some experiments need physical equipment. Here is what remains and how far each one has got.</p>
   <ul class="undone">
-    <li><b>A real piano as the reservoir.</b> The listening test page can already hear a real piano's beat rates through a microphone. The next step is a full recording session with a detuned upright and the readout fit on that, which needs an upright.</li>
-    <li><b>Writing a letter into a real tuning.</b> The tuning-channel page does the coding and the arithmetic. Doing it for real needs a strobe tuner, a cooperative piano owner, and a professional tuner willing to be the villain.</li>
-    <li><b>The bank on a breadboard.</b> The <a href="../notes/breadboard.md">build sheet</a> has the circuit and every component value worked out from the piano's detunings. Nobody has soldered it.</li>
-    <li><b>Metronomes on a real plank.</b> The page simulates them. Five metronomes, a board, and two soda cans would settle whether the letters die in the order the simulation says.</li>
-    <li><b>The sunflower itself.</b> The comodulogram page is the analysis, waiting for a recording. The protocol is in <a href="../notes/plant-comodulogram.md">the plant note</a>.</li>
-    <li><b>A spoken-digit benchmark.</b> Cut, but it has no page; it's a script, <code>tools/digits.mjs</code>, run on the Free Spoken Digit Dataset. Fed only the loudness of each spoken digit, the readout alone gets 26% right and the piano's bank lifts it to 50%. Shrink the bank's errors to zero and it falls back to 26%, the same as no bank at all. Hand the readout eleven frequency bands instead and it gets 91% on its own, and the bank adds nothing. So the errors earn their keep when the input is poor, and a good ear doesn't need them.</li>
-    <li><b>Tuner forensics, dueling banks, a commit hash buried in the register.</b> Still in the notebook.</li>
+    <li><b>A real piano as the reservoir.</b> The listening test page can already measure a real piano's beat rates through a microphone. The next step is to record a detuned upright piano and fit the readout to the recording.</li>
+    <li><b>Writing a letter into a real tuning.</b> The tuning-channel page does the coding and the arithmetic. Doing it for real needs a strobe tuner, a piano, and a tuner willing to set the deviations.</li>
+    <li><b>The bank on a breadboard.</b> The <a href="../notes/breadboard.md">build sheet</a> gives the circuit and every component value, worked out from the piano's detunings. It has not been built.</li>
+    <li><b>Metronomes on a real plank.</b> The page simulates them. Five metronomes, a board and two cans as rollers would show whether real letters fail in the order the simulation predicts.</li>
+    <li><b>The sunflower itself.</b> The comodulogram page is ready to analyze a recording. The recording protocol is in <a href="../notes/plant-comodulogram.md">the plant note</a>.</li>
+    <li><b>A spoken-digit benchmark.</b> Done as a script rather than a page: <code>tools/digits.mjs</code>, run on the Free Spoken Digit Dataset. Given only the loudness of each spoken digit, the readout alone gets 26% right and the piano's bank raises that to 50%. With the bank's errors set to zero it falls back to 26%, the same as no bank. Given eleven frequency bands instead, the readout gets 91% on its own and the bank adds nothing. The errors help most when the input carries little information.</li>
+    <li><b>Identifying a tuner from a recording, two banks coupled to each other, a commit hash stored in the register.</b> Not started.</li>
   </ul>
   <div class="foot">
     <p class="note">The shared code is <code>lab/kit.js</code>: the main page's bank with the detunings passed in, plus tunings, a frame-sliced experiment runner, and the sound and canvas plumbing. <code>node tools/verify.mjs</code> checks that it reproduces the main page and checks the claims these pages make. Pages that open the microphone ask first, and need the site served over https on a phone.</p>
@@ -66,14 +66,14 @@
   var css = Kit.css, alpha = Kit.alpha, fit = Kit.fit, TAU = Math.PI * 2;
 
   var BLURBS = {
-    "ladder.html": "Leap years, the moon, Jupiter and Saturn, and sunflower seeds all have a comma. A spiral that never closes and the ladder of near misses behind it.",
-    "bakeoff.html": "Build the bank from every tuning anybody ever fought over and see which one remembers most. The modern piano finishes mid-pack.",
-    "metronomes.html": "Metronomes on a board on soda cans fall into step. Write a letter on each one and watch agreement erase it.",
-    "fireflies.html": "A meadow of fireflies learning to flash together, and two phones doing it through the air with no network.",
-    "channel.html": "Hide a message in a piano's tuning, let a humid summer and a tuner at it, and read it back with an error-correcting code.",
-    "listen.html": "How small a mistuning can you hear? A proper staircase test of your own ears, and a meter for a real piano.",
-    "instrument.html": "Put your hand on the bank. It answers, remembers what you did a second ago, and keeps time by forgetting.",
-    "comodulogram.html": "The analysis a sunflower is waiting for: cross-frequency coupling, surrogates, and a file reader for your own plant."
+    "ladder.html": "Leap years, the moon's cycle, Jupiter and Saturn, and sunflower seeds all have a comma. See them as one spiral and learn where the best approximations come from.",
+    "bakeoff.html": "Build the bank from ten historical and modern tunings and measure which remembers the most. The modern piano finishes in the middle.",
+    "metronomes.html": "Metronomes on a board resting on rollers fall into step. Write a letter on each one and watch the coupling erase it.",
+    "fireflies.html": "Simulated fireflies learn to flash together. Two phones can do the same thing by sound alone, with no network.",
+    "channel.html": "Hide a message in a piano's tuning, add humidity drift and a tuner's visit, and recover it with an error-correcting code.",
+    "listen.html": "Measure the smallest mistuning you can hear with an adaptive listening test, and measure a real piano's beats with your microphone.",
+    "instrument.html": "Drive the bank yourself with a touchpad, keyboard, MIDI or microphone, and watch it reconstruct what you did a moment ago.",
+    "comodulogram.html": "Test whether a fast rhythm gets louder at a particular point in a slow one, on the bank, on test signals, or on your own plant recording."
   };
 
   var host = document.getElementById("trails");

@@ -171,7 +171,7 @@ claim("at K=2 the register empties, first death under 2 s, last past 8 s",
   "s .. " + (rDecay.last === null ? "-" : rDecay.last.toFixed(1)) + "s");
 
 // ══════════════════════════════════════════════════════════
-//  THE BACK COUNTRY — lab/kit.js and the claims the lab pages make
+//  THE LAB — lab/kit.js and the claims the lab pages make
 // ══════════════════════════════════════════════════════════
 
 const kitSrc = readFileSync(join(root, "lab", "kit.js"), "utf8");
@@ -371,5 +371,5 @@ console.log("— a comodulogram for a sunflower (lab/comodulogram.html) —");
 
 console.log(failures.length
   ? "\n" + failures.length + " claim(s) FAILED"
-  : "\nevery claim on the page and in the back country reproduces");
+  : "\nevery claim on the main page and in the lab reproduces");
 process.exit(failures.length ? 1 : 0);
