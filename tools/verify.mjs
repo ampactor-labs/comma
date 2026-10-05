@@ -170,7 +170,125 @@ claim("at K=2 the register empties, first death under 2 s, last past 8 s",
   rDecay.deaths + " deaths, " + (rDecay.first === null ? "-" : rDecay.first.toFixed(1)) +
   "s .. " + (rDecay.last === null ? "-" : rDecay.last.toFixed(1)) + "s");
 
+// ══════════════════════════════════════════════════════════
+//  THE BACK COUNTRY — lab/kit.js and the claims the lab pages make
+// ══════════════════════════════════════════════════════════
+
+const kitSrc = readFileSync(join(root, "lab", "kit.js"), "utf8");
+const kitScope = {};
+new Function("window", kitSrc)(kitScope);
+const Kit = kitScope.Kit;
+
+console.log("— the kit is the page's bank —");
+const kitBank = Kit.bench(Kit.omegas(Kit.intervals(Kit.edo(12))));
+let kitSame = true, kitDetail = [];
+for (const [k, sc] of [[0, 1], [0.12, 1], [8, 1], [0.12, 0]]) {
+  const a = experiment(k, sc), b = kitBank.experiment(k, sc);
+  const same = a.total === b.total && a.reach === b.reach && a.nl === b.nl;
+  kitSame = kitSame && same;
+  kitDetail.push("K=" + k + (sc === 0 ? ",x0" : "") + " " + b.total.toFixed(2));
+}
+claim("lab/kit.js reproduces index.html bit for bit", kitSame, kitDetail.join(" · "));
+const kitOm = Kit.omegas(Kit.intervals(Kit.edo(12)));
+claim("the kit's interval table matches the page's",
+  kitOm.every((w, i) => w === K.OMEGA[i]), "11 detunings");
+
+// the register in the kit agrees with the page's register
+{
+  const ph1 = new Float64Array(K.N), dv1 = new Float64Array(K.N);
+  const ph2 = new Float64Array(K.N), dv2 = new Float64Array(K.N);
+  for (let i = 0; i < K.N; i++) { ph1[i] = ph2[i] = i * 0.7; }
+  for (let s = 0; s < 500; s++) { K.bankStepPure(ph1, dv1, 1.3, 0.02); Kit.registerStep(kitOm, ph2, dv2, 1.3, 0.02); }
+  claim("the kit's register steps exactly like the page's",
+    ph1.every((v, i) => v === ph2[i]) && dv1.every((v, i) => v === dv2[i]), "500 steps at K=1.3");
+}
+
+console.log("— which tuning thinks best (lab/bakeoff.html) —");
+const cap300 = (tuning, raw) => Kit.bench(Kit.omegas(Kit.intervals(tuning, raw))).experiment(0.12, 1, { window: 300 });
+const contest = [
+  ["equal", Kit.edo(12)], ["pythagorean", Kit.temperament("pythagorean")],
+  ["meantone", Kit.temperament("meantone")], ["werckmeister", Kit.temperament("werckmeister")],
+  ["kirnberger", Kit.temperament("kirnberger")], ["vallotti", Kit.temperament("vallotti")],
+  ["just", Kit.justIntonation()], ["edo19", Kit.edo(19)], ["edo31", Kit.edo(31)], ["edo53", Kit.edo(53)]
+].map(([id, t]) => ({ id, t, total: cap300(t).total }));
+const score = Object.fromEntries(contest.map((c) => [c.id, c.total]));
+const ranked = contest.slice().sort((a, b) => b.total - a.total).map((c) => c.id);
+console.log("  " + ranked.map((id) => id + " " + score[id].toFixed(2)).join(" · "));
+claim("equal temperament lands mid-pack, Kirnberger III on top",
+  ranked[0] === "kirnberger" && ranked.indexOf("equal") >= 3 && ranked.indexOf("equal") <= 6,
+  "equal is " + (ranked.indexOf("equal") + 1) + " of " + ranked.length);
+claim("Kirnberger III and Vallotti beat equal; Werckmeister III does not",
+  score.kirnberger > score.equal && score.vallotti > score.equal && score.werckmeister < score.equal,
+  [score.kirnberger, score.vallotti, score.werckmeister, score.equal].map((v) => v.toFixed(2)).join(" / "));
+claim("meantone and just intonation do worse than equal",
+  score.meantone < score.equal && score.just < score.equal,
+  score.meantone.toFixed(2) + ", " + score.just.toFixed(2));
+const frozen = Kit.intervals(Kit.justIntonation()).filter((v) => v.beat < 0.01).length;
+claim("just intonation freezes four of eleven clocks", frozen === 4, frozen + " frozen");
+claim("53 equal holds a little over half what the piano's bank holds",
+  score.edo53 / score.equal > 0.5 && score.edo53 / score.equal < 0.65,
+  (100 * score.edo53 / score.equal).toFixed(0) + "%");
+
+const edoCap = {};
+for (let n = 5; n <= 60; n++) edoCap[n] = cap300(Kit.edo(n)).total;
+const mean = (a, b) => { let s2 = 0; for (let n = a; n <= b; n++) s2 += edoCap[n]; return s2 / (b - a + 1); };
+let bestN = 5; for (let n = 5; n <= 60; n++) if (edoCap[n] > edoCap[bestN]) bestN = n;
+claim("the best equal division sits between 9 and 20 notes, and it's downhill past 25",
+  bestN >= 9 && bestN <= 20 && mean(26, 60) < mean(9, 20) - 2,
+  "best " + bestN + " (" + edoCap[bestN].toFixed(1) + "), mean 9-20 " + mean(9, 20).toFixed(1) + ", 26-60 " + mean(26, 60).toFixed(1));
+
+{
+  const pianoRates = Kit.intervals(Kit.edo(12)).map((v) => v.fJust - v.fTemp);
+  const signs = pianoRates.map(Math.sign);
+  const even = Array.from({ length: 11 }, (_, i) => 0.37 + (8.63 - 0.37) * i / 10);
+  const evenCap = Kit.bench(even.map((r, i) => 2 * Math.PI * r * signs[i])).experiment(0.12, 1, { window: 300, skipReach: true }).total;
+  const crowd = pianoRates.filter((r) => Math.abs(r) < 0.7).length;
+  claim("a ruler-straight even fan beats the piano's lopsided one",
+    evenCap > score.equal * 1.1, evenCap.toFixed(2) + " vs " + score.equal.toFixed(2));
+  claim("the piano crowds four clocks below 0.7 Hz", crowd === 4, crowd + " below 0.7 Hz");
+}
+
+{
+  const big = [11, 47].map((n) => { const b = Kit.bench(Kit.omegas(Kit.intervals(Kit.edo(12), Kit.harmonics(n)))); const r = b.experiment(0.12, 1, { window: 300 }); return { t: r.total, share: r.total / b.NF }; });
+  claim("a bigger bank holds more but uses less of its ceiling",
+    big[1].t > big[0].t && big[1].share < big[0].share,
+    big.map((b) => b.t.toFixed(1) + " (" + (100 * b.share).toFixed(0) + "%)").join(" -> "));
+}
+
+console.log("— every clock has a comma (lab/ladder.html) —");
+{
+  const cf = (x) => { const out = []; let v = x, h2 = 0, h1 = 1, k2 = 1, k1 = 0;
+    for (let i = 0; i < 12; i++) { const a = Math.floor(v); const h = a * h1 + h2, k = a * k1 + k2; h2 = h1; h1 = h; k2 = k1; k1 = k; out.push([h, k]); const fr = v - a; if (fr < 1e-9) break; v = 1 / fr; } return out; };
+  const fifths = cf(Math.log2(1.5));
+  const r12 = fifths.find(([p, q]) => q === 12), r53 = fifths.find(([p, q]) => q === 53);
+  const c12 = 1200 * Math.abs(12 * Math.log2(1.5) - 7), c53 = 1200 * Math.abs(53 * Math.log2(1.5) - 31);
+  claim("rungs 7/12 and 31/53 miss by 23.46 and 3.62 cents",
+    !!r12 && r12[0] === 7 && !!r53 && r53[0] === 31 && Math.abs(c12 - 23.46) < 0.005 && Math.abs(c53 - 3.615) < 0.005,
+    c12.toFixed(3) + "¢, " + c53.toFixed(3) + "¢");
+  const yr = cf(365.24219).map(([p, q]) => q + ":" + (p - 365 * q));
+  claim("the year's rungs include Caesar's 4 and Khayyam's 33 (8 leap days)",
+    yr.includes("4:1") && yr.includes("33:8"), yr.slice(1, 5).join(" "));
+  const moon = cf(365.24219 / 29.530589);
+  claim("the moon's rungs include the Metonic 235 months in 19 years",
+    moon.some(([p, q]) => p === 235 && q === 19), moon.slice(0, 7).map(([p, q]) => p + "/" + q).join(" "));
+  claim("π's rungs include 355/113", cf(Math.PI).some(([p, q]) => p === 355 && q === 113), "Zu Chongzhi");
+  const fib = cf((1 + Math.sqrt(5)) / 2).map(([p, q]) => q);
+  claim("the golden ratio's rungs are Fibonacci numbers",
+    fib.slice(0, 10).join(",") === "1,1,2,3,5,8,13,21,34,55", fib.slice(0, 10).join(","));
+  const julianDrift = 1 / (365.25 - 365.24219);
+  claim("Caesar's leap year slips a day every 128 years", Math.round(julianDrift) === 128, julianDrift.toFixed(1) + " years");
+}
+
+console.log("— the breadboard (notes/breadboard.md) —");
+{
+  const RQ = 1 / (2 * 0.6 * 1e-6);
+  const Rmin = 1 / (2 * Math.PI * 8.627 * 1e-6), Rmax = 1 / (2 * Math.PI * 0.372 * 1e-6);
+  claim("one damping resistor, 833 kΩ, for every oscillator; R runs 18.4 kΩ to 427 kΩ",
+    Math.abs(RQ - 833333) < 1 && Math.abs(Rmin - 18450) < 100 && Math.abs(Rmax - 427800) < 600,
+    (RQ / 1e3).toFixed(0) + " kΩ, " + (Rmin / 1e3).toFixed(1) + " .. " + (Rmax / 1e3).toFixed(1) + " kΩ");
+}
+
 console.log(failures.length
   ? "\n" + failures.length + " claim(s) FAILED"
-  : "\nevery claim on the page reproduces");
+  : "\nevery claim on the page and in the back country reproduces");
 process.exit(failures.length ? 1 : 0);

@@ -255,6 +255,7 @@
       }
       setScale(self.scale);
       self.re = re; self.im = im; self.setScale = setScale;
+      self.setK = function (k) { self.K = k; };
       self.step = function (uIn) {
         var K2 = self.K, mr = 0, mi = 0;
         for (var q2 = 0; q2 < N; q2++) { mr += re[q2]; mi += im[q2]; }
@@ -385,8 +386,8 @@
 
     // Fit one readout on the seeded random input, for pages that then
     // apply it to live input. Returns the weights and their held-out score.
-    function trainDelay(K, k) {
-      var r = experiment(K, 1, { window: 0, skipReach: true, keepSim: true });
+    function trainDelay(K, k, scale) {
+      var r = experiment(K, scale === undefined ? 1 : scale, { window: 0, skipReach: true, keepSim: true });
       var tgt = delayTarget(r.sim.u, k, r.sim.len);
       var w = fitTarget(r.sim.X, r.A, r.piv, tgt);
       return { w: w, score: scoreRange(r.sim.X, w, tgt, WASH + TRAIN, r.sim.len) };
@@ -596,15 +597,15 @@
       var v = ACTIVE[id];
       if (!v) return;
       delete ACTIVE[id];
-      var c = audio(), t = c.currentTime;
-      if (v.gain) {
+      var t = ac ? ac.currentTime : 0;
+      if (v.gain && ac) {
         try {
           v.gain.gain.cancelScheduledValues(t);
           v.gain.gain.setValueAtTime(v.gain.gain.value, t);
           v.gain.gain.linearRampToValueAtTime(0, t + 0.08);
         } catch (e) {}
       }
-      v.nodes.forEach(function (o) { try { o.stop(t + 0.12); } catch (e) {} });
+      if (ac) v.nodes.forEach(function (o) { try { o.stop(t + 0.12); } catch (e) {} });
       if (v.stopper) { try { v.stopper(); } catch (e) {} }
       changed();
     }

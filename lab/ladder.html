@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Every Clock Has a Comma</title>
+<link rel="stylesheet" href="lab.css">
+<style>
+  .preset-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.4rem 0 1rem; }
+  .preset-row button { font-size: 0.76rem; padding: 0.5rem 0.75rem; }
+  .ladder { display: grid; gap: 0.3rem; margin-top: 0.6rem; }
+  .rung {
+    display: grid; grid-template-columns: 6.4rem 1fr 7.5rem; align-items: center; gap: 0.8rem;
+    font-family: var(--mono); font-size: 0.76rem; padding: 0.45rem 0.6rem; border: 1px solid var(--rule);
+    border-radius: 2px; background: var(--panel-2); cursor: pointer; color: var(--ink); text-align: left;
+    width: 100%;
+  }
+  .rung:hover { border-color: var(--dim); }
+  .rung[aria-pressed="true"] { border-color: var(--temper); background: var(--temper-soft); color: var(--ink); }
+  .rung .frac { color: var(--temper); font-size: 0.86rem; }
+  .rung .what { color: var(--dim); white-space: normal; line-height: 1.4; }
+  .rung .what b { color: var(--ink); font-weight: 500; }
+  .rung .miss { text-align: right; position: relative; }
+  .rung .miss i { position: absolute; right: 0; bottom: -0.32rem; height: 2px; background: var(--just); border-radius: 1px; }
+  @media (max-width: 40rem) {
+    .rung { grid-template-columns: 3.6rem 1fr; }
+    .rung .miss { grid-column: 1 / -1; text-align: left; }
+    .rung .miss i { left: 0; right: auto; }
+  }
+  .custom { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  .custom input { max-width: 12rem; }
+  .canvas-wrap { position: relative; }
+  .corner-tag { position: absolute; left: 0.6rem; top: 0.5rem; font-family: var(--mono); font-size: 0.7rem; color: var(--dim); pointer-events: none; }
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">Back country &middot; 01</span>
+  <h1>Every clock has a comma.</h1>
+  <p class="lede">Musicians think the comma is their private misery. It isn't. Any time two cycles refuse to divide into each other, one of them leaves a little remainder on the floor, and somebody has to decide what to do about it. Calendar makers have been sweeping up after the sun and the moon since before anybody wrote music down.</p>
+  <p>Below, pick a pair of clocks. Each dot is one more tick of the first clock, laid around the face of the second. If the two ever lined up exactly, the dots would stack into a few straight spokes and stop making anything new. They never do.</p>
+</header>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">01</span>
+    <div><h2>The spiral never closes.</h2></div>
+  </div>
+
+  <div class="panel">
+    <h3>Pick two clocks</h3>
+    <div class="preset-row" id="presets" role="group" aria-label="Which pair of clocks"></div>
+    <div class="custom">
+      <label for="custom-x" class="readout">or any number</label>
+      <input type="text" id="custom-x" inputmode="decimal" placeholder="e.g. 2.71828" spellcheck="false">
+      <button id="custom-go">Use it</button>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="spiral" height="460" aria-label="Spiral of points, each one more step of the first clock laid around the second clock's face; spokes show the best near-returns"></canvas>
+      <span class="corner-tag" id="spiral-tag"></span>
+    </div>
+    <div class="slider-row">
+      <label for="npts">How many ticks</label>
+      <input type="range" id="npts" min="0" max="1000" value="620">
+      <span class="readout num" id="npts-val">1,000</span>
+    </div>
+    <div class="btn-row">
+      <button id="grow" aria-pressed="false">Grow it from nothing</button>
+      <button id="arms" aria-pressed="true">Trace the spokes</button>
+    </div>
+    <div class="readout" id="spiral-read"></div>
+  </div>
+
+  <p class="wide">Watch the spokes. With few dots the eye finds a handful of arms. Add more and those arms twist, smear, and give way to a larger count, then a larger one still. Each count is a near miss: that many steps of the first clock come <em>almost</em> back to the start of the second. Almost is the whole story. Every count fails eventually, and a new one takes over.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">02</span>
+    <div><h2>The ladder of near misses.</h2></div>
+  </div>
+
+  <p class="wide">The near misses aren't random. They're the rungs of a continued fraction, the oldest trick there is for approximating a number that won't come out even. Each rung is the best you can do with cycles that short, and each leaves a remainder, which is that rung's comma. Pick one to put its spokes on the spiral.</p>
+
+  <div class="panel">
+    <h3 id="ladder-title">Rungs</h3>
+    <div class="ladder" id="ladder"></div>
+    <div class="btn-row" id="sound-row" hidden>
+      <button id="b-dyad" data-tone="temper" data-needs-sound>Hear this rung's fifth against a true one</button>
+      <button id="b-climb" data-tone="just" data-needs-sound>Climb that many true fifths</button>
+    </div>
+    <div class="readout" id="ladder-read"></div>
+  </div>
+
+  <p class="wide">For the musician, rung 12 is the piano: twelve fifths against seven octaves, off by 23.46 cents. Rung 53 is the one the Chinese theorist Jing Fang found around 40 BC and Nicholas Mercator wrote up in the 1600s: fifty-three fifths against thirty-one octaves, off by 3.6 cents. For the calendar maker, rung 4 is Julius Caesar's leap year, and the 19-year rung of the moon is the Metonic cycle that still sets the date of Easter. Same arithmetic, different arguments.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">03</span>
+    <div><h2>How far down can you read?</h2></div>
+  </div>
+
+  <p class="wide">The ladder goes down forever. Nobody can use all of it, because nobody can tell apart differences smaller than their own noise. Set how fine your instrument is and see which rung is the first one good enough to fool it.</p>
+
+  <div class="panel">
+    <h3>Your resolution</h3>
+    <div class="slider-row">
+      <label for="res">Finest difference you can catch</label>
+      <input type="range" id="res" min="0" max="1000" value="725">
+      <span class="readout num" id="res-val"></span>
+    </div>
+    <canvas id="reschart" height="220" aria-label="Error per step of each rung against your resolution"></canvas>
+    <div class="readout" id="res-read"></div>
+  </div>
+
+  <p class="wide">That is what the note on the tuning channel means when it says the spiral is infinite and your resolution isn't, and capacity is the quotient. The dots never run out. What runs out is your ability to tell one from the next. It's a good thing to remember the next time somebody sells you infinite anything.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">04</span>
+    <div><h2>The sunflower picked the worst number on purpose.</h2></div>
+  </div>
+
+  <p class="wide">Press the golden ratio up top and look at what grows. That's a sunflower head, near enough. A sunflower lays down each new seed a fixed turn past the last one, about 137.5 degrees, and that turn is built from the golden ratio, the number with the slowest ladder of all. Its continued fraction is nothing but ones, so every rung is as poor an approximation as a rung can be, and the seeds never settle into a few spokes that would waste the space between them. The arms you do see come in Fibonacci counts, 21 and 34 and 55, because those are the golden ratio's rungs.</p>
+
+  <p class="wide">A piano wants the opposite. It wants a rung good enough to close the circle, and it settles for twelve. The sunflower wants a circle that never closes, so it can keep packing seeds forever without any two lining up. Plants worked out the comma's other use a few hundred million years before Pythagoras, and nobody had to hold a meeting about it.</p>
+
+  <div class="foot">
+    <p class="note"><strong>How it's drawn.</strong> Dot n sits at angle 2&pi;&middot;n&middot;x and radius proportional to &radic;n (Vogel's model of a sunflower head), where x is the ratio of the two clocks; only its fractional part matters for the angle. The rungs are the convergents p/q of x's continued fraction, computed in double precision, so the deepest rungs of very long expansions stop being trustworthy after about twelve terms; the page stops there. A rung's miss is |q&middot;x &minus; p| in the second clock's units, converted to cents, minutes, days, or years where that means something, and to degrees of the circle otherwise. The resolution panel asks for the first rung whose error per step, the miss divided by q, falls below your resolution. Astronomical values: tropical year 365.24219 days, synodic month 29.530589 days, Jupiter's period 11.862 years, Saturn's 29.457 years. The Gregorian calendar's 97 leap days in 400 years is not a rung of the year's continued fraction; it is a committee's compromise that sits between rungs and is easy to count on fingers, which is a perfectly good reason.</p>
+  </div>
+</section>
+
+</div>
+
+<script src="kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  Kit.nav("ladder.html");
+  Kit.soundBar();
+
+  var fit = Kit.fit, css = Kit.css, alpha = Kit.alpha, S = Kit.sound;
+  var TAU = Math.PI * 2;
+  var YEAR = 365.24219, MONTH = 29.530589, JUP = 11.862, SAT = 29.457;
+
+  function fmtCents(c) { return c >= 10 ? c.toFixed(1) + "¢" : c >= 0.1 ? c.toFixed(2) + "¢" : c.toFixed(3) + "¢"; }
+  function fmtTime(days) {
+    var m = days * 1440;
+    if (m < 1) return (m * 60).toFixed(1) + " seconds";
+    if (m < 120) return m.toFixed(m < 10 ? 1 : 0) + " minutes";
+    var hr = m / 60;
+    if (hr < 48) return hr.toFixed(1) + " hours";
+    return days.toFixed(1) + " days";
+  }
+  function fmtDeg(d) { return d >= 1 ? d.toFixed(2) + "°" : d >= 0.01 ? d.toFixed(3) + "°" : d.toExponential(1) + "°"; }
+
+  // Each preset: the number x, and how to talk about a rung p/q.
+  var PRESETS = {
+    fifths: {
+      label: "Fifths and octaves", x: Math.log2(1.5),
+      tag: "each dot: one more pure fifth, folded into the octave",
+      rung: function (p, q, miss) { return "<b>" + q + "</b> fifths against <b>" + p + "</b> octaves"; },
+      missStr: function (miss) { return fmtCents(miss * 1200); },
+      unit: function (perStep) { return fmtCents(perStep * 1200); },
+      resUnit: "cents", resRange: [0.02, 30], resToX: function (r) { return r / 1200; },
+      resFmt: function (r) { return fmtCents(r); },
+      resWhat: "the fifths of the first rung whose fifths sound pure to you",
+      music: true
+    },
+    golden: {
+      label: "The golden ratio (a sunflower)", x: (1 + Math.sqrt(5)) / 2,
+      tag: "each dot: one more seed, 137.5° past the last",
+      rung: function (p, q) { return "<b>" + q + "</b> seeds come round <b>" + p + "</b> times"; },
+      missStr: function (miss) { return fmtDeg(miss * 360); },
+      unit: function (perStep) { return fmtDeg(perStep * 360); },
+      resUnit: "degrees", resRange: [0.001, 20], resToX: function (r) { return r / 360; },
+      resFmt: function (r) { return fmtDeg(r); },
+      resWhat: "the first rung whose spokes look straight to you"
+    },
+    year: {
+      label: "Days in a year", x: YEAR,
+      tag: "each dot: one more year, laid around the day",
+      rung: function (p, q) { var leap = p - 365 * q; return "<b>" + q + "</b> years with <b>" + leap + "</b> leap day" + (leap === 1 ? "" : "s"); },
+      missStr: function (miss) { return fmtTime(miss); },
+      unit: function (perStep) { return fmtTime(perStep) + "/yr"; },
+      resUnit: "minutes per year", resRange: [0.05, 300], resToX: function (r) { return r / 1440; },
+      resFmt: function (r) { return r < 1 ? (r * 60).toFixed(0) + " s/yr" : r.toFixed(r < 10 ? 1 : 0) + " min/yr"; },
+      resWhat: "the first leap rule whose yearly drift you would never notice"
+    },
+    moon: {
+      label: "Moons in a year", x: YEAR / MONTH,
+      tag: "each dot: one more year, laid around the lunar month",
+      rung: function (p, q) { return "<b>" + q + "</b> years against <b>" + p + "</b> new moons"; },
+      missStr: function (miss) { return fmtTime(miss * MONTH); },
+      unit: function (perStep) { return fmtTime(perStep * MONTH) + "/yr"; },
+      resUnit: "minutes per year", resRange: [0.05, 3000], resToX: function (r) { return r / 1440 / MONTH; },
+      resFmt: function (r) { return r < 1 ? (r * 60).toFixed(0) + " s/yr" : r < 120 ? r.toFixed(r < 10 ? 1 : 0) + " min/yr" : (r / 60).toFixed(1) + " h/yr"; },
+      resWhat: "the first lunar calendar whose drift you would never notice"
+    },
+    planets: {
+      label: "Jupiter and Saturn", x: SAT / JUP,
+      tag: "each dot: one more Saturn year, laid around Jupiter's",
+      rung: function (p, q) { return "<b>" + q + "</b> Saturn orbits against <b>" + p + "</b> of Jupiter's"; },
+      missStr: function (miss) { return (miss * JUP).toFixed(miss * JUP < 0.1 ? 3 : 2) + " years"; },
+      unit: function (perStep) { return (perStep * JUP * 365.25).toFixed(1) + " days/orbit"; },
+      resUnit: "days per orbit", resRange: [0.05, 200], resToX: function (r) { return r / 365.25 / JUP; },
+      resFmt: function (r) { return r.toFixed(r < 10 ? 2 : 0) + " d/orbit"; },
+      resWhat: "the first resonance you could not tell from exact"
+    },
+    root2: {
+      label: "√2 (the piano's tritone)", x: Math.SQRT2,
+      tag: "each dot: one more step of √2, the equal-tempered tritone",
+      rung: function (p, q) { return "<b>" + p + "/" + q + "</b>"; },
+      missStr: function (miss) { return fmtDeg(miss * 360); },
+      unit: function (perStep) { return fmtDeg(perStep * 360); },
+      resUnit: "degrees", resRange: [0.001, 20], resToX: function (r) { return r / 360; },
+      resFmt: function (r) { return fmtDeg(r); },
+      resWhat: "the first rung whose spokes look straight to you"
+    },
+    pi: {
+      label: "π", x: Math.PI,
+      tag: "each dot: one more step of π around the circle",
+      rung: function (p, q) { return "<b>" + p + "/" + q + "</b>"; },
+      missStr: function (miss) { return fmtDeg(miss * 360); },
+      unit: function (perStep) { return fmtDeg(perStep * 360); },
+      resUnit: "degrees", resRange: [0.0001, 20], resToX: function (r) { return r / 360; },
+      resFmt: function (r) { return fmtDeg(r); },
+      resWhat: "the first rung whose spokes look straight to you"
+    }
+  };
+  var ORDER = ["fifths", "golden", "year", "moon", "planets", "root2", "pi"];
+
+  function customPreset(x) {
+    return {
+      label: "x = " + x, x: x, tag: "each dot: one more step of " + x,
+      rung: function (p, q) { return "<b>" + p + "/" + q + "</b>"; },
+      missStr: function (miss) { return fmtDeg(miss * 360); },
+      unit: function (perStep) { return fmtDeg(perStep * 360); },
+      resUnit: "degrees", resRange: [0.0001, 20], resToX: function (r) { return r / 360; },
+      resFmt: function (r) { return fmtDeg(r); },
+      resWhat: "the first rung whose spokes look straight to you"
+    };
+  }
+
+  // continued fraction and its convergents
+  function ladderOf(x) {
+    var terms = [], v = x, out = [];
+    var hm2 = 0, hm1 = 1, km2 = 1, km1 = 0;
+    for (var i = 0; i < 14; i++) {
+      var a = Math.floor(v);
+      terms.push(a);
+      var h = a * hm1 + hm2, k = a * km1 + km2;
+      hm2 = hm1; hm1 = h; km2 = km1; km1 = k;
+      var miss = Math.abs(k * x - h);
+      if (k >= 1 && h >= 1 && k <= 99999 && out.length < 11) out.push({ p: h, q: k, a: a, miss: miss });
+      var fr = v - a;
+      if (fr < 1e-9 || k > 1e7) break;
+      v = 1 / fr;
+    }
+    return { terms: terms, rungs: out };
+  }
+
+  var cur = null, curKey = "fifths", L = null, sel = null;
+
+  // ── preset buttons ──
+  var presetHost = document.getElementById("presets");
+  ORDER.forEach(function (k) {
+    var b = document.createElement("button");
+    b.textContent = PRESETS[k].label;
+    b.dataset.key = k;
+    b.addEventListener("click", function () { choose(k); });
+    presetHost.appendChild(b);
+  });
+  document.getElementById("custom-go").addEventListener("click", useCustom);
+  document.getElementById("custom-x").addEventListener("keydown", function (e) { if (e.key === "Enter") useCustom(); });
+  function useCustom() {
+    var raw = document.getElementById("custom-x").value.trim().toLowerCase();
+    var x = raw === "e" ? Math.E : raw === "pi" || raw === "π" ? Math.PI : parseFloat(raw);
+    if (!isFinite(x) || x <= 0) { document.getElementById("spiral-read").textContent = "That doesn't look like a positive number."; return; }
+    choose("custom", customPreset(x));
+  }
+
+  function choose(key, preset) {
+    curKey = key;
+    cur = preset || PRESETS[key];
+    L = ladderOf(cur.x);
+    presetHost.querySelectorAll("button").forEach(function (b) {
+      b.setAttribute("aria-pressed", b.dataset.key === key ? "true" : "false");
+    });
+    // default rung: the piano for fifths, otherwise the rung nearest a few dozen
+    var def = null;
+    L.rungs.forEach(function (r) { if (key === "fifths" ? r.q === 12 : (r.q >= 3 && r.q <= 60)) def = def && key === "fifths" ? def : r; });
+    if (!def) def = L.rungs[Math.min(2, L.rungs.length - 1)];
+    sel = def;
+    document.getElementById("spiral-tag").textContent = cur.tag;
+    document.getElementById("sound-row").hidden = !cur.music;
+    buildLadder();
+    setupRes();
+    restartGrowIfOn();
+    drawSpiral();
+    drawRes();
+  }
+
+  // ── ladder list ──
+  function buildLadder() {
+    var host = document.getElementById("ladder");
+    host.innerHTML = "";
+    var maxLog = 0, minLog = 0;
+    var logs = L.rungs.map(function (r) { return Math.log10(Math.max(r.miss, 1e-12)); });
+    maxLog = Math.max.apply(null, logs); minLog = Math.min.apply(null, logs);
+    L.rungs.forEach(function (r, i) {
+      var b = document.createElement("button");
+      b.className = "rung";
+      b.setAttribute("aria-pressed", r === sel ? "true" : "false");
+      var w = maxLog > minLog ? (logs[i] - minLog) / (maxLog - minLog) : 1;
+      b.innerHTML = "<span class='frac'>" + r.p + "/" + r.q + "</span>" +
+        "<span class='what'>" + cur.rung(r.p, r.q, r.miss) + "</span>" +
+        "<span class='miss num'>off by " + cur.missStr(r.miss) + "<i style='width:" + (8 + 92 * w).toFixed(0) + "%'></i></span>";
+      b.addEventListener("click", function () { sel = r; buildLadder(); drawSpiral(); describeRung(); });
+      host.appendChild(b);
+    });
+    document.getElementById("ladder-title").textContent = "Rungs for " + cur.label.toLowerCase() +
+      " · continued fraction [" + L.terms[0] + "; " + L.terms.slice(1, 12).join(", ") + (L.terms.length > 12 ? ", …" : "") + "]";
+    describeRung();
+  }
+
+  function describeRung() {
+    var r = sel;
+    var t = cur.rung(r.p, r.q, r.miss) + ", off by <b class='temp-t'>" + cur.missStr(r.miss) + "</b>.";
+    if (cur.music) {
+      var step = 1200 / r.q, fifthSteps = Math.round(Kit.PURE_FIFTH / step);
+      var fifth = fifthSteps * step;
+      t += " Divide the octave into " + r.q + " equal steps and the best fifth is " + fifthSteps + " steps, " +
+        fifth.toFixed(2) + " cents, which misses a pure fifth by <b>" + fmtCents(Math.abs(fifth - Kit.PURE_FIFTH)) + "</b>.";
+      if (r.q === 12) t += " That's your piano.";
+      if (r.q === 53) t += " Mercator's comma lives here.";
+      document.getElementById("b-dyad").disabled = S.isMuted() || r.q > 400;
+      document.getElementById("b-climb").textContent = "Climb " + r.q + " true fifths";
+      document.getElementById("b-climb").disabled = S.isMuted() || r.q > 120;
+    }
+    if (curKey === "year" && r.q === 4) t += " Julius Caesar's rule, 46 BC. It slips a day against the seasons every 128 years, which is why Pope Gregory had to cancel ten days in October 1582.";
+    if (curKey === "year" && r.q === 33) t += " Omar Khayyam's calendar used a 33-year cycle much like this one.";
+    if (curKey === "moon" && r.q === 19) t += " The Metonic cycle, 432 BC, still behind the date of Easter and the Hebrew calendar.";
+    if (curKey === "planets" && r.q === 2) t += " The near-resonance astronomers call the Great Inequality, worked out by Laplace in 1785.";
+    if (curKey === "pi" && r.q === 113) t += " Zu Chongzhi's 355/113, around AD 480. Nobody did better for about eight hundred years.";
+    if (curKey === "golden") t += " Fibonacci numbers, every one: the golden ratio's rungs are ratios of neighbors in that sequence.";
+    document.getElementById("ladder-read").innerHTML = t;
+  }
+
+  // ── the spiral ──
+  var cv = document.getElementById("spiral");
+  var nSlider = document.getElementById("npts");
+  var growing = false, growN = 0, growStart = 0;
+  var armsOn = true;
+  function nFromSlider() { var v = parseInt(nSlider.value, 10) / 1000; return Math.round(Math.pow(10, 1 + v * 2.78)); } // 10 .. ~6000
+  function nNow() { return growing ? Math.max(1, Math.floor(growN)) : nFromSlider(); }
+
+  function drawSpiral() {
+    var f = fit(cv), g = f.g, w = f.w, h = f.h;
+    g.clearRect(0, 0, w, h);
+    var n = nNow();
+    var cx = w / 2, cy = h / 2 + 6, R = Math.min(w, h) * 0.47;
+    var frac = cur.x - Math.floor(cur.x);
+    var c = R / Math.sqrt(Math.max(n, 12));
+    var justC = css("--just"), tempC = css("--temper"), dimC = css("--dim");
+    var q = sel ? sel.q : 0;
+    var dotR = Math.max(0.9, Math.min(4.2, c * 0.42));
+
+    // faint guide
+    g.strokeStyle = css("--rule"); g.lineWidth = 1;
+    g.beginPath(); g.arc(cx, cy, R + 4, 0, TAU); g.stroke();
+
+    // spokes for the selected rung: join every q-th dot
+    if (armsOn && q > 0 && q < n) {
+      g.lineWidth = 1;
+      g.strokeStyle = alpha(tempC, q > 200 ? 0.12 : 0.3);
+      for (var arm = 0; arm < Math.min(q, 400); arm++) {
+        g.beginPath();
+        var first = true;
+        for (var k = arm; k < n; k += q) {
+          var a = TAU * ((k * frac) % 1) - Math.PI / 2, r = c * Math.sqrt(k);
+          var x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
+          if (first) { g.moveTo(x, y); first = false; } else g.lineTo(x, y);
+        }
+        g.stroke();
+      }
+    }
+
+    // dots: newest brightest; colored by which spoke they sit on
+    for (var i = 0; i < n; i++) {
+      var ang = TAU * ((i * frac) % 1) - Math.PI / 2;
+      var rr = c * Math.sqrt(i);
+      var px = cx + Math.cos(ang) * rr, py = cy + Math.sin(ang) * rr;
+      var onArm = q > 0 && armsOn ? (i % q) % 2 === 0 : true;
+      var age = (n - i) / n;
+      g.fillStyle = onArm ? justC : tempC;
+      g.globalAlpha = 0.35 + 0.6 * (1 - age * 0.7);
+      if (dotR < 1.6) g.fillRect(px - dotR, py - dotR, dotR * 2, dotR * 2);
+      else { g.beginPath(); g.arc(px, py, dotR, 0, TAU); g.fill(); }
+    }
+    g.globalAlpha = 1;
+
+    // the newest dot glows while growing
+    if (growing && n > 1) {
+      var j = n - 1, aj = TAU * ((j * frac) % 1) - Math.PI / 2, rj = c * Math.sqrt(j);
+      var gx = cx + Math.cos(aj) * rj, gy = cy + Math.sin(aj) * rj;
+      var grad = g.createRadialGradient(gx, gy, 0, gx, gy, 18);
+      grad.addColorStop(0, alpha(tempC, 0.9)); grad.addColorStop(1, alpha(tempC, 0));
+      g.fillStyle = grad; g.beginPath(); g.arc(gx, gy, 18, 0, TAU); g.fill();
+    }
+
+    g.fillStyle = dimC; g.font = "10px " + css("--mono"); g.textAlign = "right";
+    g.fillText(n.toLocaleString() + " ticks" + (q && armsOn ? " · spokes for rung " + q : ""), w - 8, h - 10);
+
+    document.getElementById("npts-val").textContent = n.toLocaleString();
+    document.getElementById("spiral-read").innerHTML = spiralText(n);
+  }
+
+  function spiralText(n) {
+    // which rung dominates what the eye sees: the largest q that is still well under n
+    var vis = null;
+    L.rungs.forEach(function (r) { if (r.q >= 2 && r.q * 3 <= n) vis = r; });
+    if (!vis) return "Too few dots yet to see any spokes.";
+    var nxt = null;
+    L.rungs.forEach(function (r) { if (!nxt && r.q > vis.q) nxt = r; });
+    return "At " + n.toLocaleString() + " ticks the eye picks out about <b class='temp-t'>" + vis.q +
+      "</b> spokes, the rung " + vis.p + "/" + vis.q + "." +
+      (nxt ? " Keep adding and they'll twist over into <b>" + nxt.q + "</b>." : "");
+  }
+
+  nSlider.addEventListener("input", function () { if (growing) stopGrow(); drawSpiral(); });
+
+  var bGrow = document.getElementById("grow");
+  function stopGrow() { growing = false; bGrow.setAttribute("aria-pressed", "false"); bGrow.textContent = "Grow it from nothing"; }
+  function restartGrowIfOn() { if (growing) { growN = 1; growStart = performance.now(); } }
+  bGrow.addEventListener("click", function () {
+    if (growing) { stopGrow(); drawSpiral(); return; }
+    growing = true; growN = 1; growStart = performance.now();
+    bGrow.setAttribute("aria-pressed", "true"); bGrow.textContent = "Stop growing";
+    requestAnimationFrame(growTick);
+  });
+  var lastG = 0;
+  function growTick(t) {
+    if (!growing) return;
+    if (document.hidden) { requestAnimationFrame(growTick); return; }
+    var dt = lastG ? Math.min(0.05, (t - lastG) / 1000) : 0.016;
+    lastG = t;
+    var target = nFromSlider();
+    // slow at first so the first spokes register, then faster
+    growN += dt * (Kit.reduced ? 400 : 6 + growN * 0.45);
+    if (growN >= target) { growN = target; stopGrow(); }
+    drawSpiral();
+    if (growing) requestAnimationFrame(growTick);
+  }
+
+  var bArms = document.getElementById("arms");
+  bArms.addEventListener("click", function () {
+    armsOn = !armsOn;
+    bArms.setAttribute("aria-pressed", armsOn ? "true" : "false");
+    drawSpiral();
+  });
+
+  // ── resolution ──
+  var resSlider = document.getElementById("res");
+  function resValue() {
+    var a = cur.resRange[0], b = cur.resRange[1];
+    var v = parseInt(resSlider.value, 10) / 1000;
+    return a * Math.pow(b / a, v);
+  }
+  function setupRes() { drawRes(); }
+  resSlider.addEventListener("input", drawRes);
+
+  var resCv = document.getElementById("reschart");
+  function drawRes() {
+    var f = fit(resCv), g = f.g, w = f.w, h = f.h;
+    g.clearRect(0, 0, w, h);
+    var r = resValue();
+    document.getElementById("res-val").textContent = cur.resFmt(r);
+    var thr = cur.resToX(r); // in units of x per step
+    var rungs = L.rungs.filter(function (z) { return z.q >= 1; });
+    var per = rungs.map(function (z) { return z.miss / z.q; });
+    var pad = { l: 40, r: 12, t: 16, b: 34 };
+    var pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+    var logs = per.map(function (v) { return Math.log10(Math.max(v, 1e-14)); });
+    var lo = Math.min(Math.min.apply(null, logs), Math.log10(thr)) - 0.3;
+    var hi = Math.max(Math.max.apply(null, logs), Math.log10(thr)) + 0.3;
+    function y(v) { return pad.t + ph * (1 - (Math.log10(Math.max(v, 1e-14)) - lo) / (hi - lo)); }
+    g.strokeStyle = css("--rule"); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(pad.l, pad.t); g.lineTo(pad.l, pad.t + ph); g.lineTo(pad.l + pw, pad.t + ph); g.stroke();
+    var n = rungs.length, bw = pw / n;
+    var first = -1;
+    for (var i = 0; i < n; i++) if (first < 0 && per[i] < thr) first = i;
+    for (var i2 = 0; i2 < n; i2++) {
+      var x = pad.l + i2 * bw + bw * 0.18, yy = y(per[i2]);
+      var good = per[i2] < thr;
+      g.fillStyle = i2 === first ? css("--sage") : good ? alpha(css("--just"), 0.45) : css("--temper");
+      g.fillRect(x, yy, bw * 0.64, pad.t + ph - yy);
+      g.fillStyle = css("--dim"); g.font = "9px " + css("--mono"); g.textAlign = "center";
+      g.fillText(String(rungs[i2].q), x + bw * 0.32, h - pad.b + 14);
+    }
+    var yt = y(thr);
+    g.strokeStyle = css("--ink"); g.setLineDash([4, 4]); g.globalAlpha = 0.7;
+    g.beginPath(); g.moveTo(pad.l, yt); g.lineTo(pad.l + pw, yt); g.stroke();
+    g.setLineDash([]); g.globalAlpha = 1;
+    g.fillStyle = css("--ink"); g.textAlign = "right"; g.font = "10px " + css("--mono");
+    g.fillText("your resolution", pad.l + pw, yt - 5);
+    g.fillStyle = css("--dim"); g.textAlign = "center";
+    g.fillText("rung (cycle length q)", pad.l + pw / 2, h - 4);
+    g.save(); g.translate(11, pad.t + ph / 2); g.rotate(-Math.PI / 2);
+    g.fillText("error per step (log)", 0, 0); g.restore();
+
+    var read = document.getElementById("res-read");
+    if (first < 0) read.innerHTML = "Nothing on the ladder this page computes is fine enough for you. You have remarkable equipment.";
+    else {
+      var z = rungs[first];
+      read.innerHTML = "At " + cur.resFmt(r) + ", <b class='sage-t'>rung " + z.q + "</b> is " + cur.resWhat +
+        ": it errs by " + cur.unit(per[first]) + " per step." +
+        (first > 0 ? " Every rung before it is coarse enough that you'd catch it." : " Even the first rung fools you.") +
+        (cur.music && z.q === 12 ? " That's the piano, and that's why it won." : "");
+    }
+  }
+
+  // ── sound, for fifths only ──
+  document.getElementById("b-dyad").addEventListener("click", function () {
+    if (!sel) return;
+    var c = S.audio(), t = c.currentTime + 0.05;
+    var root = 261.626 * 2;
+    var step = 1200 / sel.q, fifthSteps = Math.round(Kit.PURE_FIFTH / step);
+    var g5 = root * Math.pow(2, fifthSteps * step / 1200);
+    var out = c.createGain(); out.gain.value = 1; out.connect(S.bus());
+    var nodes = [];
+    [[root, t], [root * 1.5, t], [root, t + 3], [g5, t + 3]].forEach(function (p) {
+      S.voice(p[0], p[1], 2.7, 0.15, 4, out).nodes.forEach(function (o) { nodes.push(o); });
+    });
+    S.register("dyad", out, nodes);
+    S.later(function () { S.stop("dyad"); }, 6000);
+    var beat = Math.abs(3 * root - 2 * g5);
+    document.getElementById("ladder-read").innerHTML = "A true fifth first, then rung " + sel.q +
+      "'s. Its coincident partials beat <b>" + beat.toFixed(2) + "</b> times a second at this pitch" +
+      (beat < 0.05 ? ", which is to say they don't, as far as a person can tell." : ".");
+  });
+
+  document.getElementById("b-climb").addEventListener("click", function () {
+    if (!sel) return;
+    var c = S.audio(), t = c.currentTime + 0.05;
+    var root = 261.626 * 2, q = sel.q;
+    var dt = Math.max(0.05, Math.min(0.28, 3.6 / q));
+    var out = c.createGain(); out.gain.value = 1; out.connect(S.bus());
+    var nodes = [], f = root;
+    for (var i = 0; i <= q; i++) {
+      var fold = f; while (fold > root * 2) fold /= 2;
+      S.voice(fold, t + i * dt, Math.max(0.12, dt * 1.4), 0.1, 3, out).nodes.forEach(function (o) { nodes.push(o); });
+      f *= 1.5;
+    }
+    var landing = root * Math.pow(1.5, q); while (landing > root * 1.5) landing /= 2;
+    var t2 = t + (q + 1) * dt + 0.3;
+    S.voice(root, t2, 3.2, 0.16, 4, out).nodes.forEach(function (o) { nodes.push(o); });
+    S.voice(landing, t2, 3.2, 0.16, 4, out).nodes.forEach(function (o) { nodes.push(o); });
+    S.register("climb", out, nodes);
+    S.later(function () { S.stop("climb"); }, (t2 - t + 3.5) * 1000);
+    var missC = Math.abs(1200 * Math.log2(landing / root));
+    var near = Math.min(missC, 1200 - missC);
+    document.getElementById("ladder-read").innerHTML = "Climbing " + q + " pure fifths, folding back into the octave as it goes. It lands " +
+      fmtCents(near) + " off home, and the last chord beats against the start. Every rung misses. The good ones miss by less.";
+  });
+
+  S.onChange(function () { if (cur && cur.music) describeRung(); });
+
+  Kit.onTheme(function () { drawSpiral(); drawRes(); });
+  choose("fifths");
+  // open on a short grow so the spokes are seen to form
+  if (!Kit.reduced) bGrow.click();
+})();
+</script>
