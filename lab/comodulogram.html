@@ -1,0 +1,1592 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>A Comodulogram for a Sunflower</title>
+<link rel="stylesheet" href="lab.css">
+<style>
+  .hero-grid { display: grid; grid-template-columns: 1fr; gap: 0.5rem 2rem; align-items: center; }
+  @media (min-width: 54rem) { .hero-grid { grid-template-columns: minmax(0, 1fr) 19rem; } }
+  .hero-art { max-width: 22rem; width: 100%; justify-self: center; }
+  @media (min-width: 54rem) { .hero-art { order: 2; } }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.4rem 0 0.9rem; }
+  .chip.slow { color: var(--just); border-color: var(--just); }
+  .chip.fast { color: var(--temper); border-color: var(--temper); }
+  .heat-box { position: relative; }
+  .heat-box canvas { cursor: pointer; }
+  .heat-box canvas:focus-visible { outline: 2px solid var(--temper); outline-offset: 2px; }
+  .tip {
+    position: absolute; z-index: 5; pointer-events: none; display: none;
+    background: var(--panel); color: var(--ink); border: 1px solid var(--rule); border-radius: 2px;
+    font-family: var(--mono); font-size: 0.7rem; line-height: 1.5; padding: 0.4rem 0.55rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); white-space: nowrap;
+  }
+  .tip b { font-weight: 500; }
+  .legend { display: flex; align-items: center; gap: 0.6rem; font-family: var(--mono); font-size: 0.7rem; color: var(--dim); margin: 0.4rem 0 0; flex-wrap: wrap; }
+  .legend .ramp { flex: 1 1 8rem; max-width: 14rem; height: 10px; border: 1px solid var(--rule); border-radius: 2px;
+    background: linear-gradient(90deg, var(--panel-2), var(--temper)); }
+  .legend .sigkey { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--ink); vertical-align: -2px; margin-right: 0.3rem; }
+  .heat-title { display: flex; justify-content: space-between; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; }
+  .heat-title h3 { margin-bottom: 0.5rem; }
+  .big { font-family: var(--mono); font-size: 1.5rem; letter-spacing: -0.02em; color: var(--ink); }
+  .controls { display: grid; grid-template-columns: 1fr; gap: 0.2rem 1.4rem; }
+  @media (min-width: 46rem) { .controls { grid-template-columns: 1fr 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+  .field > span { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dim); }
+  .field input, .field select { max-width: 100%; min-height: 40px; }
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.2rem, 1fr)); gap: 0.8rem; margin: 0.9rem 0; }
+  .fieldset { border: 1px solid var(--rule); border-radius: 3px; padding: 0.8rem 0.9rem 0.2rem; margin: 0.9rem 0; min-width: 0; }
+  .fieldset legend { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--dim); padding: 0 0.4rem; }
+  .fieldset .fields { margin: 0.3rem 0 0.8rem; }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .filebtn { display: inline-flex; align-items: center; min-height: 40px; font-family: var(--mono); font-size: 0.84rem; padding: 0.6rem 1rem;
+    border: 1px solid var(--just); color: var(--just); background: var(--just-soft); border-radius: 2px; cursor: pointer; }
+  input[type="file"]:focus-visible + .filebtn { outline: 2px solid var(--temper); outline-offset: 2px; }
+  .check { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--mono); font-size: 0.8rem; min-height: 40px; cursor: pointer; }
+  .check input { width: 1.1rem; height: 1.1rem; accent-color: var(--temper); }
+  .status { font-family: var(--mono); font-size: 0.78rem; color: var(--dim); min-height: 1.4em; }
+  .status.warn { color: var(--rose); }
+  .finding { border-left: 2px solid var(--temper); padding-left: 1rem; }
+  .finding p { max-width: 42rem; }
+  a.btnlink { display: inline-flex; align-items: center; min-height: 40px; font-family: var(--mono); font-size: 0.84rem; padding: 0.6rem 1rem;
+    border: 1px solid var(--rule); background: var(--panel-2); color: var(--ink); border-radius: 2px; text-decoration: none; }
+  a.btnlink[aria-disabled="true"] { opacity: 0.45; pointer-events: none; }
+  .protocol { margin: 0; padding-left: 1.2rem; max-width: 42rem; }
+  .protocol li { margin: 0 0 0.45rem; }
+  .sweep-wrap[hidden] { display: none; }
+  #bank-heat-b[hidden], #byo-b-col[hidden] { display: none; }
+  .wrap { overflow-wrap: break-word; }
+</style>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">Back country &middot; 08 &middot; Plants and electrodes</span>
+  <div class="hero-grid">
+    <div class="hero-art">
+      <canvas id="sun" height="300" aria-label="A sunflower head drawn as a Vogel spiral: seeds set at the golden angle, about 137.5 degrees apart, turning slowly. A faint flicker runs through the seeds, swelling where a slow wave sweeps past."></canvas>
+    </div>
+    <div>
+      <h1>A comodulogram for a sunflower</h1>
+      <p class="lede">A sunflower has no neurons. Not one. It has cells that leak ions and a stem that carries slow electrical waves after a deer steps on it, and if you tape two electrodes to a leaf you get a voltage that wiggles at several speeds at once. Tape the same electrodes to a lump of agar and you get wiggles too. Electrode chemistry oscillates. That is the first thing to get straight out here.</p>
+      <p>Brain people have a test for whether a fast rhythm rides on a slow one: bin the slow wave's phase, see whether the fast wave swells at some part of it, draw the grid. They call the grid a comodulogram. The note this page grew out of says that nobody has pointed one at a plant, as far as its author could find. Here is the tool, run first on an oscillator bank whose insides we know, then handed over for whatever you have recorded.</p>
+    </div>
+  </div>
+</header>
+
+<section aria-labelledby="h-bank">
+  <div class="sec-head">
+    <span class="sec-mark">01</span>
+    <div><h2 id="h-bank">The bank refuses to fake it</h2></div>
+  </div>
+
+  <p>Before anybody hauls a Faraday cage out to a sunflower patch, try the test on something you understand. The piano's eleven tuning errors make a bank of oscillators (that's the <a href="../index.html">main page</a>). A few of them beat slowly, under a hertz. A few beat fast, between about five and nine. Sum the whole bank into one wire, the way an electrode sums a leaf, and ask whether the fast beats swell with the slow ones.</p>
+  <p>The main page's bank couples by addition: each oscillator gets nudged toward the average of all of them. Riding requires multiplication. Something slow has to work a fast thing's volume knob. So there is a second bank here, the same in every bolt except that the average's real part sets each oscillator's gain. One of these ought to light up. If the additive one lights up, the test is lying, and I would rather learn that here than in a greenhouse.</p>
+
+  <div class="panel">
+    <h3>The two banks, one wire each</h3>
+    <div class="chips" id="det-chips" aria-label="The eleven detunings"></div>
+    <p class="note" id="band-note" style="margin-bottom:0.6rem"></p>
+
+    <div class="controls">
+      <div class="slider-row">
+        <label for="k-slider">Coupling K</label>
+        <input type="range" id="k-slider" min="0" max="8" step="0.1" value="8">
+        <span class="readout num" id="k-read">8.0</span>
+      </div>
+      <div class="fields" style="margin:0.4rem 0">
+        <label class="field"><span>Record length</span>
+          <select id="len-sel">
+            <option value="150" selected>150 s</option>
+            <option value="300">300 s</option>
+            <option value="450">450 s</option>
+            <option value="600">600 s</option>
+          </select>
+        </label>
+        <label class="field"><span>Surrogates</span>
+          <select id="sur-sel">
+            <option value="blocks" selected>block shuffle</option>
+            <option value="shift">circular shift</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button data-tone="temper" id="bank-run">Run both banks</button>
+      <button id="bank-sweep">Sweep K from 0 to 8</button>
+      <button id="bank-long">Try 600 seconds</button>
+    </div>
+    <div class="meter" aria-hidden="true"><i id="bank-meter"></i></div>
+    <div class="status" id="bank-status" role="status" aria-live="polite"></div>
+
+    <div class="grid-2" style="margin-top:0.8rem">
+      <div>
+        <div class="heat-title"><h3>Additive (the main page's bank)</h3><span class="readout" id="add-max"></span></div>
+        <div class="heat-box">
+          <canvas id="heat-add" height="250" tabindex="0" aria-label="Comodulogram of the additive bank: phase bands across, amplitude bands up, each cell colored by z-score against surrogates. Use arrow keys to move between cells."></canvas>
+          <div class="tip" id="tip-add" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div>
+        <div class="heat-title"><h3>Multiplicative</h3><span class="readout" id="mul-max"></span></div>
+        <div class="heat-box">
+          <canvas id="heat-mul" height="250" tabindex="0" aria-label="Comodulogram of the multiplicative bank, same layout and color scale as the additive one. Use arrow keys to move between cells."></canvas>
+          <div class="tip" id="tip-mul" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-hidden="true"><span>z 0</span><span class="ramp"></span><span>10+</span><span style="margin-left:0.8rem"><span class="sigkey"></span>survives false-discovery correction (q = 0.05)</span></div>
+
+    <div class="grid-2" style="margin-top:1.2rem">
+      <div>
+        <h3 id="bank-prof-h">Phase profile of the chosen cell</h3>
+        <canvas id="bank-prof" height="180" aria-label="Bar chart: the fast band's mean amplitude in each of 18 slow-phase bins, as percent above or below flat."></canvas>
+      </div>
+      <div class="readout" id="bank-cell" aria-live="polite" style="align-self:center">Click or tap any cell to see how the fast amplitude spreads across the slow wave's phase.</div>
+    </div>
+  </div>
+
+  <div class="finding" id="bank-finding" aria-live="polite">
+    <p class="note">Measuring&hellip;</p>
+  </div>
+
+  <div class="panel sweep-wrap" id="sweep-wrap" hidden>
+    <h3>Largest z across the grid, coupling swept</h3>
+    <canvas id="sweep" height="220" aria-label="Line chart: the largest z-score in each bank's comodulogram as coupling K runs from 0 to 8. Filled dots mark couplings where at least one cell survives the false-discovery correction."></canvas>
+    <div class="table-scroll"><table id="sweep-table"><thead><tr><th>K</th><th>additive max z</th><th>cells</th><th>multiplicative max z</th><th>cells</th></tr></thead><tbody></tbody></table></div>
+  </div>
+
+  <p>The note behind this page reported a flat grid at every coupling, largest z 2.9, from a script that never made it into the repo. So I ran it again in the open, and the box above is that rerun, done fresh in your browser every time. One more thing turned up along the way. The note's protocol calls for circular-shift surrogates: slide the fast envelope against the slow phase and see how often chance does as well. On a record this short, with a slow wave this regular, the slid copies are mostly copies of each other, so chance looks stingier than it is. Set the surrogates to circular shift and run 150 or 300 seconds: when I did, the additive bank lit a cell that block shuffling and a 600-second record both put out again.</p>
+</section>
+
+<section aria-labelledby="h-byo">
+  <div class="sec-head">
+    <span class="sec-mark">02</span>
+    <div><h2 id="h-byo">Bring your own plant</h2></div>
+  </div>
+  <p>Got a recording? A leaf, a dead stem, a dish of agar, your own forearm. One column of numbers, or time and value, comma or tab or whatever. Set the sample rate, set the bands, run it. Your browser reads the file and it goes nowhere else.</p>
+  <p>Calibrate your eye first on the three canned signals. The coupled one should burn. The noise should stay dark. The spiky one is the trap the note warns about: a slow wave with a sharp spike in it carries harmonics locked to itself, and those harmonics look exactly like a fast rhythm riding a slow one. It lights up with no coupling in it at all. Then spike removal takes the costume off.</p>
+
+  <div class="panel">
+    <h3>The record</h3>
+    <div class="btn-row">
+      <input type="file" id="f-in" class="vh" accept=".csv,.txt,.tsv,.dat,text/plain,text/csv">
+      <label for="f-in" class="filebtn">Open a CSV or text file</label>
+      <button id="t-coupled">A coupled test signal</button>
+      <button id="t-spiky">A spiky uncoupled signal</button>
+      <button id="t-noise">Pure noise</button>
+    </div>
+    <div class="status" id="byo-file" role="status" aria-live="polite">No record loaded.</div>
+
+    <div class="fields">
+      <label class="field"><span>Sample rate (Hz)</span><input type="number" id="f-fs" min="0.001" step="any" value="50"></label>
+      <label class="field"><span>Surrogates</span><input type="number" id="f-nsurr" min="20" max="5000" step="1" value="400"></label>
+      <label class="field"><span>Surrogate kind</span>
+        <select id="f-sur"><option value="blocks" selected>block shuffle</option><option value="shift">circular shift</option></select>
+      </label>
+    </div>
+
+    <div class="grid-2" style="gap:0 1.2rem">
+      <fieldset class="fieldset">
+        <legend>Phase bands (slow)</legend>
+        <div class="fields">
+          <label class="field"><span>From Hz</span><input type="number" id="p-lo" step="any" min="0" value="0.3"></label>
+          <label class="field"><span>To Hz</span><input type="number" id="p-hi" step="any" min="0" value="1.2"></label>
+          <label class="field"><span>Bands</span><input type="number" id="p-n" step="1" min="1" max="16" value="4"></label>
+        </div>
+      </fieldset>
+      <fieldset class="fieldset">
+        <legend>Amplitude bands (fast)</legend>
+        <div class="fields">
+          <label class="field"><span>From Hz</span><input type="number" id="a-lo" step="any" min="0" value="3"></label>
+          <label class="field"><span>To Hz</span><input type="number" id="a-hi" step="any" min="0" value="12"></label>
+          <label class="field"><span>Bands</span><input type="number" id="a-n" step="1" min="1" max="16" value="5"></label>
+        </div>
+      </fieldset>
+    </div>
+    <p class="note" id="byo-bands"></p>
+
+    <fieldset class="fieldset">
+      <legend>Spike removal (the note's control)</legend>
+      <label class="check"><input type="checkbox" id="d-on"> Also run on a spike-removed copy</label>
+      <div class="fields">
+        <label class="field"><span>Threshold k &times; MAD</span><input type="number" id="d-k" step="any" min="1" value="4"></label>
+        <label class="field"><span>Spike window (s)</span><input type="number" id="d-win" step="any" min="0.01" value="1"></label>
+        <label class="field"><span>Method</span>
+          <select id="d-meth"><option value="template" selected>subtract the average spike</option><option value="clip">clip at the threshold</option></select>
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="btn-row">
+      <button data-tone="temper" id="byo-run">Run the comodulogram</button>
+      <a class="btnlink" id="byo-dl" aria-disabled="true" download="comodulogram.csv" href="#">Download results (CSV)</a>
+    </div>
+    <div class="meter" aria-hidden="true"><i id="byo-meter"></i></div>
+    <div class="status" id="byo-status" role="status" aria-live="polite"></div>
+
+    <div class="grid-2" style="margin-top:0.8rem">
+      <div>
+        <div class="heat-title"><h3>As recorded</h3><span class="readout" id="byo-a-max"></span></div>
+        <div class="heat-box">
+          <canvas id="heat-byo-a" height="270" tabindex="0" aria-label="Comodulogram of the loaded record: phase bands across, amplitude bands up, colored by z-score. Use arrow keys to move between cells."></canvas>
+          <div class="tip" id="tip-byo-a" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div id="byo-b-col" hidden>
+        <div class="heat-title"><h3>Spikes removed</h3><span class="readout" id="byo-b-max"></span></div>
+        <div class="heat-box">
+          <canvas id="heat-byo-b" height="270" tabindex="0" aria-label="Comodulogram of the same record after spike removal, same layout and color scale. Use arrow keys to move between cells."></canvas>
+          <div class="tip" id="tip-byo-b" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+    <div class="legend" aria-hidden="true"><span>z 0</span><span class="ramp"></span><span>10+</span><span style="margin-left:0.8rem"><span class="sigkey"></span>survives false-discovery correction (q = 0.05)</span></div>
+
+    <div class="grid-2" style="margin-top:1.2rem">
+      <div>
+        <h3>Phase profile of the chosen cell</h3>
+        <canvas id="byo-prof" height="180" aria-label="Bar chart: the chosen cell's fast-band mean amplitude in each of 18 slow-phase bins, as percent above or below flat."></canvas>
+        <div class="readout" id="byo-cell" aria-live="polite">Run it, then pick a cell.</div>
+      </div>
+      <div>
+        <h3>Look at it by eye</h3>
+        <canvas id="byo-trace" height="180" aria-label="Twenty seconds of the record: the raw trace, the slow band filtered out of it, and the fast band's envelope, for the chosen cell."></canvas>
+        <p class="note" id="byo-trace-note" style="margin:0.4rem 0 0">The raw trace in gray, the slow band in blue, the fast band's envelope in amber. The note says to inspect the filtered waveforms by eye before you believe a cell. This is that.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-worth">
+  <div class="sec-head">
+    <span class="sec-mark">03</span>
+    <div><h2 id="h-worth">What a lit cell is worth</h2></div>
+  </div>
+  <p>Not much, and not nothing. A lit cell is a statistical dependence between two filtered views of one voltage. It says organization. It does not say anybody is home, and whoever tells you a sunflower is thinking because a grid turned orange is selling something, probably a subscription.</p>
+  <p>A dark grid proves nothing either. The additive bank mixes its inputs across time; the main page's readout measures that mixing climbing to 11.5% at K = 8, and this grid can't see any of it, because one wire carries only a linear sum of the oscillators and the mixing lives in their squares. Try the nonlinear views of a recording before you call the plant simple.</p>
+
+  <div class="panel">
+    <h3>If you go out and record (from the note's protocol)</h3>
+    <ul class="protocol">
+      <li>Surface electrodes on a leaf and the stem, a soil reference. Front end at 10<sup>12</sup>&nbsp;&Omega; or better, DC-coupled or high-passed no higher than 0.001&nbsp;Hz, 24-bit ADC at 250&nbsp;Hz, all of it inside a Faraday enclosure, temperature and humidity logged.</li>
+      <li>Six hours per condition at least: undisturbed, a light step, a watering, one wound. Analyze event windows and quiet windows separately; never pool them.</li>
+      <li>Phase bands log-spaced over 0.003 to 0.3&nbsp;Hz, amplitude bands over 2 to 25&nbsp;Hz, 200 or more surrogates a cell, false-discovery correction across the grid.</li>
+      <li>The controls are the experiment: a dead or cut plant and an agar dummy under identical electrodes, a mains notch, and every lit cell re-run on a spike-removed copy.</li>
+    </ul>
+  </div>
+  <p class="poem">The comma never closed. The bank remembers because it never agreed. Maybe the sunflower turns for the same reason, and maybe it just turns. Go find out. Bring water.</p>
+</section>
+
+<div class="foot">
+  <p class="note"><strong>How the numbers are made, and where they can go wrong.</strong>
+  Filters: the record's mean is removed, its ends are tapered over two cycles of the slowest phase band (at most 10% of the record a side) and zero-padded to a power of two; each band is cut from one FFT with raised-cosine skirts 20% of the band's width, doubled on the positive side to give the analytic signal, and the tapered ends are trimmed before anything is counted. Narrow phase bands ring for longer than that trim covers, so do not trust cells built on bands narrower than a few cycles of the record's length. An amplitude band must be wider than twice the phase frequency it is tested against or the sidebands that carry the coupling fall outside it; for loaded records the page widens amplitude bands to at least twice the top phase edge and tells you when it did.
+  Statistic: Tort's modulation index on 18 phase bins. Each cell is compared with surrogates: circular shift moves the amplitude envelope against the phase by a random offset of at least one second or one cycle of the slowest phase band, whichever is longer; block shuffle cuts the envelope into blocks of that length and reorders them. The p-value is (1 + surrogates at least as large) / (1 + surrogates), so the smallest possible p is 1/(n+1), and with m cells Benjamini&ndash;Hochberg at q = 0.05 needs at least about 20m surrogates before any cell can pass. The z-score is against the surrogates' mean and spread and is shown for comparison with the note; the outlines come from p, not from z, because the surrogate distribution of the index is skewed and a normal tail read off z overstates significance.
+  Calibration, measured in Node on this page's own analysis code with white noise, 150 s at 50 Hz, the bank's 12-cell grid, 1000 surrogates, 150 records each: circular shift lit at least one cell in 13% of records, block shuffle in 8%, against a nominal 5%. A slow wave that keeps its phase for many cycles leaves only a handful of truly different surrogates in a short record, and the test gets bolder than it should. Long records fix this and nothing else does. The note's own warning stands: 140 seconds gives about fifty cycles of the slowest bank band, which is marginal, and a plant phase band at 0.01&nbsp;Hz needs hours of stable recording.
+  The bank: the sum of the real parts of the eleven oscillators at 50 samples a second, driven by the main page's seeded random input, first 10 seconds discarded, the same K for both banks; the multiplicative mode is kit.js's, where the mean field's real part scales each oscillator. Spike removal subtracts a running median, flags samples beyond k times the median absolute deviation, then either subtracts the average spike (fitted in size to each one) or clips at the threshold; template subtraction assumes the spikes look alike, clipping leaves flat-topped bumps that still carry harmonics, and either can add structure of its own, so look at the trace. Loaded files are read in the browser and never sent anywhere; the limit is 2<sup>21</sup> samples.</p>
+</div>
+
+</div>
+
+<script src="kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+// [verify:pac] begin
+// The analysis core. Plain functions, no DOM, no Kit: tools/verify.mjs
+// lifts this block out and runs it in Node.
+
+// Radix-2 FFT in place on Float64Arrays whose length is a power of two.
+// fftSteps is the same transform as a generator that yields every so many
+// butterflies, so a two-million-point record never freezes a frame.
+function* fftSteps(re, im, inverse, chunk) {
+  var n = re.length, i, j, k, len, half, tr, ti, wr, wi, cr, ci, a, b, nr, bit;
+  var work = 0, lim = chunk || Infinity;
+  for (i = 1, j = 0; i < n; i++) {
+    bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) { tr = re[i]; re[i] = re[j]; re[j] = tr; ti = im[i]; im[i] = im[j]; im[j] = ti; }
+  }
+  if (n > lim) yield 0;
+  var sgn = inverse ? 1 : -1;
+  for (len = 2; len <= n; len <<= 1) {
+    half = len >> 1;
+    wr = Math.cos(sgn * 2 * Math.PI / len); wi = Math.sin(sgn * 2 * Math.PI / len);
+    for (i = 0; i < n; i += len) {
+      cr = 1; ci = 0;
+      for (k = 0; k < half; k++) {
+        a = i + k; b = a + half;
+        tr = re[b] * cr - im[b] * ci;
+        ti = re[b] * ci + im[b] * cr;
+        re[b] = re[a] - tr; im[b] = im[a] - ti;
+        re[a] += tr; im[a] += ti;
+        nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr;
+      }
+      work += half;
+      if (work > lim) { work = 0; yield 0; }
+    }
+  }
+  if (inverse) for (i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+}
+function fftInPlace(re, im, inverse) {
+  var g = fftSteps(re, im, inverse);
+  while (!g.next().done) {}
+}
+
+function nextPow2(n) { var p = 1; while (p < n) p <<= 1; return p; }
+var CHUNK = 1 << 17; // butterflies or samples between yields
+
+// The spectrum of x, mean removed, zero-padded to a power of two. taper:
+// samples of raised-cosine fade at each end, so the record's two ends do
+// not meet the padding as a step (a step rings in every band at once,
+// slow and fast together, which is coupling the record never had).
+function* spectrumSteps(x, taper) {
+  var L = x.length, N = nextPow2(L), m = 0, i, tp = Math.min(taper || 0, L >> 1);
+  for (i = 0; i < L; i++) m += x[i];
+  m /= L;
+  var re = new Float64Array(N), im = new Float64Array(N);
+  for (i = 0; i < L; i++) re[i] = x[i] - m;
+  for (i = 0; i < tp; i++) {
+    var g = 0.5 - 0.5 * Math.cos(Math.PI * (i + 0.5) / tp);
+    re[i] *= g; re[L - 1 - i] *= g;
+  }
+  yield* fftSteps(re, im, false, CHUNK);
+  return { re: re, im: im, N: N, L: L };
+}
+
+// Raised-cosine band gain: 1 inside [lo, hi], cosine skirts of width
+// 20% of the band centred on each edge, 0 beyond.
+function bandGain(f, lo, hi) {
+  var w = Math.max(0.2 * (hi - lo), 1e-9);
+  if (f <= lo - w / 2 || f >= hi + w / 2) return 0;
+  if (f < lo + w / 2) return 0.5 - 0.5 * Math.cos(Math.PI * (f - (lo - w / 2)) / w);
+  if (f > hi - w / 2) return 0.5 - 0.5 * Math.cos(Math.PI * ((hi + w / 2) - f) / w);
+  return 1;
+}
+
+// Analytic signal of one band from a precomputed spectrum: keep positive
+// frequencies under the band's gain, double them, zero the rest, invert.
+// want: "phase", "amp" or "both".
+function* analyticSteps(S, fs, lo, hi, want) {
+  var N = S.N, L = S.L, re = new Float64Array(N), im = new Float64Array(N), k;
+  for (k = 1; k < N / 2; k++) {
+    var g = bandGain(k * fs / N, lo, hi);
+    if (g > 0) { re[k] = 2 * g * S.re[k]; im[k] = 2 * g * S.im[k]; }
+  }
+  yield* fftSteps(re, im, true, CHUNK);
+  var out = {};
+  if (want !== "amp") out.phase = new Float64Array(L);
+  if (want !== "phase") out.amp = want === "amp" ? new Float32Array(L) : new Float64Array(L);
+  for (k = 0; k < L; k++) {
+    if (out.phase) out.phase[k] = Math.atan2(im[k], re[k]);
+    if (out.amp) out.amp[k] = Math.sqrt(re[k] * re[k] + im[k] * im[k]);
+    if ((k & (CHUNK - 1)) === CHUNK - 1) yield 0;
+  }
+  return out;
+}
+
+function runSteps(g) { var r; while (!(r = g.next()).done) {} return r.value; }
+
+function bandAnalytic(x, fs, lo, hi) {
+  var S = runSteps(spectrumSteps(x, 0));
+  return runSteps(analyticSteps(S, fs, lo, hi, "both"));
+}
+
+function binOf(ph, nbins) {
+  var b = Math.floor((ph + Math.PI) / (2 * Math.PI) * nbins);
+  return b < 0 ? 0 : b >= nbins ? nbins - 1 : b;
+}
+
+// Tort et al. 2010: bin the phase, average the amplitude in each bin,
+// normalise to a distribution P, and report its Kullback-Leibler distance
+// from uniform divided by log(nbins). 0 = flat, 1 = all amplitude in one
+// bin. opts (all optional): start/end, the analysis window; bins, phase
+// bins precomputed (then phase may be null); shift, a circular offset of
+// the amplitude inside the window; map, an index array (window-relative)
+// that reorders the amplitude; profile, a Float64Array(nbins) to fill
+// with P.
+function tortMI(phase, amp, nbins, opts) {
+  nbins = nbins || 18; opts = opts || {};
+  var L = amp.length, s0 = opts.start || 0, s1 = opts.end || L, W = s1 - s0;
+  var shift = (((opts.shift || 0) % W) + W) % W, bins = opts.bins, map = opts.map;
+  var sum = new Float64Array(nbins), cnt = new Float64Array(nbins), i, j, b;
+  for (i = s0; i < s1; i++) {
+    b = bins ? bins[i] : binOf(phase[i], nbins);
+    if (map) j = s0 + map[i - s0];
+    else { j = i + shift; if (j >= s1) j -= W; }
+    sum[b] += amp[j]; cnt[b]++;
+  }
+  var tot = 0;
+  for (i = 0; i < nbins; i++) { sum[i] = cnt[i] ? sum[i] / cnt[i] : 0; tot += sum[i]; }
+  if (!(tot > 0)) return 0;
+  var H = 0;
+  for (i = 0; i < nbins; i++) {
+    var p = sum[i] / tot;
+    if (opts.profile) opts.profile[i] = p;
+    if (p > 0) H -= p * Math.log(p);
+  }
+  return (Math.log(nbins) - H) / Math.log(nbins);
+}
+
+function pacRng(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// Benjamini-Hochberg across the grid at false-discovery rate q.
+function fdrBH(pGrid, q) {
+  q = q || 0.05;
+  var list = [], i, j, k;
+  for (i = 0; i < pGrid.length; i++) for (j = 0; j < pGrid[i].length; j++) list.push({ i: i, j: j, p: pGrid[i][j] });
+  list.sort(function (a, b) { return a.p - b.p; });
+  var m = list.length, kMax = -1;
+  for (k = 0; k < m; k++) if (list[k].p <= q * (k + 1) / m) kMax = k;
+  var sig = pGrid.map(function (row) { return row.map(function () { return false; }); });
+  for (k = 0; k <= kMax; k++) sig[list[k].i][list[k].j] = true;
+  return sig;
+}
+
+// The comodulogram. phaseBands, ampBands: arrays of [lo, hi] in Hz.
+// For every cell: the Tort MI, nSurr surrogate MIs, z against the
+// surrogates, and p = (1 + surrogates >= MI) / (1 + nSurr), one-sided and
+// exact if the surrogates are exchangeable with the real alignment.
+// Surrogates (opts.surrogate):
+//   "shift"  (default) circularly shift the amplitude envelope relative to
+//            the phase by a random offset of at least max(1 s, one cycle
+//            of the slowest phase band);
+//   "blocks" cut the envelope into blocks of that same length and shuffle
+//            them, which gives far more nearly independent surrogates
+//            from a short record.
+// Each band is filtered once. Yields a progress number in [0, 1], and
+// {progress, cell, mi, z, p} as each cell finishes.
+var TRIM_CYCLES = 2;
+function* comodulogramGen(x, fs, phaseBands, ampBands, nSurr, seed, opts) {
+  opts = opts || {};
+  var NB = 18, nS = nSurr === undefined ? 200 : nSurr, mode = opts.surrogate || "shift";
+  var rng = pacRng(seed === undefined ? 1 : seed);
+  var L = x.length, nP = phaseBands.length, nA = ampBands.length, i, j, s;
+  // trim TRIM_CYCLES cycles of the slowest phase band (at most 10% a side)
+  // and taper the same span before filtering
+  var loMin = Infinity;
+  for (i = 0; i < nP; i++) loMin = Math.min(loMin, phaseBands[i][0]);
+  var trim = Math.min(Math.ceil(TRIM_CYCLES * fs / loMin), Math.floor(0.1 * L));
+  var start = trim, end = L - trim, W = end - start;
+  var minShift = Math.max(1, Math.min(Math.ceil(Math.max(fs, fs / loMin)), Math.floor(W / 4)));
+  var filt = nP + nA, done = 0, total;
+  // filtering is about as costly as a few surrogate passes; weigh it so
+  var fW = 8 * Math.max(1, Math.log2(nextPow2(L)) / 4);
+  total = filt * fW + nP * nA * (1 + nS);
+  var S = yield* spectrumSteps(x, trim);
+  var bins = [], amps = [];
+  for (i = 0; i < nP; i++) {
+    var ph = (yield* analyticSteps(S, fs, phaseBands[i][0], phaseBands[i][1], "phase")).phase;
+    var bi = new Uint8Array(L);
+    for (s = 0; s < L; s++) bi[s] = binOf(ph[s], NB);
+    bins.push(bi);
+    done += fW; yield done / total;
+  }
+  for (j = 0; j < nA; j++) {
+    amps.push((yield* analyticSteps(S, fs, ampBands[j][0], ampBands[j][1], "amp")).amp);
+    done += fW; yield done / total;
+  }
+  S = null;
+  var nBlk = Math.max(2, Math.floor(W / minShift)), map = mode === "blocks" ? new Int32Array(W) : null;
+  var order = new Int32Array(nBlk);
+  function shuffleMap() {
+    var q, t, w = 0;
+    for (q = 0; q < nBlk; q++) order[q] = q;
+    for (q = nBlk - 1; q > 0; q--) { t = Math.floor(rng() * (q + 1)); var o = order[q]; order[q] = order[t]; order[t] = o; }
+    for (q = 0; q < nBlk; q++) {
+      var b0 = Math.floor(order[q] * W / nBlk), b1 = Math.floor((order[q] + 1) * W / nBlk);
+      for (t = b0; t < b1; t++) map[w++] = t;
+    }
+  }
+  var mi = [], z = [], pv = [], prof = [], sMean = [], sSd = [];
+  for (i = 0; i < nP; i++) { mi.push([]); z.push([]); pv.push([]); prof.push([]); sMean.push([]); sSd.push([]); }
+  var per = Math.max(1, Math.floor(CHUNK * 2 / Math.max(1, W))), acc = 0;
+  for (i = 0; i < nP; i++) {
+    for (j = 0; j < nA; j++) {
+      var p = new Float64Array(NB);
+      var m0 = tortMI(null, amps[j], NB, { bins: bins[i], start: start, end: end, profile: p });
+      var sm = 0, sq = 0, ge = 0;
+      for (s = 0; s < nS; s++) {
+        var o2 = { bins: bins[i], start: start, end: end };
+        if (map) { shuffleMap(); o2.map = map; }
+        else o2.shift = minShift + Math.floor(rng() * (W - 2 * minShift + 1));
+        var v = tortMI(null, amps[j], NB, o2);
+        sm += v; sq += v * v; if (v >= m0) ge++;
+        if (++acc >= per) { acc = 0; yield (done + s) / total; }
+      }
+      var mean = nS ? sm / nS : 0;
+      var sd = nS > 1 ? Math.sqrt(Math.max(0, (sq - nS * mean * mean) / (nS - 1))) : 0;
+      mi[i][j] = m0; prof[i][j] = p; sMean[i][j] = mean; sSd[i][j] = sd;
+      z[i][j] = sd > 0 ? (m0 - mean) / sd : 0;
+      pv[i][j] = (1 + ge) / (1 + nS);
+      done += 1 + nS;
+      yield { progress: done / total, cell: [i, j], mi: m0, z: z[i][j], p: pv[i][j] };
+    }
+  }
+  return { mi: mi, z: z, p: pv, sig: fdrBH(pv, 0.05), meanBinned: prof, surrMean: sMean, surrSd: sSd,
+           phaseBands: phaseBands, ampBands: ampBands, nSurr: nS, surrogate: mode, fs: fs, n: L,
+           trim: trim, minShift: minShift };
+}
+
+function comodulogramSync(x, fs, phaseBands, ampBands, nSurr, seed, opts) {
+  return runSteps(comodulogramGen(x, fs, phaseBands, ampBands, nSurr, seed, opts));
+}
+
+// Gaussian noise from the seeded generator
+function gaussFrom(rng) {
+  var u = 0, v = 0;
+  while (u === 0) u = rng();
+  v = rng();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+// A test signal: a slow rhythm (fSlow, default 0.5 Hz) plus a fast one
+// (fFast, default 6 Hz) whose amplitude follows the slow phase with depth
+// strength in [0, 1], plus white noise (opts.noise, default 0.5). With
+// opts.spiky the slow wave grows a sharp spike once a cycle (fast rise,
+// slower fall, the shape of a plant action potential) and the fast rhythm
+// is left entirely uncoupled: the spike's own harmonics are all the
+// "coupling" there is.
+function synthPAC(fs, seconds, strength, seed, opts) {
+  opts = opts || {};
+  var fS = opts.fSlow || 0.5, fF = opts.fFast || 6;
+  var noise = opts.noise === undefined ? 0.5 : opts.noise;
+  var L = Math.round(fs * seconds), x = new Float64Array(L);
+  var rng = pacRng(seed === undefined ? 7 : seed);
+  var phS = rng() * 2 * Math.PI, phF = rng() * 2 * Math.PI, ou = 0, lastWrap = -10;
+  var TWO = 2 * Math.PI, dt = 1 / fs, tauOU = 2;
+  for (var t = 0; t < L; t++) {
+    // the slow rate wanders (lognormal, about 12%, correlation time 2 s),
+    // so the slow rhythm is a band that forgets its phase within a few
+    // cycles, and never runs backwards
+    ou += -ou * dt / tauOU + Math.sqrt(2 * dt / tauOU) * gaussFrom(rng);
+    var before = Math.floor(phS / TWO);
+    phS += TWO * fS * Math.exp(0.12 * ou) * dt;
+    if (Math.floor(phS / TWO) !== before) lastWrap = t * dt;
+    phF += TWO * fF / fs;
+    var slow, fast;
+    if (opts.spiky) {
+      var tau = t * dt - lastWrap;
+      slow = 0.5 * Math.cos(phS) + 6 * (1 - Math.exp(-tau / 0.05)) * Math.exp(-tau / 0.2);
+      fast = 0.35 * Math.cos(phF);
+    } else {
+      slow = Math.cos(phS);
+      fast = 0.35 * (1 + strength * Math.cos(phS)) * Math.cos(phF);
+    }
+    x[t] = slow + fast + noise * gaussFrom(rng);
+  }
+  return x;
+}
+
+// Spike removal, the note's control. Residual r = x minus a running
+// median (window winSec). Samples where |r| > k * 1.4826 * MAD(r) mark
+// spikes. method "template" (default): average the residual around every
+// spike peak into one tapered template and subtract it, scaled by least
+// squares, at each spike; whatever rides underneath (a fast rhythm)
+// survives. method "clip": clamp r to the threshold. Returns
+// {y, spikes, threshold}.
+function* despikeSteps(x, fs, k, winSec, method) {
+  var L = x.length, h = Math.max(1, Math.round((winSec || 1) * fs / 2));
+  var med = yield* runningMedianSteps(x, 2 * h);
+  var r = new Float64Array(L), ar = new Float64Array(L), i, j;
+  for (i = 0; i < L; i++) { r[i] = x[i] - med[i]; ar[i] = Math.abs(r[i]); }
+  // MAD from at most 2^17 evenly strided samples, so sorting stays cheap
+  var stride = Math.max(1, Math.ceil(L / 131072)), sub = [];
+  for (i = 0; i < L; i += stride) sub.push(ar[i]);
+  yield 0;
+  var thr = (k || 4) * 1.4826 * (medianOf(sub) || 1e-12);
+  var y = new Float64Array(L);
+  if (method === "clip") {
+    var nc = 0;
+    for (i = 0; i < L; i++) {
+      var c = r[i] > thr ? thr : r[i] < -thr ? -thr : r[i];
+      if (c !== r[i]) nc++;
+      y[i] = med[i] + c;
+    }
+    return { y: y, spikes: nc, threshold: thr, method: "clip" };
+  }
+  // peaks of suprathreshold runs, at least h samples apart
+  var peaks = [];
+  for (i = 0; i < L; i++) {
+    if (ar[i] <= thr) continue;
+    var best = i;
+    while (i < L && ar[i] > thr) { if (ar[i] > ar[best]) best = i; i++; }
+    if (!peaks.length || best - peaks[peaks.length - 1] >= h) peaks.push(best);
+  }
+  for (i = 0; i < L; i++) y[i] = x[i];
+  if (!peaks.length) return { y: y, spikes: 0, threshold: thr, method: "template" };
+  var W = 2 * h + 1, T = new Float64Array(W), p, q;
+  function build() {
+    var n = 0; T.fill(0);
+    for (p = 0; p < peaks.length; p++) {
+      if (peaks[p] - h < 0 || peaks[p] + h >= L) continue;
+      for (j = 0; j < W; j++) T[j] += r[peaks[p] - h + j];
+      n++;
+    }
+    if (n) for (j = 0; j < W; j++) T[j] /= n;
+    return n;
+  }
+  if (!build()) return { y: y, spikes: 0, threshold: thr, method: "template" };
+  // re-align every spike to the template (a few samples either way), then
+  // rebuild it: peak-picking on a noisy, round-topped spike jitters
+  var lag = Math.max(1, Math.round(0.08 * fs));
+  for (p = 0; p < peaks.length; p++) {
+    var bestL = 0, bestC = -Infinity;
+    for (var d = -lag; d <= lag; d++) {
+      var c0 = 0, s0 = peaks[p] + d - h;
+      if (s0 < 0 || s0 + W > L) continue;
+      for (j = 0; j < W; j++) c0 += r[s0 + j] * T[j];
+      if (c0 > bestC) { bestC = c0; bestL = d; }
+    }
+    peaks[p] += bestL;
+  }
+  build();
+  var tt = 0;
+  for (j = 0; j < W; j++) {
+    // Tukey taper on the outer quarter so the subtraction leaves no step
+    var e = Math.min(j, W - 1 - j) / (W / 8);
+    var tap = e >= 1 ? 1 : 0.5 - 0.5 * Math.cos(Math.PI * e);
+    T[j] *= tap; tt += T[j] * T[j];
+  }
+  for (p = 0; p < peaks.length; p++) {
+    var st = peaks[p] - h, dot = 0;
+    for (j = 0; j < W; j++) { q = st + j; if (q >= 0 && q < L) dot += r[q] * T[j]; }
+    var amp = tt > 0 ? dot / tt : 0;
+    for (j = 0; j < W; j++) { q = st + j; if (q >= 0 && q < L) y[q] -= amp * T[j]; }
+  }
+  return { y: y, spikes: peaks.length, threshold: thr, method: "template" };
+}
+function medianOf(a) {
+  var b = Float64Array.from(a).sort(), n = b.length;
+  return n ? (n & 1 ? b[n >> 1] : 0.5 * (b[n / 2 - 1] + b[n / 2])) : 0;
+}
+// running median, half-width h, by keeping the window sorted
+function* runningMedianSteps(x, h) {
+  var L = x.length, out = new Float64Array(L), win = [], i;
+  function ins(v) { var lo = 0, hi = win.length; while (lo < hi) { var m = (lo + hi) >> 1; if (win[m] < v) lo = m + 1; else hi = m; } win.splice(lo, 0, v); }
+  function del(v) { var lo = 0, hi = win.length; while (lo < hi) { var m = (lo + hi) >> 1; if (win[m] < v) lo = m + 1; else hi = m; } win.splice(lo, 1); }
+  for (i = 0; i < Math.min(L, h + 1); i++) ins(x[i]);
+  for (i = 0; i < L; i++) {
+    var n = win.length;
+    out[i] = n & 1 ? win[n >> 1] : 0.5 * (win[n / 2 - 1] + win[n / 2]);
+    if (i + h + 1 < L) ins(x[i + h + 1]);
+    if (i - h >= 0) del(x[i - h]);
+    if ((i & 16383) === 16383) yield 0;
+  }
+  return out;
+}
+function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs, k, winSec, method)); }
+// [verify:pac] end
+
+  // ══════════════════════════════════════════════════════════
+  //  THE PAGE
+  // ══════════════════════════════════════════════════════════
+
+  Kit.nav("comodulogram.html");
+  Kit.soundBar();
+
+  var $ = function (id) { return document.getElementById(id); };
+  var FS = 50, WASH = 500, BANK_NS = 1000, SWEEP_NS = 500, MAX_SAMPLES = 1 << 21;
+  var IV = Kit.intervals(Kit.edo(12));
+  var OMEGA = Kit.omegas(IV);
+
+  // ── colors ──
+  function hexRgb(h) {
+    h = (h || "#888888").replace("#", "").trim();
+    if (h.length === 3) h = h.split("").map(function (c) { return c + c; }).join("");
+    var n = parseInt(h, 16);
+    return [n >> 16 & 255, n >> 8 & 255, n & 255];
+  }
+  function mix(a, b, t) {
+    var A = hexRgb(a), B = hexRgb(b);
+    return "rgb(" + Math.round(A[0] + (B[0] - A[0]) * t) + "," + Math.round(A[1] + (B[1] - A[1]) * t) + "," + Math.round(A[2] + (B[2] - A[2]) * t) + ")";
+  }
+  function isDark() { var g = hexRgb(Kit.css("--ground")); return (g[0] + g[1] + g[2]) / 3 < 110; }
+  var Z_TOP = 10;
+  function zT(z) { return Math.pow(Math.max(0, Math.min(1, z / Z_TOP)), 0.85); }
+
+  function fmtHz(f) { return f >= 10 ? f.toFixed(0) : f >= 1 ? f.toFixed(1) : f >= 0.1 ? f.toFixed(2) : f >= 0.01 ? f.toFixed(3) : f.toPrecision(2); }
+  function fmtBand(b) { return fmtHz(b[0]) + "–" + fmtHz(b[1]); }
+  function fmtP(p) { return p < 0.001 ? p.toExponential(1) : p.toFixed(3); }
+
+  // ══════════════════════════════════════════════════════════
+  //  HEATMAP
+  // ══════════════════════════════════════════════════════════
+  var animating = [];
+  function animLoop() {
+    var now = performance.now(), keep = [];
+    animating.forEach(function (h) { if (h.draw(now)) keep.push(h); });
+    animating = keep;
+    if (animating.length) requestAnimationFrame(animLoop);
+  }
+  function wake(h) {
+    if (animating.indexOf(h) < 0) { animating.push(h); if (animating.length === 1) requestAnimationFrame(animLoop); }
+  }
+
+  function Heat(canvas, tip, onSelect) {
+    var st = { pb: [], ab: [], cells: {}, sel: null, hover: null, next: null, sigAt: 0, sig: null, running: false };
+    var self = { st: st };
+    var M = { l: 58, r: 8, t: 8, b: 40 };
+    var G = null;
+    function key(i, j) { return i + "," + j; }
+    self.reset = function (pb, ab) {
+      st.pb = pb; st.ab = ab; st.cells = {}; st.sig = null; st.next = [0, 0]; st.running = true;
+      if (st.sel && (st.sel[0] >= pb.length || st.sel[1] >= ab.length)) st.sel = null;
+      wake(self);
+    };
+    self.setCell = function (c) {
+      st.cells[key(c.cell[0], c.cell[1])] = { z: c.z, mi: c.mi, p: c.p, t0: performance.now() };
+      var i = c.cell[0], j = c.cell[1] + 1;
+      if (j >= st.ab.length) { j = 0; i++; }
+      st.next = i < st.pb.length ? [i, j] : null;
+      wake(self);
+    };
+    self.finish = function (res) {
+      st.res = res; st.sig = res.sig; st.sigAt = performance.now(); st.running = false; st.next = null;
+      wake(self);
+    };
+    self.stop = function () { st.running = false; st.next = null; wake(self); };
+    self.select = function (i, j, silent) {
+      st.sel = [i, j]; wake(self);
+      if (!silent && onSelect) onSelect(i, j);
+    };
+    function geom() {
+      var f = Kit.fit(canvas);
+      var nP = Math.max(1, st.pb.length), nA = Math.max(1, st.ab.length);
+      var narrow = f.w < 340;
+      M.l = narrow ? 46 : 58; M.b = 40;
+      var cw = (f.w - M.l - M.r) / nP, ch = (f.h - M.t - M.b) / nA;
+      G = { f: f, nP: nP, nA: nA, cw: cw, ch: ch };
+      return G;
+    }
+    function cellRect(i, j) {
+      // amplitude bands run upward: band 0 at the bottom
+      return { x: M.l + i * G.cw, y: M.t + (G.nA - 1 - j) * G.ch, w: G.cw, h: G.ch };
+    }
+    self.draw = function (now) {
+      now = now || performance.now();
+      var g = geom(), c = g.f.g, W = g.f.w, H = g.f.h, more = false;
+      var panel2 = Kit.css("--panel-2"), temper = Kit.css("--temper"), ink = Kit.css("--ink"),
+          dim = Kit.css("--dim"), rule = Kit.css("--rule"), just = Kit.css("--just"), ground = Kit.css("--ground");
+      c.clearRect(0, 0, W, H);
+      if (!st.pb.length) {
+        c.fillStyle = dim; c.font = "12px " + Kit.css("--mono"); c.textAlign = "center";
+        c.fillText("waiting for a record", W / 2, H / 2);
+        return false;
+      }
+      var gap = g.cw > 14 && g.ch > 14 ? 2 : 1;
+      for (var i = 0; i < g.nP; i++) for (var j = 0; j < g.nA; j++) {
+        var r = cellRect(i, j), cell = st.cells[key(i, j)];
+        c.fillStyle = panel2;
+        c.fillRect(r.x + gap / 2, r.y + gap / 2, r.w - gap, r.h - gap);
+        if (cell) {
+          var a = Math.min(1, (now - cell.t0) / 420);
+          if (a < 1) more = true;
+          var e = 1 - Math.pow(1 - a, 3);
+          c.globalAlpha = e;
+          c.fillStyle = mix(panel2, temper, zT(cell.z));
+          c.fillRect(r.x + gap / 2, r.y + gap / 2, r.w - gap, r.h - gap);
+          c.globalAlpha = 1;
+          if (r.w > 30 && r.h > 20) {
+            c.fillStyle = zT(cell.z) > 0.55 ? ground : (zT(cell.z) > 0.25 ? ink : dim);
+            c.font = (r.w > 46 ? 11 : 10) + "px " + Kit.css("--mono");
+            c.textAlign = "center"; c.textBaseline = "middle";
+            c.globalAlpha = e;
+            c.fillText(cell.z.toFixed(1), r.x + r.w / 2, r.y + r.h / 2);
+            c.globalAlpha = 1;
+          }
+        }
+        if (st.next && st.next[0] === i && st.next[1] === j && st.running) {
+          var pulse = Kit.reduced ? 0.6 : 0.35 + 0.35 * Math.sin(now / 160);
+          c.strokeStyle = Kit.alpha(temper, pulse); c.lineWidth = 1.5;
+          c.strokeRect(r.x + 2, r.y + 2, r.w - 4, r.h - 4);
+          more = true;
+        }
+      }
+      if (st.sig) {
+        var sa = Math.min(1, (now - st.sigAt) / 500);
+        if (sa < 1) more = true;
+        c.strokeStyle = ink; c.lineWidth = 2; c.globalAlpha = sa;
+        for (i = 0; i < g.nP; i++) for (j = 0; j < g.nA; j++) {
+          if (!st.sig[i][j]) continue;
+          var rs = cellRect(i, j);
+          c.strokeRect(rs.x + gap / 2 + 1, rs.y + gap / 2 + 1, rs.w - gap - 2, rs.h - gap - 2);
+        }
+        c.globalAlpha = 1;
+      }
+      if (st.sel && st.sel[0] < g.nP && st.sel[1] < g.nA) {
+        var rr = cellRect(st.sel[0], st.sel[1]);
+        c.strokeStyle = just; c.lineWidth = 2;
+        c.setLineDash([4, 3]);
+        c.strokeRect(rr.x + 4, rr.y + 4, rr.w - 8, rr.h - 8);
+        c.setLineDash([]);
+      }
+      // axes
+      c.fillStyle = dim; c.font = "10px " + Kit.css("--mono"); c.textBaseline = "middle";
+      c.textAlign = "right";
+      var everyA = Math.max(1, Math.ceil(13 / g.ch));
+      for (j = 0; j < g.nA; j += everyA) {
+        var ry = cellRect(0, j);
+        c.fillText(fmtBand(st.ab[j]), M.l - 5, ry.y + ry.h / 2);
+      }
+      c.textAlign = "center"; c.textBaseline = "top";
+      var labW = 0;
+      st.pb.forEach(function (b) { labW = Math.max(labW, c.measureText(fmtBand(b)).width); });
+      var everyP = Math.max(1, Math.ceil((labW + 8) / g.cw));
+      for (i = 0; i < g.nP; i += everyP) {
+        var rx = cellRect(i, 0);
+        c.fillText(fmtBand(st.pb[i]), rx.x + rx.w / 2, H - M.b + 5);
+      }
+      c.fillText("phase band (Hz)", M.l + (W - M.l - M.r) / 2, H - 14);
+      c.save(); c.translate(10, M.t + (H - M.t - M.b) / 2); c.rotate(-Math.PI / 2);
+      c.textBaseline = "middle"; c.fillText("amplitude band (Hz)", 0, 0); c.restore();
+      c.strokeStyle = rule; c.lineWidth = 1;
+      c.strokeRect(M.l + 0.5, M.t + 0.5, W - M.l - M.r - 1, H - M.t - M.b - 1);
+      return more || st.running;
+    };
+    function hit(ev) {
+      if (!G || !st.pb.length) return null;
+      var b = canvas.getBoundingClientRect();
+      var x = ev.clientX - b.left, y = ev.clientY - b.top;
+      var i = Math.floor((x - M.l) / G.cw), jr = Math.floor((y - M.t) / G.ch);
+      if (i < 0 || i >= G.nP || jr < 0 || jr >= G.nA) return null;
+      return { i: i, j: G.nA - 1 - jr, x: x, y: y };
+    }
+    self.describe = function (i, j) {
+      var cell = st.cells[key(i, j)];
+      var s = "phase " + fmtBand(st.pb[i]) + " Hz × amp " + fmtBand(st.ab[j]) + " Hz";
+      if (!cell) return s + ", not yet measured";
+      return s + ", z " + cell.z.toFixed(2) + ", MI " + cell.mi.toExponential(2) + ", p " + fmtP(cell.p) +
+        (st.sig ? (st.sig[i][j] ? ", survives FDR" : ", does not survive FDR") : "");
+    };
+    canvas.addEventListener("pointermove", function (ev) {
+      var h = hit(ev);
+      if (!h) { tip.style.display = "none"; return; }
+      var cell = st.cells[key(h.i, h.j)];
+      tip.innerHTML = "<b>phase " + fmtBand(st.pb[h.i]) + " Hz</b><br><b>amp " + fmtBand(st.ab[h.j]) + " Hz</b><br>" +
+        (cell ? "z " + cell.z.toFixed(2) + " &middot; p " + fmtP(cell.p) + "<br>MI " + cell.mi.toExponential(2) +
+          (st.sig && st.sig[h.i][h.j] ? "<br>survives FDR" : "") : "not yet measured");
+      tip.style.display = "block";
+      var bw = canvas.clientWidth, tw = tip.offsetWidth;
+      var left = h.x + 14; if (left + tw > bw) left = Math.max(0, h.x - tw - 10);
+      tip.style.left = left + "px"; tip.style.top = Math.max(0, h.y - 10) + "px";
+    });
+    canvas.addEventListener("pointerleave", function () { tip.style.display = "none"; });
+    canvas.addEventListener("click", function (ev) { var h = hit(ev); if (h) self.select(h.i, h.j); });
+    canvas.addEventListener("keydown", function (ev) {
+      if (!st.pb.length) return;
+      var s = st.sel ? st.sel.slice() : [0, 0], moved = true;
+      if (ev.key === "ArrowLeft") s[0] = Math.max(0, s[0] - 1);
+      else if (ev.key === "ArrowRight") s[0] = Math.min(st.pb.length - 1, s[0] + 1);
+      else if (ev.key === "ArrowUp") s[1] = Math.min(st.ab.length - 1, s[1] + 1);
+      else if (ev.key === "ArrowDown") s[1] = Math.max(0, s[1] - 1);
+      else if (ev.key === "Enter" || ev.key === " ") moved = true;
+      else moved = false;
+      if (moved) { ev.preventDefault(); self.select(s[0], s[1]); }
+    });
+    Kit.onTheme(function () { self.draw(); });
+    return self;
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  PHASE PROFILE (18 bins, as percent above or below flat)
+  // ══════════════════════════════════════════════════════════
+  function drawProfile(canvas, prof, significant) {
+    var f = Kit.fit(canvas), c = f.g, W = f.w, H = f.h;
+    var dim = Kit.css("--dim"), rule = Kit.css("--rule"), temper = Kit.css("--temper"), just = Kit.css("--just"), ink = Kit.css("--ink");
+    c.clearRect(0, 0, W, H);
+    var L = 44, R = 8, T = 22, B = 26, pw = W - L - R, ph = H - T - B;
+    c.font = "10px " + Kit.css("--mono"); c.fillStyle = dim;
+    if (!prof) {
+      c.textAlign = "center"; c.textBaseline = "middle";
+      c.fillText("pick a cell", L + pw / 2, T + ph / 2);
+      return;
+    }
+    var n = prof.length, dev = [], mx = 0.02;
+    for (var b = 0; b < n; b++) { dev.push(prof[b] * n - 1); mx = Math.max(mx, Math.abs(dev[b])); }
+    mx *= 1.15;
+    var y0 = T + ph / 2, sc = (ph / 2) / mx;
+    // the slow wave for orientation: phase 0 is its crest
+    c.strokeStyle = Kit.alpha(dim, 0.7); c.lineWidth = 1;
+    c.beginPath();
+    for (var k = 0; k <= 72; k++) {
+      var xx = L + pw * k / 72, phs = -Math.PI + 2 * Math.PI * k / 72;
+      var yy = 4 + 7 - 7 * Math.cos(phs);
+      if (k) c.lineTo(xx, yy); else c.moveTo(xx, yy);
+    }
+    c.stroke();
+    var bw = pw / n, gap = bw > 8 ? 2 : 1;
+    for (b = 0; b < n; b++) {
+      var h = dev[b] * sc;
+      c.fillStyle = dev[b] >= 0 ? (significant ? temper : Kit.alpha(temper, 0.55)) : (significant ? just : Kit.alpha(just, 0.55));
+      var x = L + b * bw + gap / 2;
+      if (h >= 0) c.fillRect(x, y0 - h, bw - gap, h);
+      else c.fillRect(x, y0, bw - gap, -h);
+    }
+    c.strokeStyle = rule; c.beginPath(); c.moveTo(L, y0 + 0.5); c.lineTo(L + pw, y0 + 0.5); c.stroke();
+    c.fillStyle = dim; c.textAlign = "right"; c.textBaseline = "middle";
+    var tick = mx > 0.3 ? 0.2 : mx > 0.12 ? 0.1 : mx > 0.06 ? 0.05 : 0.02;
+    for (var tv = -Math.floor(mx / tick) * tick; tv <= mx + 1e-9; tv += tick) {
+      var ty = y0 - tv * sc;
+      if (ty < T - 2 || ty > T + ph + 2) continue;
+      c.fillText((tv > 0 ? "+" : "") + Math.round(tv * 100) + "%", L - 6, ty);
+    }
+    c.textAlign = "center"; c.textBaseline = "top";
+    [-180, -90, 0, 90, 180].forEach(function (d) {
+      c.fillText(d + "°", L + pw * (d + 180) / 360, H - B + 6);
+    });
+    c.fillStyle = ink; c.textAlign = "left"; c.textBaseline = "top";
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  SECTION 01: THE BANK
+  // ══════════════════════════════════════════════════════════
+  var PB = [[0.30, 0.46], [0.46, 0.61], [0.61, 0.76], [0.76, 1.00]];
+  var AB = [[4.0, 6.0], [6.2, 7.8], [7.5, 9.4]];
+
+  (function chips() {
+    var order = IV.map(function (v, i) { return i; }).sort(function (a, b) { return IV[a].beat - IV[b].beat; });
+    var html = "";
+    order.forEach(function (i) {
+      var v = IV[i], cls = v.beat < 1 ? "slow" : v.beat > 4 ? "fast" : "";
+      html += '<span class="chip ' + cls + '">' + v.name + " " + v.beat.toFixed(2) + " Hz</span>";
+    });
+    $("det-chips").innerHTML = html;
+    $("band-note").innerHTML = "Blue chips supply phase, amber ones amplitude. Phase bands sit on the slow detunings (" +
+      PB.slice(0, 3).map(fmtBand).join(", ") + " Hz) plus " + fmtBand(PB[3]) +
+      " Hz, a band with no oscillator in it, as a control. Amplitude bands (" + AB.map(fmtBand).join(", ") +
+      " Hz) each hold a cluster of fast detunings with room for the sidebands a 0.4 to 0.7 Hz modulation puts on them. " +
+      "The two middle detunings, near 2.2 and 2.8 Hz, are left out of both.";
+  })();
+
+  var bankProfile = { res: null, which: null };
+  var heatAdd = Heat($("heat-add"), $("tip-add"), function (i, j) { pickBank("add", i, j); });
+  var heatMul = Heat($("heat-mul"), $("tip-mul"), function (i, j) { pickBank("mul", i, j); });
+  var bankRes = { add: null, mul: null };
+
+  function pickBank(which, i, j) {
+    var other = which === "add" ? heatMul : heatAdd, h = which === "add" ? heatAdd : heatMul;
+    other.st.sel = null; other.draw();
+    var res = bankRes[which];
+    var name = which === "add" ? "Additive" : "Multiplicative";
+    if (!res) { $("bank-cell").textContent = name + ": " + h.describe(i, j) + "."; drawProfile($("bank-prof"), null); return; }
+    drawProfile($("bank-prof"), res.meanBinned[i][j], res.sig[i][j]);
+    $("bank-cell").innerHTML = "<b>" + name + "</b>, phase " + fmtBand(PB[i]) + " Hz &times; amplitude " + fmtBand(AB[j]) + " Hz<br>" +
+      "MI <b>" + res.mi[i][j].toExponential(2) + "</b> against a surrogate mean of " + res.surrMean[i][j].toExponential(2) +
+      " (sd " + res.surrSd[i][j].toExponential(2) + ")<br>z <b>" + res.z[i][j].toFixed(2) + "</b>, p " + fmtP(res.p[i][j]) +
+      ", " + (res.sig[i][j] ? "<b>survives</b>" : "does not survive") + " the false-discovery correction<br>" +
+      "Bars above the line: phases of the slow wave where the fast band runs louder than average. The curve on top is the slow wave itself; 0&deg; is its crest.";
+    bankProfile.which = which;
+  }
+
+  function bankSignalGen(K, mode, secs) {
+    return (function* () {
+      var bench = Kit.bench(OMEGA, { mode: mode });
+      var Lst = WASH + secs * FS;
+      var sim = bench.makeSim(K, 1, Kit.makeInput(Lst));
+      while (!sim.step(2500)) yield 0;
+      var x = new Float64Array(secs * FS), N = bench.N, NF = bench.NF;
+      for (var t = 0; t < x.length; t++) {
+        var s = 0, b = (t + WASH) * NF;
+        for (var j = 0; j < N; j++) s += sim.X[b + j];
+        x[t] = s;
+      }
+      return x;
+    })();
+  }
+
+  // run a comodulogram generator, feeding finished cells to a heatmap
+  function* intoHeat(gen, heat, prog) {
+    var r;
+    while (!(r = gen.next()).done) {
+      var v = r.value;
+      if (v && typeof v === "object") { if (heat) heat.setCell(v); prog(v.progress); }
+      else prog(v);
+      yield 0;
+    }
+    if (heat) heat.finish(r.value);
+    return r.value;
+  }
+
+  var bankCancel = null;
+  function setBusy(busy) {
+    ["bank-run", "bank-sweep", "bank-long"].forEach(function (id) { $(id).disabled = busy; });
+  }
+  function maxCell(res) {
+    var best = { z: -Infinity, i: 0, j: 0 }, n = 0;
+    for (var i = 0; i < res.z.length; i++) for (var j = 0; j < res.z[i].length; j++) {
+      if (res.z[i][j] > best.z) best = { z: res.z[i][j], i: i, j: j };
+      if (res.sig[i][j]) n++;
+    }
+    best.nsig = n; best.mi = res.mi[best.i][best.j]; best.mean = res.surrMean[best.i][best.j]; best.p = res.p[best.i][best.j];
+    return best;
+  }
+
+  function runBank() {
+    if (bankCancel) bankCancel();
+    var K = +$("k-slider").value, secs = +$("len-sel").value, sur = $("sur-sel").value;
+    bankRes = { add: null, mul: null };
+    heatAdd.reset(PB, AB); heatMul.reset(PB, AB);
+    $("add-max").textContent = ""; $("mul-max").textContent = "";
+    setBusy(true);
+    var meter = $("bank-meter"), status = $("bank-status");
+    var t0 = performance.now();
+    var gen = (function* () {
+      var out = {};
+      var parts = [["additive", heatAdd, "add"], ["multiplicative", heatMul, "mul"]];
+      for (var p = 0; p < 2; p++) {
+        var mode = parts[p][0], heat = parts[p][1], key = parts[p][2];
+        status.textContent = "Running the " + mode + " bank for " + secs + " s of signal…";
+        var x = yield* bankSignalGen(K, mode, secs);
+        status.textContent = "Comodulogram of the " + mode + " bank: " + PB.length * AB.length + " cells, " + BANK_NS + " surrogates each…";
+        var res = yield* intoHeat(comodulogramGen(x, FS, PB, AB, BANK_NS, 1, { surrogate: sur }), heat, function (v) {
+          meter.style.width = (100 * (p + Math.min(1, v)) / 2).toFixed(1) + "%";
+        });
+        bankRes[key] = res; out[key] = res;
+        var mc = maxCell(res);
+        $(key + "-max").innerHTML = "max z <b class=\"num\">" + mc.z.toFixed(2) + "</b> &middot; " + mc.nsig + " cell" + (mc.nsig === 1 ? "" : "s");
+      }
+      return out;
+    })();
+    bankCancel = Kit.drive(gen, function (out) {
+      bankCancel = null; setBusy(false);
+      meter.style.width = "100%";
+      status.textContent = "Done in " + ((performance.now() - t0) / 1000).toFixed(1) + " s.";
+      writeFinding(K, secs, sur, out);
+      // show the multiplicative bank's strongest cell
+      var mc = maxCell(out.mul);
+      heatMul.select(mc.i, mc.j);
+    }, null, 10);
+  }
+
+  function writeFinding(K, secs, sur, out) {
+    var a = maxCell(out.add), m = maxCell(out.mul);
+    var surName = sur === "blocks" ? "block-shuffle" : "circular-shift";
+    var html = "<p><strong>Measured just now</strong>, K = " + K.toFixed(1) + ", " + secs + " s of signal, " + BANK_NS + " " + surName +
+      " surrogates a cell. The additive bank's largest z is <b class=\"num\">" + a.z.toFixed(2) + "</b> and " +
+      (a.nsig ? a.nsig + " of its 12 cells survive" : "none of its 12 cells survive") + " the false-discovery correction. " +
+      "The multiplicative bank's largest z is <b class=\"num\">" + m.z.toFixed(2) + "</b>, at phase " + fmtBand(PB[m.i]) + " Hz and amplitude " + fmtBand(AB[m.j]) +
+      " Hz, and " + (m.nsig ? m.nsig + " of its cells survive." : "none of its cells survive.") + "</p>";
+    var verdict;
+    if (!a.nsig && m.nsig) {
+      verdict = "That is the answer the physics predicts. Addition leaves the grid dark; multiplication lights it. " +
+        "The multiplicative bank's best cell has a modulation index of " + m.mi.toExponential(2) + " against a surrogate average of " + m.mean.toExponential(2) +
+        (secs < 600 ? ". It is a small effect, and at " + secs + " seconds it is barely clear of chance. Give it 600 seconds and see what a longer record does to it." :
+          ". At this length the coupling stands well clear of chance.");
+    } else if (!a.nsig && !m.nsig) {
+      verdict = "Neither bank lights up. For the additive bank that is expected. For the multiplicative one it means the effect is too small for this record: " +
+        "its best cell's index is " + m.mi.toExponential(2) + " against a surrogate average of " + m.mean.toExponential(2) + ". " +
+        (K < 4 ? "Turn the coupling up; the gain swing scales with K." : secs < 600 ? "Run a longer record; the note's warning about power applies here first." : "This coupling is too weak to see in 600 seconds.");
+    } else if (a.nsig && !m.nsig) {
+      verdict = "The additive bank lit and the multiplicative one did not. Treat that additive cell as a false light until a longer record or block shuffling confirms it; read the footnote on calibration.";
+    } else {
+      verdict = "Both banks light. The multiplicative one should; the additive one should not, so its cells are suspects. " +
+        (sur === "shift" ? "Switch to block shuffling, or run 600 seconds, and see whether they survive." : "Run 600 seconds and see whether they survive.");
+    }
+    html += "<p>" + verdict + "</p>";
+    $("bank-finding").innerHTML = html;
+  }
+
+  // ── the sweep ──
+  var SWEEP_K = [0, 0.12, 0.5, 1, 2, 3, 4, 5, 6, 7, 8];
+  var sweepData = null;
+  function runSweep() {
+    if (bankCancel) bankCancel();
+    var secs = +$("len-sel").value, sur = $("sur-sel").value;
+    setBusy(true);
+    $("sweep-wrap").hidden = false;
+    sweepData = { secs: secs, sur: sur, rows: [] };
+    drawSweep();
+    var meter = $("bank-meter"), status = $("bank-status"), total = SWEEP_K.length * 2;
+    var gen = (function* () {
+      for (var k = 0; k < SWEEP_K.length; k++) {
+        var row = { K: SWEEP_K[k] };
+        var modes = ["additive", "multiplicative"];
+        for (var p = 0; p < 2; p++) {
+          status.textContent = "Sweep: " + modes[p] + " bank at K = " + SWEEP_K[k] + " (" + secs + " s, " + SWEEP_NS + " surrogates a cell)…";
+          var x = yield* bankSignalGen(SWEEP_K[k], modes[p], secs);
+          var done = k * 2 + p;
+          var res = yield* intoHeat(comodulogramGen(x, FS, PB, AB, SWEEP_NS, 1, { surrogate: sur }), null, function (v) {
+            meter.style.width = (100 * (done + Math.min(1, v)) / total).toFixed(1) + "%";
+          });
+          var mc = maxCell(res);
+          row[p ? "mul" : "add"] = { z: mc.z, nsig: mc.nsig };
+        }
+        sweepData.rows.push(row);
+        drawSweep(); sweepTable();
+      }
+    })();
+    bankCancel = Kit.drive(gen, function () {
+      bankCancel = null; setBusy(false); meter.style.width = "100%";
+      var addLit = sweepData.rows.filter(function (r) { return r.add.nsig; }).map(function (r) { return r.K; });
+      var mulLit = sweepData.rows.filter(function (r) { return r.mul.nsig; }).map(function (r) { return r.K; });
+      status.textContent = "Sweep done. Additive cells surviving the correction at K = " + (addLit.length ? addLit.join(", ") : "none") +
+        "; multiplicative at K = " + (mulLit.length ? mulLit.join(", ") : "none") + ".";
+    }, null, 10);
+  }
+  function sweepTable() {
+    var tb = $("sweep-table").querySelector("tbody"), html = "";
+    sweepData.rows.forEach(function (r) {
+      html += "<tr><td>" + r.K + "</td><td>" + r.add.z.toFixed(2) + "</td><td>" + r.add.nsig + "</td><td>" + r.mul.z.toFixed(2) + "</td><td>" + r.mul.nsig + "</td></tr>";
+    });
+    tb.innerHTML = html;
+  }
+  function drawSweep() {
+    var cv = $("sweep");
+    if (!sweepData || $("sweep-wrap").hidden) return;
+    var f = Kit.fit(cv), c = f.g, W = f.w, H = f.h;
+    var dim = Kit.css("--dim"), rule = Kit.css("--rule"), just = Kit.css("--just"), temper = Kit.css("--temper"), panel = Kit.css("--panel");
+    c.clearRect(0, 0, W, H);
+    var L = 36, R = 92, T = 12, B = 30, pw = W - L - R, ph = H - T - B;
+    if (W < 420) R = 16;
+    pw = W - L - R;
+    var ymax = 6;
+    sweepData.rows.forEach(function (r) { ymax = Math.max(ymax, r.add.z, r.mul.z); });
+    ymax = Math.ceil(ymax / 2) * 2;
+    var X = function (k) { return L + pw * k / 8; }, Y = function (z) { return T + ph * (1 - Math.max(-1, z) / ymax); };
+    c.font = "10px " + Kit.css("--mono"); c.fillStyle = dim; c.textAlign = "right"; c.textBaseline = "middle";
+    c.strokeStyle = rule; c.lineWidth = 1;
+    for (var z = 0; z <= ymax; z += 2) {
+      c.beginPath(); c.moveTo(L, Math.round(Y(z)) + 0.5); c.lineTo(L + pw, Math.round(Y(z)) + 0.5); c.stroke();
+      c.fillText(z, L - 6, Y(z));
+    }
+    c.textAlign = "center"; c.textBaseline = "top";
+    for (var k = 0; k <= 8; k += 2) c.fillText("K " + k, X(k), H - B + 8);
+    [["add", just, "additive"], ["mul", temper, "multiplicative"]].forEach(function (s) {
+      var rows = sweepData.rows;
+      if (!rows.length) return;
+      c.strokeStyle = s[1]; c.lineWidth = 2; c.beginPath();
+      rows.forEach(function (r, i) { var x = X(r.K), y = Y(r[s[0]].z); if (i) c.lineTo(x, y); else c.moveTo(x, y); });
+      c.stroke();
+      rows.forEach(function (r) {
+        var x = X(r.K), y = Y(r[s[0]].z);
+        c.beginPath(); c.arc(x, y, 4.5, 0, 2 * Math.PI);
+        c.fillStyle = r[s[0]].nsig ? s[1] : panel; c.fill();
+        c.lineWidth = 2; c.strokeStyle = s[1]; c.stroke();
+      });
+      if (R > 40) {
+        var last = rows[rows.length - 1];
+        c.fillStyle = dim; c.textAlign = "left"; c.textBaseline = "middle";
+        c.fillText(s[2], X(last.K) + 10, Y(last[s[0]].z) + (s[0] === "add" ? 8 : -8));
+        c.textAlign = "center"; c.textBaseline = "top";
+      }
+    });
+  }
+  Kit.onTheme(drawSweep);
+
+  $("k-slider").addEventListener("input", function () { $("k-read").textContent = (+this.value).toFixed(1); });
+  $("k-slider").addEventListener("change", runBank);
+  $("len-sel").addEventListener("change", runBank);
+  $("sur-sel").addEventListener("change", runBank);
+  $("bank-run").addEventListener("click", runBank);
+  $("bank-sweep").addEventListener("click", runSweep);
+  $("bank-long").addEventListener("click", function () { $("len-sel").value = "600"; runBank(); });
+  Kit.onTheme(function () {
+    if (bankProfile.which && bankRes[bankProfile.which]) {
+      var h = bankProfile.which === "add" ? heatAdd : heatMul;
+      if (h.st.sel) pickBank(bankProfile.which, h.st.sel[0], h.st.sel[1]);
+    } else drawProfile($("bank-prof"), null);
+  });
+
+  // ══════════════════════════════════════════════════════════
+  //  SECTION 02: BRING YOUR OWN PLANT
+  // ══════════════════════════════════════════════════════════
+  var byo = { x: null, fs: 50, name: "", y: null, despike: null, resA: null, resB: null, pb: null, ab: null, cancel: null, which: "a" };
+  var heatA = Heat($("heat-byo-a"), $("tip-byo-a"), function (i, j) { pickByo("a", i, j); });
+  var heatB = Heat($("heat-byo-b"), $("tip-byo-b"), function (i, j) { pickByo("b", i, j); });
+
+  function logEdges(lo, hi, n) {
+    var e = [];
+    for (var k = 0; k <= n; k++) e.push(lo * Math.pow(hi / lo, k / n));
+    return e;
+  }
+  // phase bands: contiguous, log-spaced. amplitude bands: centres
+  // log-spaced from lo to hi, each at least minW wide (sidebands).
+  function makeBands() {
+    var fs = +$("f-fs").value, nyq = fs / 2;
+    var pl = +$("p-lo").value, phh = +$("p-hi").value, pn = Math.round(+$("p-n").value);
+    var al = +$("a-lo").value, ah = +$("a-hi").value, an = Math.round(+$("a-n").value);
+    var err = null;
+    if (!(fs > 0)) err = "The sample rate has to be a positive number.";
+    else if (!(pl > 0 && phh > pl)) err = "Phase bands need 0 < from < to.";
+    else if (!(al > 0 && ah >= al)) err = "Amplitude bands need 0 < from ≤ to.";
+    else if (!(pn >= 1 && pn <= 16 && an >= 1 && an <= 16)) err = "Use 1 to 16 bands of each kind.";
+    if (err) return { err: err };
+    var pe = logEdges(pl, phh, pn), pb = [];
+    for (var k = 0; k < pn; k++) pb.push([pe[k], pe[k + 1]]);
+    var minW = 2 * phh, ab = [], widened = false, clipped = false;
+    var r = an > 1 ? Math.pow(ah / al, 1 / (an - 1)) : 1.5;
+    for (k = 0; k < an; k++) {
+      var cen = an > 1 ? al * Math.pow(ah / al, k / (an - 1)) : al;
+      var w = cen * (Math.sqrt(r) - 1 / Math.sqrt(r));
+      if (w < minW) { w = minW; widened = true; }
+      var lo = cen - w / 2, hi = cen + w / 2;
+      if (hi > 0.9 * nyq) { hi = 0.9 * nyq; clipped = true; }
+      if (lo <= phh) { lo = phh * 1.05; }
+      if (hi <= lo) return { err: "An amplitude band near " + fmtHz(cen) + " Hz does not fit between the phase bands and 90% of the Nyquist frequency (" + fmtHz(0.9 * nyq) + " Hz)." };
+      ab.push([lo, hi]);
+    }
+    if (phh >= 0.9 * nyq) return { err: "The phase bands run past 90% of the Nyquist frequency." };
+    return { pb: pb, ab: ab, widened: widened, clipped: clipped, minW: minW };
+  }
+  function showBands() {
+    var b = makeBands(), el = $("byo-bands");
+    if (b.err) { el.textContent = b.err; el.style.color = Kit.css("--rose"); return b; }
+    el.style.color = "";
+    var t = "Phase: " + b.pb.map(fmtBand).join(", ") + " Hz. Amplitude: " + b.ab.map(fmtBand).join(", ") + " Hz.";
+    if (b.widened) t += " Amplitude bands widened to at least " + fmtHz(b.minW) + " Hz, twice the top phase edge, so the coupling's sidebands fit.";
+    if (b.clipped) t += " The top amplitude band is cut at 90% of Nyquist.";
+    el.textContent = t;
+    return b;
+  }
+  ["f-fs", "p-lo", "p-hi", "p-n", "a-lo", "a-hi", "a-n"].forEach(function (id) { $(id).addEventListener("input", showBands); });
+
+  // ── reading a file ──
+  function parseText(text) {
+    var lines = text.split(/\r\n|\n|\r/), sample = [], i;
+    for (i = 0; i < lines.length && sample.length < 30; i++) {
+      var ln = lines[i].trim();
+      if (ln && ln[0] !== "#" && ln[0] !== "%") sample.push(ln);
+    }
+    if (!sample.length) return { err: "The file is empty." };
+    var cands = [",", "\t", ";", "|"], delim = null, best = 0;
+    cands.forEach(function (d) {
+      var counts = sample.slice(-20).map(function (l) { return l.split(d).length - 1; });
+      var mn = Math.min.apply(null, counts);
+      if (mn > best) { best = mn; delim = d; }
+    });
+    var decimalComma = delim === ";" && /\d,\d/.test(sample.join(" "));
+    var split = delim ? function (l) { return l.split(delim); } : function (l) { return l.trim().split(/\s+/); };
+    var cols = null, rows = [], skipped = 0, header = 0;
+    for (i = 0; i < lines.length; i++) {
+      var l = lines[i].trim();
+      if (!l || l[0] === "#" || l[0] === "%") continue;
+      var parts = split(l).map(function (s) {
+        s = s.trim().replace(/^"|"$/g, "");
+        if (decimalComma) s = s.replace(",", ".");
+        return s === "" ? NaN : Number(s);
+      });
+      if (parts.some(function (v) { return !isFinite(v); })) {
+        if (!rows.length) header++; else skipped++;
+        continue;
+      }
+      if (cols === null) cols = parts.length;
+      if (parts.length < cols) { skipped++; continue; }
+      rows.push(parts);
+      if (rows.length > MAX_SAMPLES) return { err: "More than 2^21 (" + MAX_SAMPLES.toLocaleString() + ") samples. Decimate it first: keep every " + Math.ceil(lines.length / MAX_SAMPLES) + "th sample after a low-pass filter, and divide the sample rate by the same number." };
+    }
+    if (rows.length < 64) return { err: "Found only " + rows.length + " numeric rows; need at least 64." };
+    var x = new Float64Array(rows.length), fs = null, note = "";
+    if (cols >= 2) {
+      var vcol = cols - 1, mono = true;
+      for (i = 1; i < Math.min(rows.length, 2000); i++) if (!(rows[i][0] > rows[i - 1][0])) { mono = false; break; }
+      if (mono) {
+        var dts = [];
+        for (i = 1; i < Math.min(rows.length, 4001); i++) dts.push(rows[i][0] - rows[i - 1][0]);
+        dts.sort(function (a, b) { return a - b; });
+        var dt = dts[dts.length >> 1];
+        if (dt > 0) fs = 1 / dt;
+        note = "first column read as time (seconds), sample rate set from its median step";
+        vcol = 1;
+      } else note = "column " + (vcol + 1) + " of " + cols + " read as the values";
+      for (i = 0; i < rows.length; i++) x[i] = rows[i][vcol];
+    } else for (i = 0; i < rows.length; i++) x[i] = rows[i][0];
+    return { x: x, fs: fs, delim: delim, header: header, skipped: skipped, note: note };
+  }
+
+  $("f-in").addEventListener("change", function () {
+    var file = this.files && this.files[0];
+    if (!file) return;
+    var st = $("byo-file");
+    if (file.size > 200 * 1024 * 1024) { st.textContent = "That file is over 200 MB. Decimate it first."; st.className = "status warn"; return; }
+    st.className = "status"; st.textContent = "Reading " + file.name + "…";
+    var rd = new FileReader();
+    rd.onload = function () {
+      var p = parseText(String(rd.result));
+      if (p.err) { st.textContent = p.err; st.className = "status warn"; return; }
+      if (p.fs) $("f-fs").value = +p.fs.toPrecision(6);
+      var fs = +$("f-fs").value;
+      // the note's plant bands, if the record can carry them
+      var dur = p.x.length / fs;
+      if (dur > 3600 && fs >= 60) {
+        $("p-lo").value = 0.003; $("p-hi").value = 0.3; $("p-n").value = 6;
+        $("a-lo").value = 2; $("a-hi").value = Math.min(25, 0.4 * fs); $("a-n").value = 6;
+      }
+      loadSignal(p.x, fs, file.name, "Loaded " + file.name + ": " + p.x.length.toLocaleString() + " samples" +
+        (p.header ? ", " + p.header + " header line" + (p.header > 1 ? "s" : "") + " skipped" : "") +
+        (p.skipped ? ", " + p.skipped + " unreadable rows dropped" : "") +
+        ", delimiter " + (p.delim === "\t" ? "tab" : p.delim ? "“" + p.delim + "”" : "whitespace") +
+        (p.note ? "; " + p.note : "") + ".");
+    };
+    rd.onerror = function () { st.textContent = "Could not read the file."; st.className = "status warn"; };
+    rd.readAsText(file);
+  });
+
+  function loadSignal(x, fs, name, msg) {
+    byo.x = x; byo.fs = fs; byo.name = name;
+    var b = showBands(), st = $("byo-file"), dur = x.length / fs;
+    var cyc = b.pb ? dur * b.pb[0][0] : 0;
+    st.className = "status";
+    st.textContent = msg + " " + dur.toFixed(dur < 100 ? 1 : 0) + " s at " + fmtHz(fs) + " Hz" +
+      (b.pb ? "; about " + Math.round(cyc) + " cycles of the slowest phase band" + (cyc < 50 ? ", fewer than the fifty the note calls marginal" : "") : "") + ".";
+    if (b.pb && cyc < 50) st.className = "status warn";
+  }
+
+  function gaussNoise(L, seed) {
+    var rng = pacRng(seed), x = new Float64Array(L);
+    for (var i = 0; i < L; i++) x[i] = gaussFrom(rng);
+    return x;
+  }
+  function testBands() {
+    $("f-fs").value = 50; $("p-lo").value = 0.3; $("p-hi").value = 1.2; $("p-n").value = 4;
+    $("a-lo").value = 3; $("a-hi").value = 12; $("a-n").value = 5;
+  }
+  var TEST_SECS = 240;
+  $("t-coupled").addEventListener("click", function () {
+    testBands(); $("d-on").checked = false;
+    loadSignal(synthPAC(50, TEST_SECS, 0.8, 21), 50, "coupled test signal",
+      "A 0.5 Hz rhythm plus a 6 Hz one whose amplitude swings 80% with the slow phase, plus noise.");
+    runByo();
+  });
+  $("t-spiky").addEventListener("click", function () {
+    testBands(); $("d-on").checked = true;
+    loadSignal(synthPAC(50, TEST_SECS, 0, 22, { spiky: true }), 50, "spiky uncoupled test signal",
+      "A 0.5 Hz wave with a sharp spike each cycle, plus a 6 Hz rhythm that ignores it completely, plus noise.");
+    runByo();
+  });
+  $("t-noise").addEventListener("click", function () {
+    testBands(); $("d-on").checked = false;
+    loadSignal(gaussNoise(50 * TEST_SECS, 23), 50, "pure noise", "White Gaussian noise and nothing else.");
+    runByo();
+  });
+
+  function runByo() {
+    var st = $("byo-status");
+    if (!byo.x) { st.textContent = "Load a record or a test signal first."; st.className = "status warn"; return; }
+    var b = showBands();
+    if (b.err) { st.textContent = b.err; st.className = "status warn"; return; }
+    var nS = Math.max(20, Math.min(5000, Math.round(+$("f-nsurr").value) || 200));
+    var sur = $("f-sur").value, fs = +$("f-fs").value;
+    if (byo.x.length > MAX_SAMPLES) { st.textContent = "Too many samples; decimate to under 2^21."; st.className = "status warn"; return; }
+    if (byo.cancel) byo.cancel();
+    st.className = "status";
+    var useD = $("d-on").checked;
+    byo.pb = b.pb; byo.ab = b.ab; byo.fs = fs; byo.resA = null; byo.resB = null; byo.y = null; byo.nS = nS; byo.sur = sur;
+    heatA.reset(b.pb, b.ab);
+    $("byo-b-col").hidden = !useD;
+    if (useD) heatB.reset(b.pb, b.ab);
+    $("byo-a-max").textContent = ""; $("byo-b-max").textContent = "";
+    $("byo-dl").setAttribute("aria-disabled", "true");
+    $("byo-run").disabled = true;
+    var m = b.pb.length * b.ab.length;
+    var warnN = nS < 20 * m ? " With " + nS + " surrogates the smallest possible p is " + (1 / (nS + 1)).toFixed(4) + ", which Benjamini–Hochberg over " + m + " cells may never let through; use about " + (20 * m) + "." : "";
+    var meter = $("byo-meter"), t0 = performance.now(), parts = useD ? 2 : 1;
+    var gen = (function* () {
+      st.textContent = "Comodulogram, " + m + " cells, " + nS + " surrogates each…" + warnN;
+      byo.resA = yield* intoHeat(comodulogramGen(byo.x, fs, b.pb, b.ab, nS, 1, { surrogate: sur }), heatA, function (v) {
+        meter.style.width = (100 * Math.min(1, v) / parts).toFixed(1) + "%";
+      });
+      var ma = maxCell(byo.resA);
+      $("byo-a-max").innerHTML = "max z <b class=\"num\">" + ma.z.toFixed(2) + "</b> &middot; " + ma.nsig + " cell" + (ma.nsig === 1 ? "" : "s");
+      if (useD) {
+        st.textContent = "Removing spikes…";
+        var d = yield* despikeSteps(byo.x, fs, +$("d-k").value || 4, +$("d-win").value || 1, $("d-meth").value);
+        byo.y = d.y; byo.despike = d;
+        st.textContent = "Spike-removed copy (" + d.spikes + (d.method === "clip" ? " samples clipped" : " spikes subtracted") + "): comodulogram…";
+        byo.resB = yield* intoHeat(comodulogramGen(d.y, fs, b.pb, b.ab, nS, 1, { surrogate: sur }), heatB, function (v) {
+          meter.style.width = (50 + 50 * Math.min(1, v)).toFixed(1) + "%";
+        });
+        var mb = maxCell(byo.resB);
+        $("byo-b-max").innerHTML = "max z <b class=\"num\">" + mb.z.toFixed(2) + "</b> &middot; " + mb.nsig + " cell" + (mb.nsig === 1 ? "" : "s");
+      }
+    })();
+    byo.cancel = Kit.drive(gen, function () {
+      byo.cancel = null; $("byo-run").disabled = false; meter.style.width = "100%";
+      var ma = maxCell(byo.resA), txt = byo.name + ": largest z " + ma.z.toFixed(2) + ", " + ma.nsig + " of " + m + " cells survive the correction";
+      if (byo.resB) {
+        var mb = maxCell(byo.resB);
+        txt += "; after spike removal (" + byo.despike.spikes + (byo.despike.method === "clip" ? " samples clipped" : " spikes") + ") largest z " + mb.z.toFixed(2) + ", " + mb.nsig + " survive";
+        if (ma.nsig && !mb.nsig) txt += ". The coupling did not survive the control: treat it as the spike's own harmonics";
+        else if (ma.nsig && mb.nsig) txt += ". Some cells survive the control; look at the trace before believing them";
+      }
+      st.textContent = txt + ". (" + ((performance.now() - t0) / 1000).toFixed(1) + " s)" + warnN;
+      makeCsv();
+      var mc = maxCell(byo.resA);
+      heatA.select(mc.i, mc.j);
+    }, null, 10);
+  }
+  $("byo-run").addEventListener("click", runByo);
+
+  function pickByo(which, i, j) {
+    var h = which === "a" ? heatA : heatB, other = which === "a" ? heatB : heatA;
+    other.st.sel = null; other.draw();
+    byo.which = which; byo.selCell = [i, j];
+    var res = which === "a" ? byo.resA : byo.resB;
+    if (!res) { $("byo-cell").textContent = h.describe(i, j) + "."; drawProfile($("byo-prof"), null); return; }
+    drawProfile($("byo-prof"), res.meanBinned[i][j], res.sig[i][j]);
+    $("byo-cell").innerHTML = "<b>" + (which === "a" ? "As recorded" : "Spikes removed") + "</b>, phase " + fmtBand(res.phaseBands[i]) + " Hz &times; amplitude " + fmtBand(res.ampBands[j]) + " Hz<br>" +
+      "MI <b>" + res.mi[i][j].toExponential(2) + "</b> (surrogates " + res.surrMean[i][j].toExponential(2) + " &plusmn; " + res.surrSd[i][j].toExponential(2) + "), z <b>" + res.z[i][j].toFixed(2) + "</b>, p " + fmtP(res.p[i][j]) +
+      ", " + (res.sig[i][j] ? "<b>survives</b>" : "does not survive") + " the correction";
+    drawTrace();
+  }
+
+  // ── the trace: 20 s from the middle of the record ──
+  var traceCache = null;
+  function drawTrace() {
+    var cv = $("byo-trace"), f = Kit.fit(cv), c = f.g, W = f.w, H = f.h;
+    var dim = Kit.css("--dim"), just = Kit.css("--just"), temper = Kit.css("--temper"), rule = Kit.css("--rule");
+    c.clearRect(0, 0, W, H);
+    var res = byo.which === "b" ? byo.resB : byo.resA, sig = byo.which === "b" ? byo.y : byo.x;
+    c.font = "10px " + Kit.css("--mono");
+    if (!res || !byo.selCell || !sig) {
+      c.fillStyle = dim; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("pick a cell", W / 2, H / 2); return;
+    }
+    var i = byo.selCell[0], j = byo.selCell[1], fs = res.fs;
+    var k = byo.which + "|" + i + "|" + j + "|" + sig.length;
+    if (!traceCache || traceCache.k !== k) {
+      // an excerpt of at most 2^16 samples from the middle, filtered on
+      // its own: cheap, and plenty for a 20 s look
+      var n = Math.min(sig.length, 1 << 16), s0 = Math.floor((sig.length - n) / 2);
+      var ex = sig.subarray(s0, s0 + n);
+      var S = runSteps(spectrumSteps(ex, Math.floor(n * 0.05)));
+      var slow = runSteps(analyticSteps(S, fs, res.phaseBands[i][0], res.phaseBands[i][1], "both"));
+      var fast = runSteps(analyticSteps(S, fs, res.ampBands[j][0], res.ampBands[j][1], "amp"));
+      // slow band's real part = amp * cos(phase)
+      var sr = new Float64Array(n);
+      for (var q = 0; q < n; q++) sr[q] = slow.amp[q] * Math.cos(slow.phase[q]);
+      traceCache = { k: k, ex: ex, slow: sr, env: fast.amp, n: n };
+    }
+    var T = traceCache, span = Math.min(T.n, Math.round(20 * fs)), a0 = Math.floor((T.n - span) / 2);
+    var L = 6, R = 6, top = 8, bot = 20, pw = W - L - R, ph = H - top - bot;
+    var mean = 0, q2;
+    for (q2 = a0; q2 < a0 + span; q2++) mean += T.ex[q2];
+    mean /= span;
+    var mx = 1e-12, ms = 1e-12, me = 1e-12;
+    for (q2 = a0; q2 < a0 + span; q2++) { mx = Math.max(mx, Math.abs(T.ex[q2] - mean)); ms = Math.max(ms, Math.abs(T.slow[q2])); me = Math.max(me, T.env[q2]); }
+    var step = Math.max(1, Math.floor(span / (pw * 2)));
+    function line(arr, off, scale, color, width, yc) {
+      c.strokeStyle = color; c.lineWidth = width; c.beginPath();
+      for (var t = 0; t < span; t += step) {
+        var x = L + pw * t / span, y = yc - (arr[a0 + t] - off) * scale;
+        if (t) c.lineTo(x, y); else c.moveTo(x, y);
+      }
+      c.stroke();
+    }
+    var yRaw = top + ph * 0.3, yBand = top + ph * 0.78;
+    line(T.ex, mean, (ph * 0.28) / mx, Kit.alpha(dim, 0.8), 1, yRaw);
+    line(T.slow, 0, (ph * 0.2) / ms, just, 2, yBand);
+    line(T.env, 0, (ph * 0.2) / me, temper, 2, yBand);
+    c.strokeStyle = rule; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(L, H - bot + 0.5); c.lineTo(L + pw, H - bot + 0.5); c.stroke();
+    c.fillStyle = dim; c.textAlign = "left"; c.textBaseline = "top";
+    c.fillText((span / fs).toFixed(span / fs < 10 ? 1 : 0) + " s from the middle of the record", L, H - bot + 5);
+  }
+  Kit.onTheme(function () {
+    drawTrace();
+    if (byo.selCell) {
+      var res = byo.which === "b" ? byo.resB : byo.resA;
+      if (res) drawProfile($("byo-prof"), res.meanBinned[byo.selCell[0]][byo.selCell[1]], res.sig[byo.selCell[0]][byo.selCell[1]]);
+    } else drawProfile($("byo-prof"), null);
+  });
+
+  // ── CSV ──
+  var csvUrl = null;
+  function makeCsv() {
+    var rows = ["series,phase_lo_hz,phase_hi_hz,amp_lo_hz,amp_hi_hz,mi,z,p,fdr_q05,surr_mean,surr_sd," +
+      Array.from({ length: 18 }, function (_, b) { return "bin" + (b + 1) + "_" + Math.round(-180 + 20 * b + 10) + "deg"; }).join(",")];
+    [["recorded", byo.resA], ["spikes_removed", byo.resB]].forEach(function (pr) {
+      var r = pr[1];
+      if (!r) return;
+      for (var i = 0; i < r.phaseBands.length; i++) for (var j = 0; j < r.ampBands.length; j++) {
+        rows.push([pr[0], r.phaseBands[i][0].toPrecision(6), r.phaseBands[i][1].toPrecision(6), r.ampBands[j][0].toPrecision(6), r.ampBands[j][1].toPrecision(6),
+          r.mi[i][j].toExponential(6), r.z[i][j].toFixed(4), r.p[i][j].toPrecision(6), r.sig[i][j] ? 1 : 0,
+          r.surrMean[i][j].toExponential(6), r.surrSd[i][j].toExponential(6)].concat(Array.from(r.meanBinned[i][j]).map(function (v) { return v.toPrecision(6); })).join(","));
+      }
+    });
+    rows.unshift("# comodulogram of " + byo.name.replace(/[\r\n,]/g, " ") + ", fs " + byo.fs + " Hz, " + byo.x.length + " samples, " + byo.nS + " " + byo.sur + " surrogates per cell, Tort MI on 18 bins, Benjamini-Hochberg q=0.05");
+    if (csvUrl) URL.revokeObjectURL(csvUrl);
+    csvUrl = URL.createObjectURL(new Blob([rows.join("\n") + "\n"], { type: "text/csv" }));
+    var a = $("byo-dl");
+    a.href = csvUrl; a.setAttribute("aria-disabled", "false");
+    a.download = "comodulogram-" + byo.name.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase() + ".csv";
+  }
+  $("byo-dl").addEventListener("click", function (e) { if (this.getAttribute("aria-disabled") === "true") e.preventDefault(); });
+
+  // ══════════════════════════════════════════════════════════
+  //  THE SUNFLOWER: a Vogel spiral, seeds at the golden angle
+  // ══════════════════════════════════════════════════════════
+  (function sunflower() {
+    var cv = $("sun"), GA = Math.PI * (3 - Math.sqrt(5)), NSEED = 460, NPET = 34;
+    var visible = true, raf = null, last = 0, clock = 0;
+    function draw(t) {
+      var f = Kit.fit(cv), c = f.g, W = f.w, H = f.h;
+      var temper = Kit.css("--temper"), ink = Kit.css("--ink"), sage = Kit.css("--sage"), dark = isDark();
+      c.clearRect(0, 0, W, H);
+      var cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2 / 1.55;
+      var rot = Kit.reduced ? 0 : t * 0.035;
+      // petals, two rings offset by half a petal
+      for (var ring = 0; ring < 2; ring++) {
+        for (var p = 0; p < NPET; p++) {
+          var ang = rot * 0.6 + (p + ring * 0.5) * 2 * Math.PI / NPET;
+          var len = R * (ring ? 0.46 : 0.52), wid = R * 0.085;
+          c.save(); c.translate(cx + Math.cos(ang) * R * 1.0, cy + Math.sin(ang) * R * 1.0); c.rotate(ang);
+          c.beginPath(); c.ellipse(len * 0.5, 0, len * 0.55, wid, 0, 0, 2 * Math.PI);
+          c.fillStyle = Kit.alpha(temper, ring ? 0.18 : 0.26); c.fill();
+          c.strokeStyle = Kit.alpha(temper, ring ? 0.25 : 0.45); c.lineWidth = 1; c.stroke();
+          c.restore();
+        }
+      }
+      // the disk
+      c.beginPath(); c.arc(cx, cy, R * 1.02, 0, 2 * Math.PI);
+      c.fillStyle = Kit.alpha(dark ? "#000000" : ink, dark ? 0.35 : 0.08); c.fill();
+      c.globalCompositeOperation = dark ? "lighter" : "source-over";
+      // a slow wave sweeps around the head; a faint fast flicker in the
+      // seeds swells where it passes. Phase-amplitude coupling, in seeds.
+      var slowA = Kit.reduced ? 0.8 : t * 0.45, fastT = Kit.reduced ? 0 : t * 5.2;
+      var sz = R / Math.sqrt(NSEED) * 0.9;
+      for (var n = 1; n <= NSEED; n++) {
+        var r = R * Math.sqrt(n / NSEED), th = n * GA + rot;
+        var x = cx + r * Math.cos(th), y = cy + r * Math.sin(th);
+        var slow = 0.5 + 0.5 * Math.cos(th - slowA);
+        var fast = 0.5 + 0.5 * Math.sin(fastT + n * 0.9);
+        var glow = 0.35 + 0.35 * (n / NSEED) + 0.3 * slow * slow * fast;
+        var s = sz * (0.55 + 0.45 * Math.sqrt(n / NSEED)) * (1 + 0.12 * slow * fast);
+        c.beginPath(); c.arc(x, y, s, 0, 2 * Math.PI);
+        c.fillStyle = Kit.alpha(n < NSEED * 0.12 ? sage : temper, Math.min(1, glow * (dark ? 0.75 : 0.85)));
+        c.fill();
+      }
+      c.globalCompositeOperation = "source-over";
+    }
+    function frame(ts) {
+      raf = null;
+      if (!visible || document.hidden) return;
+      var dt = last ? Math.min(0.1, (ts - last) / 1000) : 0;
+      last = ts; clock += dt;
+      draw(clock);
+      if (!Kit.reduced) raf = requestAnimationFrame(frame);
+    }
+    function start() { if (!raf && !Kit.reduced) { last = 0; raf = requestAnimationFrame(frame); } }
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) start(); }).observe(cv);
+    }
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) start(); });
+    Kit.onTheme(function () { draw(clock); });
+    draw(0); start();
+  })();
+
+  // ── boot ──
+  showBands();
+  drawProfile($("bank-prof"), null);
+  drawProfile($("byo-prof"), null);
+  heatA.draw(); heatB.draw();
+  drawTrace();
+  runBank();
+})();
+</script>
+</body>
+</html>
