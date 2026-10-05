@@ -58,15 +58,17 @@
 <div class="wrap">
 
 <header class="hero">
-  <span class="eyebrow">Back country &middot; 08 &middot; Plants and electrodes</span>
+  <span class="eyebrow">Lab &middot; 08 &middot; Plants and electrodes</span>
   <div class="hero-grid">
     <div class="hero-art">
       <canvas id="sun" height="300" aria-label="A sunflower head drawn as a Vogel spiral: seeds set at the golden angle, about 137.5 degrees apart, turning slowly. A faint flicker runs through the seeds, swelling where a slow wave sweeps past."></canvas>
     </div>
     <div>
       <h1>A comodulogram for a sunflower</h1>
-      <p class="lede">A sunflower has no neurons. Not one. It has cells that leak ions and a stem that carries slow electrical waves after a deer steps on it, and if you tape two electrodes to a leaf you get a voltage that wiggles at several speeds at once. Tape the same electrodes to a lump of agar and you get wiggles too. Electrode chemistry oscillates. That is the first thing to get straight out here.</p>
-      <p>Brain people have a test for whether a fast rhythm rides on a slow one: bin the slow wave's phase, see whether the fast wave swells at some part of it, draw the grid. They call the grid a comodulogram. The note this page grew out of says that nobody has pointed one at a plant, as far as its author could find. Here is the tool, run first on an oscillator bank whose insides we know, then handed over for whatever you have recorded.</p>
+      <p class="lede">This page tests one question about a signal: does a fast rhythm get louder at a particular point in a slow rhythm's cycle? You run the test first on a simulated system whose answer is known. Then you can run it on your own recording, such as one from electrodes on a plant leaf.</p>
+      <p>Picture a slow wave that rises and falls about once every two seconds. A fast wobble, several times a second, rides on top of it. If the wobble is always biggest near the slow wave's peak, the two rhythms are linked. This is called phase-amplitude coupling. The slow rhythm's phase (where it is in its cycle, in degrees, with 0&deg; at the crest) sets the fast rhythm's amplitude (how large its swings are).</p>
+      <p>A comodulogram checks many pairs of rhythms at once. It is a grid. Each column is a slow frequency band, which supplies the phase. Each row is a fast frequency band, which supplies the amplitude. Each cell gets a score for how closely that fast band's loudness follows that slow band's phase. Brain researchers use this grid on EEG recordings. The note this page is based on found no published comodulogram of a plant.</p>
+      <p>A plant has no neurons. Its cells still move ions, and its stem carries slow electrical waves after it is touched or wounded. Two electrodes on a leaf record a voltage that changes at several speeds at once. The same electrodes on agar (a lab jelly with no living cells) also show changes, because electrode chemistry oscillates by itself. Any plant result needs controls for this.</p>
     </div>
   </div>
 </header>
@@ -74,14 +76,17 @@
 <section aria-labelledby="h-bank">
   <div class="sec-head">
     <span class="sec-mark">01</span>
-    <div><h2 id="h-bank">The bank refuses to fake it</h2></div>
+    <div><h2 id="h-bank">Check the test on two simulated banks</h2></div>
   </div>
 
-  <p>Before anybody hauls a Faraday cage out to a sunflower patch, try the test on something you understand. The piano's eleven tuning errors make a bank of oscillators (that's the <a href="../index.html">main page</a>). A few of them beat slowly, under a hertz. A few beat fast, between about five and nine. Sum the whole bank into one wire, the way an electrode sums a leaf, and ask whether the fast beats swell with the slow ones.</p>
-  <p>The main page's bank couples by addition: each oscillator gets nudged toward the average of all of them. Riding requires multiplication. Something slow has to work a fast thing's volume knob. So there is a second bank here, the same in every bolt except that the average's real part sets each oscillator's gain. One of these ought to light up. If the additive one lights up, the test is lying, and I would rather learn that here than in a greenhouse.</p>
+  <p>Before you trust the test on a plant, run it on a system whose answer you already know. The <a href="../index.html">main page</a> builds a bank of eleven oscillators, one for each of the piano's eleven tuning errors (the small gap between a piano interval and its pure, whole-number-ratio version). Each oscillator produces a beat, the slow pulse two close tones make, like two guitar strings slightly out of tune. A few beat slowly, under 1&nbsp;Hz. A few beat fast, between about 5 and 9&nbsp;Hz. Here all eleven are added into one signal, the way one electrode adds up activity across a leaf. The test then asks whether the fast beats get louder at a particular phase of the slow ones.</p>
+  <p>The two banks differ in their coupling, the way the oscillators influence each other. The coupling strength is K. In the main page's bank, coupling is additive: each oscillator is nudged toward the average of all of them. Additive nudging cannot make one rhythm control another's loudness. That takes multiplication, where a slow signal turns a fast oscillator's volume up and down. So this page adds a second bank. It is identical except that the real part of the group average sets each oscillator's gain. The multiplicative bank should light up the grid. The additive bank should stay dark. If the additive bank lights up, the test is producing false positives, and you want to learn that here before you record a plant.</p>
+  <p><strong>How to read the grid.</strong> Both banks run when the page opens, and again when you change a setting or press Run both banks. Cells fill in one at a time. A stronger amber color means stronger evidence of coupling, and the number in each cell is its z-score. A thick outline means the cell passed the significance test described below. Click any cell to see its phase profile underneath.</p>
+  <p><strong>How each cell is scored.</strong> The score is the modulation index (MI). It splits the slow wave's cycle into 18 phase bins and averages the fast band's amplitude in each bin. MI measures how far that profile is from flat: 0 means flat, 1 means all the amplitude falls in one bin. </p>
+  <p><strong>How the significance test works.</strong> Even pure noise gives a small MI above zero. So each cell is compared with surrogates, which are copies of the data with the fast amplitude moved out of line with the slow phase. Circular shift slides the amplitude along in time. Block shuffle cuts it into blocks and reorders them. The p-value is roughly the share of surrogates that score at least as high as the real data. The z-score is how many standard deviations the real MI sits above the surrogates' average. With 12 cells tested at once, some can look strong by chance. A false-discovery correction (Benjamini&ndash;Hochberg at q&nbsp;=&nbsp;0.05) decides which cells count, and only those get the outline.</p>
 
   <div class="panel">
-    <h3>The two banks, one wire each</h3>
+    <h3>The two banks, each summed into one signal</h3>
     <div class="chips" id="det-chips" aria-label="The eleven detunings"></div>
     <p class="note" id="band-note" style="margin-bottom:0.6rem"></p>
 
@@ -148,25 +153,26 @@
   </div>
 
   <div class="panel sweep-wrap" id="sweep-wrap" hidden>
-    <h3>Largest z across the grid, coupling swept</h3>
+    <h3>Largest z-score in each grid as K rises from 0 to 8</h3>
     <canvas id="sweep" height="220" aria-label="Line chart: the largest z-score in each bank's comodulogram as coupling K runs from 0 to 8. Filled dots mark couplings where at least one cell survives the false-discovery correction."></canvas>
-    <p class="note" style="margin:0.5rem 0 0">Blue: additive. Amber: multiplicative. A filled dot means at least one cell at that coupling survives the false-discovery correction; hollow means none does. The sweep uses 500 surrogates a cell.</p>
+    <p class="note" style="margin:0.5rem 0 0">Blue: additive. Amber: multiplicative. A filled dot means at least one cell at that coupling survives the false-discovery correction; hollow means none does. The sweep uses 500 surrogates per cell.</p>
     <div class="table-scroll"><table id="sweep-table"><thead><tr><th>K</th><th>additive max z</th><th>cells</th><th>multiplicative max z</th><th>cells</th></tr></thead><tbody></tbody></table></div>
   </div>
 
-  <p>The note behind this page reported a flat grid at every coupling, largest z 2.9, from a script that never made it into the repo. So I ran it again in the open, and the box above is that rerun, done fresh in your browser every time. One more thing turned up along the way. The note's protocol calls for circular-shift surrogates: slide the fast envelope against the slow phase and see how often chance does as well. On a record this short, with a slow wave this regular, the slid copies are mostly copies of each other, so chance looks stingier than it is. Set the surrogates to circular shift and run 150 or 300 seconds: when I did, the additive bank lit a cell that block shuffling and a 600-second record both put out again.</p>
+  <p>The note this page is based on reported a flat grid at every coupling, with a largest z of 2.9. The script that produced that result was never added to the repository. The panel above reruns the analysis in your browser each time, so you can check the result yourself.</p>
+  <p>The rerun found one problem with the note's method. The note calls for circular-shift surrogates. On a record this short, with a slow wave this regular, the shifted copies are mostly alike. Chance then looks less likely than it really is, and the test passes cells too easily. To see this, set Surrogates to circular shift and run 150 or 300 seconds. When this page was tested that way, the additive bank lit a cell. Block shuffle and a 600-second record both made that cell go dark again.</p>
 </section>
 
 <section aria-labelledby="h-byo">
   <div class="sec-head">
     <span class="sec-mark">02</span>
-    <div><h2 id="h-byo">Bring your own plant</h2></div>
+    <div><h2 id="h-byo">Run the test on your own recording</h2></div>
   </div>
-  <p>Got a recording? A leaf, a dead stem, a dish of agar, your own forearm. One column of numbers, or time and value, comma or tab or whatever. Set the sample rate, set the bands, run it. Your browser reads the file and it goes nowhere else.</p>
-  <p>Calibrate your eye first on the three canned signals. The coupled one should burn. The noise should stay dark. The spiky one is the trap the note warns about: a slow wave with a sharp spike in it carries harmonics locked to itself, and those harmonics look exactly like a fast rhythm riding a slow one. It lights up with no coupling in it at all. Spike removal takes most of the costume off. Usually not all of it, and the scraps that stay are why the note piles on more controls.</p>
+  <p>You can load a recording from anything: a leaf, a dead stem, a dish of agar, or your own forearm. The file needs one column of values, or two columns of time and value. Commas, tabs, semicolons and spaces all work as separators. Set the sample rate and the bands, then press Run the comodulogram. Your browser reads the file, and it is not uploaded anywhere.</p>
+  <p>Try the three test signals first, so you know what each kind of result looks like. The coupled signal should light up brightly. Pure noise should stay dark. The spiky signal shows the main trap the note warns about. It is a slow wave with a sharp spike once per cycle, plus a fast rhythm that is not coupled to it at all. A sharp spike contains harmonics, higher frequencies locked to the spike's timing. Those harmonics rise and fall with the slow wave, so they look exactly like coupling, and the grid lights up. Spike removal takes out most of this false signal, but usually not all of it. That leftover is why the note asks for more controls.</p>
 
   <div class="panel">
-    <h3>The record</h3>
+    <h3>Load a recording</h3>
     <div class="btn-row">
       <input type="file" id="f-in" class="vh" accept=".csv,.txt,.tsv,.dat,text/plain,text/csv">
       <label for="f-in" class="filebtn">Open a CSV or text file</label>
@@ -174,7 +180,7 @@
       <button id="t-spiky">A spiky uncoupled signal</button>
       <button id="t-noise">Pure noise</button>
     </div>
-    <div class="status" id="byo-file" role="status" aria-live="polite">No record loaded.</div>
+    <div class="status" id="byo-file" role="status" aria-live="polite">No recording loaded.</div>
 
     <div class="fields">
       <label class="field"><span>Sample rate (Hz)</span><input type="number" id="f-fs" min="0.001" step="any" value="50"></label>
@@ -205,7 +211,7 @@
     <p class="note" id="byo-bands"></p>
 
     <fieldset class="fieldset">
-      <legend>Spike removal (the note's control)</legend>
+      <legend>Spike removal (a control from the note)</legend>
       <label class="check"><input type="checkbox" id="d-on"> Also run on a spike-removed copy</label>
       <div class="fields">
         <label class="field"><span>Threshold k &times; MAD</span><input type="number" id="d-k" step="any" min="1" value="4"></label>
@@ -245,12 +251,12 @@
       <div>
         <h3>Phase profile of the chosen cell</h3>
         <canvas id="byo-prof" height="180" aria-label="Bar chart: the chosen cell's fast-band mean amplitude in each of 18 slow-phase bins, as percent above or below flat."></canvas>
-        <div class="readout" id="byo-cell" aria-live="polite">Run it, then pick a cell.</div>
+        <div class="readout" id="byo-cell" aria-live="polite">Run the comodulogram, then pick a cell.</div>
       </div>
       <div>
-        <h3>Look at it by eye</h3>
+        <h3>Check the waveforms by eye</h3>
         <canvas id="byo-trace" height="180" aria-label="Twenty seconds of the record: the raw trace, the slow band filtered out of it, and the fast band's envelope, for the chosen cell."></canvas>
-        <p class="note" id="byo-trace-note" style="margin:0.4rem 0 0">The raw trace in gray, the slow band in blue, the fast band's envelope in amber. The note says to inspect the filtered waveforms by eye before you believe a cell. This is that.</p>
+        <p class="note" id="byo-trace-note" style="margin:0.4rem 0 0">Gray is the raw trace. Blue is the slow band. Amber is the fast band's envelope, its loudness from moment to moment. The note says to look at the filtered waveforms before you believe a cell. With real coupling, the amber envelope peaks at about the same point in each blue cycle.</p>
       </div>
     </div>
   </div>
@@ -259,29 +265,29 @@
 <section aria-labelledby="h-worth">
   <div class="sec-head">
     <span class="sec-mark">03</span>
-    <div><h2 id="h-worth">What a lit cell is worth</h2></div>
+    <div><h2 id="h-worth">What a result means</h2></div>
   </div>
-  <p>Not much, and not nothing. A lit cell is a statistical dependence between two filtered views of one voltage. It says organization. It does not say anybody is home, and whoever tells you a sunflower is thinking because a grid turned orange is selling something, probably a subscription.</p>
-  <p>A dark grid proves nothing either. The additive bank mixes its inputs across time; the main page's readout measures that mixing climbing to 11.5% at K = 8, and this grid can't see any of it, because one wire carries only a linear sum of the oscillators and the mixing lives in their squares. Try the nonlinear views of a recording before you call the plant simple.</p>
+  <p>A lit cell shows a statistical dependence between two filtered versions of one voltage. It tells you the signal has structure. It does not tell you the plant senses, decides or thinks. A grid that lights up is not evidence of a mind.</p>
+  <p>A dark grid does not prove the plant is simple, either. The additive bank does mix its inputs over time. The main page's readout measures that mixing rising to 11.5% at K&nbsp;=&nbsp;8, and this grid sees none of it. One signal carries only a linear sum of the oscillators, and the mixing shows up only in their squares and other nonlinear combinations. Before you conclude that a plant recording has no structure, also run nonlinear analyses on it.</p>
 
   <div class="panel">
-    <h3>If you go out and record (from the note's protocol)</h3>
+    <h3>How to record a plant (from the note's protocol)</h3>
     <ul class="protocol">
-      <li>Surface electrodes on a leaf and the stem, a soil reference. Front end at 10<sup>12</sup>&nbsp;&Omega; or better, DC-coupled or high-passed no higher than 0.001&nbsp;Hz, 24-bit ADC at 250&nbsp;Hz, all of it inside a Faraday enclosure, temperature and humidity logged.</li>
-      <li>Six hours per condition at least: undisturbed, a light step, a watering, one wound. Analyze event windows and quiet windows separately; never pool them.</li>
-      <li>Phase bands log-spaced over 0.003 to 0.3&nbsp;Hz, amplitude bands over 2 to 25&nbsp;Hz, 200 or more surrogates a cell, false-discovery correction across the grid.</li>
-      <li>The controls are the experiment: a dead or cut plant and an agar dummy under identical electrodes, a mains notch, and every lit cell re-run on a spike-removed copy.</li>
+      <li>Place surface electrodes on a leaf and on the stem, with a reference electrode in the soil. Use an amplifier input impedance of 10<sup>12</sup>&nbsp;&Omega; or more, DC-coupled or high-passed no higher than 0.001&nbsp;Hz, and a 24-bit ADC at 250&nbsp;Hz. Put everything inside a Faraday enclosure (a grounded metal cage that blocks outside electrical noise), and log temperature and humidity.</li>
+      <li>Record at least six hours per condition: undisturbed, a light step, a watering, and one wound. Analyze event windows and quiet windows separately. Do not pool them.</li>
+      <li>Use phase bands log-spaced from 0.003 to 0.3&nbsp;Hz and amplitude bands from 2 to 25&nbsp;Hz. Use 200 or more surrogates per cell, and apply the false-discovery correction across the whole grid.</li>
+      <li>Run the controls, which matter as much as the plant: a dead or cut plant and an agar dummy under identical electrodes, a mains notch filter to remove power-line hum, and a re-run of every lit cell on a spike-removed copy.</li>
     </ul>
   </div>
-  <p class="poem">The comma never closed. The bank remembers because it never agreed. Maybe the sunflower turns for the same reason, and maybe it just turns. Go find out. Bring water.</p>
 </section>
 
 <div class="foot">
-  <p class="note"><strong>How the numbers are made, and where they can go wrong.</strong>
-  Filters: the record's mean is removed, its ends are tapered over two cycles of the slowest phase band (at most 10% of the record a side) and zero-padded to a power of two; each band is cut from one FFT with raised-cosine skirts 20% of the band's width, doubled on the positive side to give the analytic signal, and the tapered ends are trimmed before anything is counted. Narrow phase bands ring for longer than that trim covers, so do not trust cells built on bands narrower than a few cycles of the record's length. An amplitude band must be wider than twice the phase frequency it is tested against or the sidebands that carry the coupling fall outside it; for loaded records the page widens amplitude bands to at least twice the top phase edge and tells you when it did.
-  Statistic: Tort's modulation index on 18 phase bins. Each cell is compared with surrogates: circular shift moves the amplitude envelope against the phase by a random offset of at least one second or one cycle of the slowest phase band, whichever is longer; block shuffle cuts the envelope into blocks of that length and reorders them. The p-value is (1 + surrogates at least as large) / (1 + surrogates), so the smallest possible p is 1/(n+1), and with m cells Benjamini&ndash;Hochberg at q = 0.05 needs at least about 20m surrogates before any cell can pass. The z-score is against the surrogates' mean and spread and is shown for comparison with the note; the outlines come from p, not from z, because the surrogate distribution of the index is skewed and a normal tail read off z overstates significance.
-  Calibration, measured in Node on this page's own analysis code with white noise, 150 s at 50 Hz, the bank's 12-cell grid, 1000 surrogates, 150 records each: circular shift lit at least one cell in 13% of records, block shuffle in 8%, against a nominal 5%. A slow wave that keeps its phase for many cycles leaves only a handful of truly different surrogates in a short record, and the test gets bolder than it should. Long records fix this and nothing else does. The note's own warning stands: 140 seconds gives about fifty cycles of the slowest bank band, which is marginal, and a plant phase band at 0.01&nbsp;Hz needs hours of stable recording.
-  The bank: the sum of the real parts of the eleven oscillators at 50 samples a second, driven by the main page's seeded random input, first 10 seconds discarded, the same K for both banks; the multiplicative mode is kit.js's, where the mean field's real part scales each oscillator. Spike removal subtracts a running median, flags samples beyond k times the median absolute deviation, then either subtracts the average spike (fitted in size to each one) or clips at the threshold; template subtraction assumes the spikes look alike, clipping leaves flat-topped bumps that still carry harmonics, and either can add structure of its own, so look at the trace. Loaded files are read in the browser and never sent anywhere; the limit is 2<sup>21</sup> samples.</p>
+  <p class="note"><strong>Method notes and limits.</strong></p>
+  <p class="note"><strong>Filters.</strong> The record's mean is removed. Its ends are tapered over two cycles of the slowest phase band (at most 10% of the record on each side), and it is zero-padded to a power of two. Each band is cut from a single FFT with raised-cosine edges 20% of the band's width. The positive frequencies are doubled to give the analytic signal, a complex signal whose angle is the phase and whose size is the amplitude. The tapered ends are trimmed before anything is counted. Narrow phase bands ring for longer than that trim covers, so do not trust cells built on bands narrower than a few cycles per record length. An amplitude band must be wider than twice the phase frequency it is tested against. Otherwise the sidebands that carry the coupling fall outside it. For loaded records, the page widens amplitude bands to at least twice the top phase edge and tells you when it did.</p>
+  <p class="note"><strong>Statistic.</strong> The score is Tort's modulation index (the MI above) on 18 phase bins. Circular-shift surrogates move the amplitude envelope against the phase by a random offset of at least one second or one cycle of the slowest phase band, whichever is longer. Block-shuffle surrogates cut the envelope into blocks of that length and reorder them. The p-value is (1 + surrogates at least as large) / (1 + surrogates), so the smallest possible p is 1/(n+1). With m cells, Benjamini&ndash;Hochberg at q = 0.05 needs at least about 20m surrogates before any cell can pass. The z-score is measured against the surrogates' mean and standard deviation and is shown for comparison with the note. The outlines come from p, not from z. The surrogate distribution of the index is skewed, so reading a normal tail off z overstates significance.</p>
+  <p class="note"><strong>Calibration.</strong> This was measured in Node with this page's own analysis code: white noise, 150 s at 50 Hz, the bank's 12-cell grid, 1000 surrogates, 150 records each. Circular shift lit at least one cell in 13% of records and block shuffle in 8%, against a nominal 5%. A slow wave that keeps its phase for many cycles leaves only a few truly different surrogates in a short record, so the test passes cells too easily. Only longer records fix this. The note's own warning stands: 140 seconds gives about fifty cycles of the slowest bank band, which is marginal, and a plant phase band at 0.01&nbsp;Hz needs hours of stable recording.</p>
+  <p class="note"><strong>The bank.</strong> The signal is the sum of the real parts of the eleven oscillators at 50 samples per second. It is driven by the main page's seeded random input, the first 10 seconds are discarded, and both banks use the same K. The multiplicative mode is the one in kit.js, where the real part of the mean field (the group average) scales each oscillator.</p>
+  <p class="note"><strong>Spike removal.</strong> A running median is subtracted, and samples beyond k times the median absolute deviation (MAD) are flagged. The page then either subtracts the average spike, scaled to fit each one, or clips at the threshold. Template subtraction (the average-spike method) assumes the spikes look alike. Clipping leaves flat-topped bumps that still carry harmonics. Either method can add structure of its own, so check the trace. Loaded files are read in the browser and never sent anywhere. The limit is 2<sup>21</sup> samples.</p>
 </div>
 
 </div>
@@ -766,7 +772,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
   function fmtHz(f) { return f >= 10 ? f.toFixed(0) : f >= 1 ? f.toFixed(1) : f >= 0.1 ? f.toFixed(2) : f >= 0.01 ? f.toFixed(3) : f.toPrecision(2); }
   function fmtBand(b) { return fmtHz(b[0]) + "–" + fmtHz(b[1]); }
   function fmtP(p) { return p < 0.01 ? p.toPrecision(2) : p.toFixed(3); }
-  function pText(res, i, j) { var p = res.p[i][j]; return fmtP(p) + (Math.abs(p - 1 / (res.nSurr + 1)) < 1e-12 ? " (the floor: no surrogate reached it)" : ""); }
+  function pText(res, i, j) { var p = res.p[i][j]; return fmtP(p) + (Math.abs(p - 1 / (res.nSurr + 1)) < 1e-12 ? " (the smallest possible: no surrogate reached it)" : ""); }
 
   // ══════════════════════════════════════════════════════════
   //  HEATMAP
@@ -832,7 +838,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
       c.clearRect(0, 0, W, H);
       if (!st.pb.length) {
         c.fillStyle = dim; c.font = "12px " + Kit.css("--mono"); c.textAlign = "center";
-        c.fillText("waiting for a record", W / 2, H / 2);
+        c.fillText("waiting for data", W / 2, H / 2);
         return false;
       }
       var gap = g.cw > 14 && g.ch > 14 ? 2 : 1;
@@ -918,7 +924,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
       var s = "phase " + fmtBand(st.pb[i]) + " Hz × amp " + fmtBand(st.ab[j]) + " Hz";
       if (!cell) return s + ", not yet measured";
       return s + ", z " + cell.z.toFixed(2) + ", MI " + cell.mi.toExponential(2) + ", p " + fmtP(cell.p) +
-        (st.sig ? (st.sig[i][j] ? ", survives FDR" : ", does not survive FDR") : "");
+        (st.sig ? (st.sig[i][j] ? ", survives the correction" : ", does not survive the correction") : "");
     };
     canvas.addEventListener("pointermove", function (ev) {
       var h = hit(ev);
@@ -926,7 +932,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
       var cell = st.cells[key(h.i, h.j)];
       tip.innerHTML = "<b>phase " + fmtBand(st.pb[h.i]) + " Hz</b><br><b>amp " + fmtBand(st.ab[h.j]) + " Hz</b><br>" +
         (cell ? "z " + cell.z.toFixed(2) + " &middot; p " + fmtP(cell.p) + "<br>MI " + cell.mi.toExponential(2) +
-          (st.sig && st.sig[h.i][h.j] ? "<br>survives FDR" : "") : "not yet measured");
+          (st.sig && st.sig[h.i][h.j] ? "<br>survives the correction" : "") : "not yet measured");
       tip.style.display = "block";
       var bw = canvas.clientWidth, tw = tip.offsetWidth;
       var left = h.x + 14; if (left + tw > bw) left = Math.max(0, h.x - tw - 10);
@@ -1014,11 +1020,11 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
       html += '<span class="chip ' + cls + '">' + v.name + " " + v.beat.toFixed(2) + " Hz</span>";
     });
     $("det-chips").innerHTML = html;
-    $("band-note").innerHTML = "Blue chips supply phase, amber ones amplitude. Phase bands sit on the slow detunings (" +
-      PB.slice(0, 3).map(fmtBand).join(", ") + " Hz) plus " + fmtBand(PB[3]) +
-      " Hz, a band with no oscillator in it, as a control. Amplitude bands (" + AB.map(fmtBand).join(", ") +
-      " Hz) each hold a cluster of fast detunings with room for the sidebands a 0.4 to 0.7 Hz modulation puts on them. " +
-      "The two middle detunings, near 2.2 and 2.8 Hz, are left out of both.";
+    $("band-note").innerHTML = "Each chip is one oscillator and its beat rate. Blue chips are slow and supply the phase. Amber chips are fast and supply the amplitude. " +
+      "The phase bands cover the slow beats (" + PB.slice(0, 3).map(fmtBand).join(", ") + " Hz). A fourth phase band, " + fmtBand(PB[3]) +
+      " Hz, contains no oscillator and serves as a control. Each amplitude band (" + AB.map(fmtBand).join(", ") +
+      " Hz) holds a cluster of fast beats, with room for the sidebands (extra frequencies just above and below) that a 0.4 to 0.7 Hz modulation adds. " +
+      "The two middle beats, near 2.2 and 2.8 Hz, are in neither.";
   })();
 
   var bankProfile = { res: null, which: null };
@@ -1037,7 +1043,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
       "MI <b>" + res.mi[i][j].toExponential(2) + "</b> against a surrogate mean of " + res.surrMean[i][j].toExponential(2) +
       " (sd " + res.surrSd[i][j].toExponential(2) + ")<br>z <b>" + res.z[i][j].toFixed(2) + "</b>, p " + fmtP(res.p[i][j]) +
       ", " + (res.sig[i][j] ? "<b>survives</b>" : "does not survive") + " the false-discovery correction<br>" +
-      "Bars above the line: phases of the slow wave where the fast band runs louder than average. The curve on top is the slow wave itself; 0&deg; is its crest.";
+      "Bars above the line mark phases of the slow wave where the fast band is louder than average. The curve at the top is the slow wave itself, with 0&deg; at its crest.";
     bankProfile.which = which;
   }
 
@@ -1098,9 +1104,9 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
       var parts = [["additive", heatAdd, "add"], ["multiplicative", heatMul, "mul"]];
       for (var p = 0; p < 2; p++) {
         var mode = parts[p][0], heat = parts[p][1], key = parts[p][2];
-        status.textContent = "Running the " + mode + " bank for " + secs + " s of signal…";
+        status.textContent = "Simulating the " + mode + " bank for " + secs + " s…";
         var x = yield* bankSignalGen(K, mode, secs);
-        status.textContent = "Comodulogram of the " + mode + " bank: " + PB.length * AB.length + " cells, " + BANK_NS + " surrogates each…";
+        status.textContent = "Measuring the " + mode + " bank: " + PB.length * AB.length + " cells, " + BANK_NS + " surrogates each…";
         var res = yield* intoHeat(comodulogramGen(x, FS, PB, AB, BANK_NS, 1, { surrogate: sur }), heat, function (v) {
           meter.style.width = (100 * (p + Math.min(1, v)) / 2).toFixed(1) + "%";
         });
@@ -1124,26 +1130,26 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
   function writeFinding(K, secs, sur, out) {
     var a = maxCell(out.add), m = maxCell(out.mul);
     var surName = sur === "blocks" ? "block-shuffle" : "circular-shift";
-    var html = "<p><strong>Measured just now</strong>, K = " + K.toFixed(1) + ", " + secs + " s of signal, " + BANK_NS + " " + surName +
-      " surrogates a cell. The additive bank's largest z is <b class=\"num\">" + a.z.toFixed(2) + "</b> and " +
+    var html = "<p><strong>Result of this run.</strong> K = " + K.toFixed(1) + ", " + secs + " s of signal, " + BANK_NS + " " + surName +
+      " surrogates per cell. The additive bank's largest z-score is <b class=\"num\">" + a.z.toFixed(2) + "</b>, and " +
       (a.nsig ? a.nsig + " of its 12 cells survive" : "none of its 12 cells survive") + " the false-discovery correction. " +
-      "The multiplicative bank's largest z is <b class=\"num\">" + m.z.toFixed(2) + "</b>, at phase " + fmtBand(PB[m.i]) + " Hz and amplitude " + fmtBand(AB[m.j]) +
+      "The multiplicative bank's largest z-score is <b class=\"num\">" + m.z.toFixed(2) + "</b>, at phase " + fmtBand(PB[m.i]) + " Hz and amplitude " + fmtBand(AB[m.j]) +
       " Hz, and " + (m.nsig ? m.nsig + " of its cells survive." : "none of its cells survive.") + "</p>";
     var verdict;
     if (!a.nsig && m.nsig) {
-      verdict = "That is the answer the physics predicts. Addition leaves the grid dark; multiplication lights it. " +
-        "The multiplicative bank's best cell has a modulation index of " + m.mi.toExponential(2) + " against a surrogate average of " + m.mean.toExponential(2) +
-        (secs < 600 ? ". It is a small effect, and at " + secs + " seconds it is barely clear of chance. Give it 600 seconds and see what a longer record does to it." :
-          ". At this length the coupling stands well clear of chance.");
+      verdict = "This matches what the physics predicts. Additive coupling leaves the grid dark, and multiplicative coupling lights it. " +
+        "The multiplicative bank's best cell has a modulation index of " + m.mi.toExponential(2) + ", against a surrogate average of " + m.mean.toExponential(2) +
+        (secs < 600 ? ". This is a small effect, and at " + secs + " seconds it is only just clear of chance. Press Try 600 seconds to see how a longer record changes it." :
+          ". At this length the coupling is well clear of chance.");
     } else if (!a.nsig && !m.nsig) {
-      verdict = "Neither bank lights up. For the additive bank that is expected. For the multiplicative one it means the effect is too small for this record: " +
-        "its best cell's index is " + m.mi.toExponential(2) + " against a surrogate average of " + m.mean.toExponential(2) + ". " +
-        (K < 4 ? "Turn the coupling up; the gain swing scales with K." : secs < 600 ? "Run a longer record; the note's warning about power applies here first." : "This coupling is too weak to see in 600 seconds.");
+      verdict = "Neither bank lights up. That is expected for the additive bank. For the multiplicative bank, it means the effect is too small to detect in this record. " +
+        "Its best cell's index is " + m.mi.toExponential(2) + ", against a surrogate average of " + m.mean.toExponential(2) + ". " +
+        (K < 4 ? "Raise the coupling K. The size of the gain swing grows with K." : secs < 600 ? "Run a longer record. Short records are where the note's warning about statistical power applies first." : "At this coupling the effect is too weak to see in 600 seconds.");
     } else if (a.nsig && !m.nsig) {
-      verdict = "The additive bank lit and the multiplicative one did not. Treat that additive cell as a false light until a longer record or block shuffling confirms it; read the footnote on calibration.";
+      verdict = "The additive bank lit up and the multiplicative bank did not. Treat the additive cell as a false positive until a longer record or block shuffle confirms it. See the calibration note at the bottom of the page.";
     } else {
-      verdict = "Both banks light. The multiplicative one should; the additive one should not, so its cells are suspects. " +
-        (sur === "shift" ? "Switch to block shuffling, or run 600 seconds, and see whether they survive." : "Run 600 seconds and see whether they survive.");
+      verdict = "Both banks light up. The multiplicative bank should. The additive bank should not, so treat its lit cells as suspect. " +
+        (sur === "shift" ? "Switch to block shuffle or run 600 seconds, and check whether they survive." : "Run 600 seconds and check whether they survive.");
     }
     html += "<p>" + verdict + "</p>";
     $("bank-finding").innerHTML = html;
@@ -1165,7 +1171,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
         var row = { K: SWEEP_K[k] };
         var modes = ["additive", "multiplicative"];
         for (var p = 0; p < 2; p++) {
-          status.textContent = "Sweep: " + modes[p] + " bank at K = " + SWEEP_K[k] + " (" + secs + " s, " + SWEEP_NS + " surrogates a cell)…";
+          status.textContent = "Sweep: " + modes[p] + " bank at K = " + SWEEP_K[k] + " (" + secs + " s, " + SWEEP_NS + " surrogates per cell)…";
           var x = yield* bankSignalGen(SWEEP_K[k], modes[p], secs);
           var done = k * 2 + p;
           var res = yield* intoHeat(comodulogramGen(x, FS, PB, AB, SWEEP_NS, 1, { surrogate: sur }), null, function (v) {
@@ -1182,8 +1188,8 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
       bankCancel = null; setBusy(false); meter.style.width = "100%";
       var addLit = sweepData.rows.filter(function (r) { return r.add.nsig; }).map(function (r) { return r.K; });
       var mulLit = sweepData.rows.filter(function (r) { return r.mul.nsig; }).map(function (r) { return r.K; });
-      status.textContent = "Sweep done. Additive cells surviving the correction at K = " + (addLit.length ? addLit.join(", ") : "none") +
-        "; multiplicative at K = " + (mulLit.length ? mulLit.join(", ") : "none") + ".";
+      status.textContent = "Sweep done. K values where additive cells survive the correction: " + (addLit.length ? addLit.join(", ") : "none") +
+        ". Multiplicative: " + (mulLit.length ? mulLit.join(", ") : "none") + ".";
     }, null, 10);
   }
   function sweepTable() {
@@ -1360,7 +1366,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
     var file = this.files && this.files[0];
     if (!file) return;
     var st = $("byo-file");
-    if (file.size > 200 * 1024 * 1024) { st.textContent = "That file is over 200 MB. Decimate it first."; st.className = "status warn"; return; }
+    if (file.size > 200 * 1024 * 1024) { st.textContent = "That file is over 200 MB. Reduce its sample rate first."; st.className = "status warn"; return; }
     st.className = "status"; st.textContent = "Reading " + file.name + "…";
     var rd = new FileReader();
     rd.onload = function () {
@@ -1390,7 +1396,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
     var cyc = b.pb ? dur * b.pb[0][0] : 0;
     st.className = "status";
     st.textContent = msg + " " + dur.toFixed(dur < 100 ? 1 : 0) + " s at " + fmtHz(fs) + " Hz" +
-      (b.pb ? "; about " + Math.round(cyc) + " cycles of the slowest phase band" + (cyc < 50 ? ", fewer than the fifty the note calls marginal" : "") : "") + ".";
+      (b.pb ? "; about " + Math.round(cyc) + " cycles of the slowest phase band" + (cyc < 50 ? ", fewer than the 50 cycles the note calls marginal" : "") : "") + ".";
     if (b.pb && cyc < 50) st.className = "status warn";
   }
 
@@ -1413,7 +1419,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
   $("t-spiky").addEventListener("click", function () {
     testBands(); $("d-on").checked = true;
     loadSignal(synthPAC(50, TEST_SECS, 0, 22, { spiky: true }), 50, "spiky uncoupled test signal",
-      "A 0.5 Hz wave with a sharp spike each cycle, plus a 6 Hz rhythm that ignores it completely, plus noise.");
+      "A 0.5 Hz wave with a sharp spike each cycle, plus a 6 Hz rhythm that is not coupled to it, plus noise.");
     runByo();
   });
   $("t-noise").addEventListener("click", function () {
@@ -1424,12 +1430,12 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
 
   function runByo() {
     var st = $("byo-status");
-    if (!byo.x) { st.textContent = "Load a record or a test signal first."; st.className = "status warn"; return; }
+    if (!byo.x) { st.textContent = "Load a recording or a test signal first."; st.className = "status warn"; return; }
     var b = showBands();
     if (b.err) { st.textContent = b.err; st.className = "status warn"; return; }
     var nS = Math.max(20, Math.min(5000, Math.round(+$("f-nsurr").value) || 200));
     var sur = $("f-sur").value, fs = +$("f-fs").value;
-    if (byo.x.length > MAX_SAMPLES) { st.textContent = "Too many samples; decimate to under 2^21."; st.className = "status warn"; return; }
+    if (byo.x.length > MAX_SAMPLES) { st.textContent = "Too many samples. Reduce the sample rate to get under 2^21."; st.className = "status warn"; return; }
     if (byo.cancel) byo.cancel();
     st.className = "status";
     var useD = $("d-on").checked;
@@ -1444,7 +1450,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
     var warnN = nS < 20 * m ? " With " + nS + " surrogates the smallest possible p is " + (1 / (nS + 1)).toFixed(4) + ", which Benjamini–Hochberg over " + m + " cells may never let through; use about " + (20 * m) + "." : "";
     var meter = $("byo-meter"), t0 = performance.now(), parts = useD ? 2 : 1;
     var gen = (function* () {
-      st.textContent = "Comodulogram, " + m + " cells, " + nS + " surrogates each…" + warnN;
+      st.textContent = "Measuring " + m + " cells, " + nS + " surrogates each…" + warnN;
       byo.resA = yield* intoHeat(comodulogramGen(byo.x, fs, b.pb, b.ab, nS, 1, { surrogate: sur }), heatA, function (v) {
         meter.style.width = (100 * Math.min(1, v) / parts).toFixed(1) + "%";
       });
@@ -1454,7 +1460,7 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
         st.textContent = "Removing spikes…";
         var d = yield* despikeSteps(byo.x, fs, +$("d-k").value || 4, +$("d-win").value || 1, $("d-meth").value);
         byo.y = d.y; byo.despike = d;
-        st.textContent = "Spike-removed copy (" + d.spikes + (d.method === "clip" ? " samples clipped" : " spikes subtracted") + "): comodulogram…";
+        st.textContent = "Spike-removed copy (" + d.spikes + (d.method === "clip" ? " samples clipped" : " spikes subtracted") + "). Measuring the copy…";
         byo.resB = yield* intoHeat(comodulogramGen(d.y, fs, b.pb, b.ab, nS, 1, { surrogate: sur }), heatB, function (v) {
           meter.style.width = (50 + 50 * Math.min(1, v)).toFixed(1) + "%";
         });
@@ -1468,8 +1474,8 @@ function despike(x, fs, k, winSec, method) { return runSteps(despikeSteps(x, fs,
       if (byo.resB) {
         var mb = maxCell(byo.resB);
         txt += "; after spike removal (" + byo.despike.spikes + (byo.despike.method === "clip" ? " samples clipped" : " spikes") + ") largest z " + mb.z.toFixed(2) + ", " + mb.nsig + (mb.nsig === 1 ? " survives" : " survive");
-        if (ma.nsig && !mb.nsig) txt += ". The coupling did not survive the control: treat it as the spike's own harmonics";
-        else if (ma.nsig && mb.nsig) txt += ". Some cells survive the control; look at the trace before believing them";
+        if (ma.nsig && !mb.nsig) txt += ". The coupling did not survive spike removal, so treat it as harmonics of the spikes";
+        else if (ma.nsig && mb.nsig) txt += ". Some cells survive spike removal. Check the trace before you trust them";
       }
       st.textContent = txt + ". (" + ((performance.now() - t0) / 1000).toFixed(1) + " s)" + warnN;
       makeCsv();
