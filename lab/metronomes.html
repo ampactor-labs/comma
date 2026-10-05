@@ -1,0 +1,1055 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Metronomes on a Plank</title>
+<link rel="stylesheet" href="lab.css">
+<script src="kit.js"></script>
+<style>
+  .stage-wrap { position: relative; }
+  .ctl-group { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
+  .ctl-group + .ctl-group { margin-left: 0.4rem; }
+  .ctl-group .lbl { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); margin-right: 0.15rem; }
+  .btn-row button, .msg-row button { min-height: 40px; }
+  input[type="range"] { min-height: 40px; }
+  .msg-row { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; margin: 1rem 0 0.4rem; }
+  .msg-row input[type="text"] { flex: 1 1 10rem; max-width: 16rem; min-height: 40px; text-transform: uppercase; }
+  .slider-row .readout.num { min-width: 11rem; }
+  .log { font-family: var(--mono); font-size: 0.74rem; color: var(--dim); line-height: 1.7; min-height: 2.6em; }
+  .log b { color: var(--temper); font-weight: 500; }
+  .log i { color: var(--just); font-style: normal; }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media (max-width: 40rem) {
+    .ctl-group + .ctl-group { margin-left: 0; }
+    .slider-row .readout.num { min-width: 0; }
+  }
+</style>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">Back country &middot; 03 &middot; Wood</span>
+  <h1>Metronomes on a Plank</h1>
+  <p class="lede">Set eleven metronomes ticking on a board, each one a hair off from its neighbors, and they go about their business like ravens on a fence, every bird for itself. Now put the board on a couple of soda cans. Inside half a minute they are swinging together like a high school band on the Fourth of July. Nobody ordered it. The board did it, by giving a little under every one of them, and what it spent to bring them into line was the difference between them. I had written a message in that difference.</p>
+  <p>This is the coupling knob from the main page, built out of pine and two cans of cheap beer.</p>
+</header>
+
+<section aria-labelledby="h-plank">
+  <div class="sec-head">
+    <span class="sec-mark">01</span>
+    <div><h2 id="h-plank">The plank</h2></div>
+  </div>
+
+  <div class="panel">
+    <h3>Eleven metronomes, one board</h3>
+    <div class="stage-wrap">
+      <canvas id="stage" height="360" role="img" aria-label="Side view of a wooden plank resting on soda-can rollers, carrying a row of metronomes. Each metronome's arm swings; its letter is painted on its face, cyan while the letter is intact and amber once it has slipped. Interval names are carved into the front edge of the plank."></canvas>
+    </div>
+
+    <div class="btn-row" role="group" aria-label="Simulation controls">
+      <span class="ctl-group" role="group" aria-label="Where the plank sits">
+        <button id="b-floor" aria-pressed="false">On the floor</button>
+        <button id="b-rollers" aria-pressed="true">On rollers</button>
+      </span>
+      <span class="ctl-group" role="group" aria-label="Speed">
+        <button id="b-x1" aria-pressed="true">1&times;</button>
+        <button id="b-x4" aria-pressed="false">4&times;</button>
+        <button id="b-run" aria-pressed="false">Pause</button>
+      </span>
+      <span class="ctl-group" role="group" aria-label="How many metronomes">
+        <button id="b-n11" aria-pressed="true">11</button>
+        <button id="b-n5" aria-pressed="false">5</button>
+      </span>
+      <span class="ctl-group">
+        <button id="b-sound" data-needs-sound aria-pressed="false">Ticks off</button>
+      </span>
+    </div>
+
+    <div class="slider-row">
+      <label for="s-free">How loose the plank is</label>
+      <input type="range" id="s-free" min="0" max="100" value="71" step="1">
+      <span class="readout num" id="v-free">mass ratio 0.081</span>
+    </div>
+    <div class="slider-row">
+      <label for="s-spread">How different they are</label>
+      <input type="range" id="s-spread" min="0" max="50" value="15" step="1">
+      <span class="readout num" id="v-spread">spread 1.5%</span>
+    </div>
+
+    <div class="msg-row">
+      <label for="msg" class="vh">Message, up to ten characters</label>
+      <input type="text" id="msg" value="SLICKROCK" maxlength="10" spellcheck="false" autocomplete="off">
+      <button id="b-write" data-tone="just">Write</button>
+      <button id="b-reset">Reset</button>
+    </div>
+    <div class="readout" id="r-main">&nbsp;</div>
+    <div class="log" id="r-log" aria-label="Slip log">&nbsp;</div>
+    <div class="vh" aria-live="polite" id="r-live"></div>
+  </div>
+
+  <p class="note">How to run it. The page opens with the plank on rollers and SLICKROCK painted into the phases, one letter to a metronome; the one on the left is the anchor and carries none. Watch the letters go amber. Watch the arms come around until they lean together. Then press <b>On the floor</b>, <b>Reset</b>, <b>Write</b>, and leave it alone: the message keeps as long as you care to watch. Each metronome's tempo comes from one of the piano's intervals: the faster that interval beats on a piano, the faster its metronome runs, and the second slider sets how far apart the slowest and fastest are. The name under each one is carved into the plank's edge.</p>
+
+  <div class="panel">
+    <div class="grid-2">
+      <div>
+        <h3>Phase wheel</h3>
+        <canvas id="wheel" height="300" role="img" aria-label="Phase wheel. Each metronome is a dot on a circle at its current phase, sized by how wrong its interval is on a piano; a hollow ring marks where its free-running ghost would be. The arrow from the center is the mean field: its length is the order parameter R."></canvas>
+        <p class="note" style="margin-top:0.6rem">Solid dot: the metronome. Hollow ring: its ghost, the same metronome on a plank nailed to the floor. The gap between them is the letter. Thirty-two notches, one per letter. The arrow is the plank's opinion.</p>
+      </div>
+      <div>
+        <h3>Agreement and memory</h3>
+        <canvas id="chart" height="300" role="img" aria-label="Strip chart over the last sixty seconds of simulated time: the order parameter R from 0 to 1, and the number of letters still intact."></canvas>
+        <p class="note" style="margin-top:0.6rem"><span class="sage-t">R</span>, the order parameter, is 1 when every arm swings as one and near 0 when they scatter. <span class="just-t">Letters intact</span> counts the ones that have never slipped.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-knob">
+  <div class="sec-head">
+    <span class="sec-mark">02</span>
+    <div><h2 id="h-knob">Same knob, made of wood</h2></div>
+  </div>
+  <p>The main page has a slider marked K. Turn it up and eleven oscillators get pulled toward their average, the mean field, and the message they hold comes apart letter by letter. People hear that and figure it for a math trick. It is not a trick. It is what a board does.</p>
+  <p>Every metronome on the plank shoves the board a little each swing. The board answers by sliding the opposite way, by an amount set by the sum of all eleven swings at once, and every metronome feels that slide as a nudge at its base. That sum is the mean field. Nobody had to program it in. Pine supplies it free of charge.</p>
+  <p>On the floor, the plank cannot move, the sum goes nowhere, and K is zero. Each metronome keeps its own time and its own secret. On rollers the board gets a say, and the board, like every committee I ever sat through, wants consensus. The metronomes give it consensus. The ticks that rattled along like hail on a tin roof close up into one clack, and it is a satisfying sound, right up until you remember what it cost.</p>
+  <p>The message was never in any single metronome. It lived in how far each one stood from where it would have been alone, which is the only place a message can live in a row of clocks. Agreement pulls every one of them to the same place, and the distances go to zero, and so does what was written in them. The more they agree, the less there is to say.</p>
+</section>
+
+<section aria-labelledby="h-first">
+  <div class="sec-head">
+    <span class="sec-mark">03</span>
+    <div><h2 id="h-first">The letters go before the tune does</h2></div>
+  </div>
+  <p>Here is the part that surprised me. The arms take a good while to line up. The letters do not wait for them. Each letter has one thirty-second of a circle to rattle around in, a little over eleven degrees, and a plank that hardly seems to move is enough to shove a metronome that far in a few swings. The slip log under the plank keeps the times.</p>
+  <p id="p-measured" class="note">&nbsp;</p>
+  <p>So you do not need a dam to kill a river. A few cans under a board will do it, and the river will thank you for the steady beat while it dries up.</p>
+</section>
+
+<div class="foot">
+  <p><strong>What this is.</strong> A simulation, not a recording; no real metronomes were harmed or consulted. The model is the one in James Pantaleone, <a href="https://doi.org/10.1119/1.1501118">&ldquo;Synchronization of metronomes,&rdquo; Am. J. Phys. 70, 992 (2002)</a>. Each metronome is a pendulum, &theta;&Prime; + &omega;&sup2; sin&thinsp;&theta; + &mu;[(&theta;/&theta;<sub>v</sub>)&sup2; &minus; 1]&thinsp;&theta;&prime; = &minus;(x&Prime;/l)&thinsp;cos&thinsp;&theta;, where the van der Pol term stands in for the escapement and settles the swing near 0.75&nbsp;rad (&theta;<sub>v</sub> = 0.375&nbsp;rad, &mu; = 0.4&nbsp;s<sup>&minus;1</sup>). The plank obeys x&Prime;/l = &minus;&beta;&thinsp;&Sigma; d&sup2;(sin&thinsp;&theta;<sub>j</sub>)/dt&sup2; &minus; &gamma;x&prime;/l &minus; &kappa;x/l with &beta; = m/(M + Nm), roller friction &gamma; = 0.3&nbsp;s<sup>&minus;1</sup>, and a weak centering spring &kappa; = 0.2&nbsp;s<sup>&minus;2</sup> that keeps the board from wandering off the cans (it is far below the swing rate). Because the plank's acceleration depends on every arm's, the accelerations are solved together each step, a rank-one system done with Sherman&ndash;Morrison. Integration is fourth-order Runge&ndash;Kutta at a fixed 1&nbsp;ms of simulated time.</p>
+  <p><strong>Parameters.</strong> A swing of 0.75&nbsp;rad runs slower than the small-angle rate, so the base small-angle rate &omega;/2&pi; = <span id="f-lin" class="num">&hellip;</span>&nbsp;Hz is chosen at load so that a free metronome, measured, swings at <span id="f-swing" class="num">&hellip;</span>&nbsp;Hz. It ticks twice per swing: <span id="f-bpm" class="num">&hellip;</span> ticks a minute on the dial. Each metronome's rate is offset in proportion to its interval's beat rate against the piano (Kit.intervals of 12-EDO, the same table as the main page), centred on the mean, with the spread slider setting the full range from slowest to fastest. The looseness slider is the mass ratio Nm/(M + Nm), from 0 (on the floor) to 0.16; I capped it there because in my scans of this model at 0.2 with eleven metronomes the in-phase state sometimes failed to win inside 150&nbsp;s. The plank's motion on screen is drawn four times larger than the model's so you can see it (two and a half times on a narrow screen); the rollers turn at the rate rolling without slipping would give for the drawn motion, and the sliding weights sit higher on the slower metronomes by an exaggerated amount. The arms swing at their true angles.</p>
+  <p><strong>The message.</strong> Phase is read as atan2 of &minus;&theta;&prime;/&Omega; and &theta;, with &Omega; the measured swing rate. Every metronome has a ghost, an uncoupled copy that starts from its state at the moment you press Write. Writing advances each metronome along its own cycle by the letter's phase (letter index &times; 2&pi;/32); the ghost is not advanced. A letter reads as the phase gap to its ghost, rounded to 32 levels, and it is marked slipped the first time that rounding disagrees with what was written. With the plank on the floor, metronome and ghost obey identical equations and the gap only wobbles by the small non-uniformity of the phase estimate, which in my tests never passed 1.7 degrees against a margin of 5.6. Times in the slip log and the chart are simulated seconds. Sound is a filtered noise click at each centre crossing, scheduled to the simulated time.</p>
+</div>
+
+</div>
+
+<script>
+/*SIM-START*/
+// The plank: N pendulums θ_i on a cart x, after Pantaleone (2002).
+//   θ_i'' + ω_i² sin θ_i + μ[(θ_i/θv)² − 1] θ_i' = −(x''/l) cos θ_i
+//   x''/l = −β Σ_j d²/dt²(sin θ_j) − γ x'/l − κ x/l,   β = m/(M+Nm)
+// With X = x/l and d²/dt² sin θ = cos θ θ'' − sin θ θ'², the accelerations
+// solve (I − β c cᵀ) θ'' = f − c B, c_i = cos θ_i. Sherman–Morrison inverts
+// that rank-one system in O(N); it reduces to one scalar, the plank's
+// acceleration A = (B − β c·f) / (1 − β c·c), and then θ_i'' = f_i − c_i A.
+function makePlank(N, omega, P) {
+  var S = { N: N, omega: Float64Array.from(omega), P: P,
+    th: new Float64Array(N), w: new Float64Array(N),
+    gth: new Float64Array(N), gw: new Float64Array(N),
+    X: 0, V: 0, t: 0, Om: new Float64Array(N) };
+  var M = 2 * N + 2;
+  var y = new Float64Array(M), yt = new Float64Array(M), f = new Float64Array(N);
+  var k1 = new Float64Array(M), k2 = new Float64Array(M), k3 = new Float64Array(M), k4 = new Float64Array(M);
+  var gy = new Float64Array(2 * N), gyt = new Float64Array(2 * N);
+  var g1 = new Float64Array(2 * N), g2 = new Float64Array(2 * N), g3 = new Float64Array(2 * N), g4 = new Float64Array(2 * N);
+  function escapement(th, w) { var r = th / P.thv; return P.mu * (r * r - 1) * w; }
+  function deriv(y, out) {
+    var b = P.ratio / N, cf = 0, cc = 0, sw = 0;
+    for (var i = 0; i < N; i++) {
+      var th = y[i], w = y[N + i], c = Math.cos(th), s = Math.sin(th);
+      var fi = -S.omega[i] * S.omega[i] * s - escapement(th, w);
+      f[i] = fi; cf += c * fi; cc += c * c; sw += s * w * w;
+    }
+    var B = b * sw - P.gam * y[2 * N + 1] - P.kc * y[2 * N];
+    var A = (B - b * cf) / (1 - b * cc);
+    for (var j = 0; j < N; j++) { out[j] = y[N + j]; out[N + j] = f[j] - Math.cos(y[j]) * A; }
+    out[2 * N] = y[2 * N + 1]; out[2 * N + 1] = A;
+  }
+  // the ghosts: the same metronomes on a plank nailed to the floor
+  function gderiv(y, out) {
+    for (var i = 0; i < N; i++) {
+      out[i] = y[N + i];
+      out[N + i] = -S.omega[i] * S.omega[i] * Math.sin(y[i]) - escapement(y[i], y[N + i]);
+    }
+  }
+  function rk4(fn, y, yt, a, b, c, d, n, h) {
+    var j;
+    fn(y, a); for (j = 0; j < n; j++) yt[j] = y[j] + 0.5 * h * a[j];
+    fn(yt, b); for (j = 0; j < n; j++) yt[j] = y[j] + 0.5 * h * b[j];
+    fn(yt, c); for (j = 0; j < n; j++) yt[j] = y[j] + h * c[j];
+    fn(yt, d);
+    for (j = 0; j < n; j++) y[j] += h / 6 * (a[j] + 2 * b[j] + 2 * c[j] + d[j]);
+  }
+  // one step of h seconds; onTick(i, sub) for every arm that crosses centre
+  S.step = function (h, onTick, sub) {
+    var i;
+    for (i = 0; i < N; i++) { y[i] = S.th[i]; y[N + i] = S.w[i]; gy[i] = S.gth[i]; gy[N + i] = S.gw[i]; }
+    y[2 * N] = S.X; y[2 * N + 1] = S.V;
+    rk4(deriv, y, yt, k1, k2, k3, k4, M, h);
+    rk4(gderiv, gy, gyt, g1, g2, g3, g4, 2 * N, h);
+    for (i = 0; i < N; i++) {
+      if (onTick && (y[i] > 0) !== (S.th[i] > 0)) onTick(i, sub);
+      S.th[i] = y[i]; S.w[i] = y[N + i]; S.gth[i] = gy[i]; S.gw[i] = gy[N + i];
+    }
+    S.X = y[2 * N]; S.V = y[2 * N + 1]; S.t += h;
+  };
+  // phase on the (θ, θ'/Ω) plane, Ω the metronome's true swing rate at
+  // its own amplitude, so the phase advances nearly uniformly
+  S.phase = function (i) { return Math.atan2(-S.w[i] / S.Om[i], S.th[i]); };
+  S.gphase = function (i) { return Math.atan2(-S.gw[i] / S.Om[i], S.gth[i]); };
+  S.dev = function (i) {
+    var d = S.phase(i) - S.gphase(i);
+    return d - 2 * Math.PI * Math.floor((d + Math.PI) / (2 * Math.PI));
+  };
+  // A phase kick: run pendulum i on its own for dphi/Ω seconds, so it lands
+  // on its own cycle exactly where it would have been, later.
+  S.kick = function (i, dphi, h) {
+    var tau = (((dphi % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)) / S.Om[i];
+    var n = Math.round(tau / h), hh = n ? tau / n : 0;
+    var q = new Float64Array(2), qt = new Float64Array(2);
+    var a = [new Float64Array(2), new Float64Array(2), new Float64Array(2), new Float64Array(2)];
+    var om = S.omega[i];
+    function fn(v, o) { o[0] = v[1]; o[1] = -om * om * Math.sin(v[0]) - escapement(v[0], v[1]); }
+    q[0] = S.th[i]; q[1] = S.w[i];
+    for (var s = 0; s < n; s++) rk4(fn, q, qt, a[0], a[1], a[2], a[3], 2, hh);
+    S.th[i] = q[0]; S.w[i] = q[1];
+  };
+  S.resetGhosts = function () { for (var i = 0; i < N; i++) { S.gth[i] = S.th[i]; S.gw[i] = S.w[i]; } };
+  S.order = function () {
+    var re = 0, im = 0;
+    for (var i = 0; i < N; i++) { var p = S.phase(i); re += Math.cos(p); im += Math.sin(p); }
+    return { R: Math.sqrt(re * re + im * im) / N, psi: Math.atan2(im, re) };
+  };
+  return S;
+}
+// Run one free metronome onto its cycle; measure its amplitude and swing rate.
+function limitCycle(omega, P, h) {
+  var th = P.thv * 2, w = 0, t = 0, last = null, sum = 0, cnt = 0, amp = 0;
+  function acc(th, w) { var r = th / P.thv; return -omega * omega * Math.sin(th) - P.mu * (r * r - 1) * w; }
+  while (t < 60) {
+    var a1 = acc(th, w), v1 = w;
+    var v2 = w + 0.5 * h * a1, a2 = acc(th + 0.5 * h * v1, v2);
+    var v3 = w + 0.5 * h * a2, a3 = acc(th + 0.5 * h * v2, v3);
+    var v4 = w + h * a3, a4 = acc(th + h * v3, v4);
+    var nth = th + h / 6 * (v1 + 2 * v2 + 2 * v3 + v4), nw = w + h / 6 * (a1 + 2 * a2 + 2 * a3 + a4);
+    if (t > 40) {
+      amp = Math.max(amp, Math.abs(nth));
+      if (th < 0 && nth >= 0) {
+        var tc = t + h * (-th) / (nth - th);
+        if (last !== null) { sum += tc - last; cnt++; }
+        last = tc;
+      }
+    }
+    th = nth; w = nw; t += h;
+  }
+  return { amp: amp, Om: 2 * Math.PI / (sum / cnt) };
+}
+/*SIM-END*/
+
+(function () {
+  "use strict";
+  Kit.nav("metronomes.html");
+  Kit.soundBar();
+
+  var TWO_PI = 2 * Math.PI;
+  var ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ .,!?'";
+  var SHORT = { 3: "P5", 5: "M3", 7: "h7", 9: "M2", 11: "11th", 13: "13th", 15: "M7", 17: "17th", 19: "19th", 21: "21st", 23: "23rd" };
+  var IV_ALL = Kit.intervals(Kit.edo(12));
+  var ERR_MAX = Math.max.apply(null, IV_ALL.map(function (v) { return Math.abs(v.err); }));
+  var SWING = 1.6, F0 = SWING, H = 0.001, RATIO_MAX = 0.16, MAX_FRAME = 0.1;
+  var P = { mu: 0.4, thv: 0.375, gam: 0.3, kc: 0.2, ratio: 0 };
+  // A 0.75 rad swing runs slower than the small-angle rate, so pick the
+  // small-angle rate that makes the real swing land on SWING (two passes).
+  var LC = limitCycle(TWO_PI * F0, P, H);
+  F0 = SWING * F0 / (LC.Om / TWO_PI);
+  LC = limitCycle(TWO_PI * F0, P, H);
+  F0 = SWING * F0 / (LC.Om / TWO_PI);
+  LC = limitCycle(TWO_PI * F0, P, H);
+  var OM_RATIO = LC.Om / (TWO_PI * F0);
+
+  document.getElementById("f-swing").textContent = (LC.Om / TWO_PI).toFixed(3);
+  document.getElementById("f-lin").textContent = F0.toFixed(3);
+  document.getElementById("f-bpm").textContent = Math.round(2 * 60 * LC.Om / TWO_PI);
+
+  // ── state ──
+  var N = 11, spread = 0.015, speed = 1, running = !Kit.reduced, seed = 1;
+  var IV, sim, refPhase = 0;
+  var msg = null;           // { level[], slipped[], slipT[], text, tWrite }
+  var hist = [];            // { t, R, intact }
+  var nextSample = 0, Rs = null;
+  var lock = { since: 0, above: 0, t: null };
+  var lastRollerRatio = 0.0807;
+  var flash = [], paint = [], slipFlash = [], trails = [], dotTrail = [];
+  var lift = 1, liftTarget = 1;
+
+  function sliderToRatio(v) { return RATIO_MAX * (v / 100) * (v / 100); }
+  function ratioToSlider(r) { return Math.round(100 * Math.sqrt(r / RATIO_MAX)); }
+
+  function omegasFor(n, sp) {
+    var b = IV_ALL.slice(0, n).map(function (v) { return v.beat; });
+    var mb = b.reduce(function (a, c) { return a + c; }, 0) / n;
+    var rg = Math.max.apply(null, b) - Math.min.apply(null, b);
+    return b.map(function (x) { return TWO_PI * F0 * (1 + sp * (x - mb) / rg); });
+  }
+
+  function build() {
+    IV = IV_ALL.slice(0, N);
+    var om = omegasFor(N, spread);
+    sim = makePlank(N, om, P);
+    var rng = Kit.mulberry32(seed * 7919 + N);
+    for (var i = 0; i < N; i++) {
+      sim.Om[i] = om[i] * OM_RATIO;
+      var p = rng() * TWO_PI;
+      sim.th[i] = LC.amp * Math.cos(p);
+      sim.w[i] = -LC.amp * sim.Om[i] * Math.sin(p);
+    }
+    sim.resetGhosts();
+    refPhase = 0; hist = []; nextSample = 0; msg = null;
+    lock = { above: 0, t: null, since: 0 };
+    flash = new Float64Array(N); paint = new Float64Array(N); slipFlash = new Float64Array(N);
+    trails = []; dotTrail = [];
+    for (var j = 0; j < N; j++) { trails.push([]); dotTrail.push([]); }
+    logLines = [];
+    sample(true);
+  }
+
+  function setSpread(sp) {
+    spread = sp;
+    var om = omegasFor(N, spread);
+    for (var i = 0; i < N; i++) { sim.omega[i] = om[i]; sim.Om[i] = om[i] * OM_RATIO; }
+    lock.above = 0; lock.t = null; lock.since = sim.t;
+  }
+
+  function setRatio(r) {
+    var was = P.ratio;
+    P.ratio = r;
+    if (r > 0) lastRollerRatio = r;
+    liftTarget = r > 0 ? 1 : 0;
+    if ((was > 0) !== (r > 0) || Math.abs(was - r) > 1e-9) { lock.above = 0; lock.t = null; lock.since = sim.t; }
+  }
+
+  // ── the message ──
+  var logLines = [];
+  function writeMessage(text) {
+    var s = (text || "").toUpperCase();
+    sim.resetGhosts();
+    msg = { level: [], slipped: [], slipT: [], text: "", tWrite: sim.t };
+    for (var i = 1; i < N; i++) {
+      var ch = i - 1 < s.length ? s[i - 1] : " ";
+      var idx = ALPHA.indexOf(ch);
+      if (idx < 0) idx = ALPHA.indexOf(" ");
+      msg.level[i] = idx; msg.slipped[i] = false; msg.slipT[i] = null;
+      msg.text += ALPHA[idx];
+      sim.kick(i, idx / 32 * TWO_PI, H);
+      paint[i] = 1;
+    }
+    logLines = [];
+    hist.push({ t: sim.t, R: Rs === null ? sim.order().R : Rs, intact: N - 1, mark: "write" });
+    announce("Written: " + msg.text.trim() + ".");
+  }
+  function levelOf(i) {
+    var lv = Math.round(sim.dev(i) / TWO_PI * 32);
+    return ((lv % 32) + 32) % 32;
+  }
+  function decode() {
+    if (!msg) return;
+    for (var i = 1; i < N; i++) {
+      if (!msg.slipped[i] && levelOf(i) !== msg.level[i]) {
+        msg.slipped[i] = true; msg.slipT[i] = sim.t - msg.tWrite; slipFlash[i] = 1;
+        logLines.push({ i: i, t: msg.slipT[i] });
+        if (intactCount() === 0) announce("Every letter has slipped, " + msg.slipT[i].toFixed(1) + " seconds after writing.");
+      }
+    }
+  }
+  function intactCount() {
+    if (!msg) return 0;
+    var c = 0;
+    for (var i = 1; i < N; i++) if (!msg.slipped[i]) c++;
+    return c;
+  }
+  function readText() {
+    var s = "";
+    for (var i = 1; i < N; i++) s += ALPHA[levelOf(i)];
+    return s;
+  }
+
+  // ── sampling the history and the lock ──
+  function sample(force) {
+    var o = sim.order();
+    if (force || sim.t >= nextSample) {
+      // R from atan2 phases wobbles at twice the swing rate; smooth it a little
+      Rs = force || Rs === null ? o.R : Rs + (o.R - Rs) * 0.35;
+      hist.push({ t: sim.t, R: Rs, intact: msg ? intactCount() : null });
+      if (hist.length > 1400) hist.splice(0, hist.length - 1400);
+      nextSample = sim.t + 0.1;
+      if (P.ratio > 0 && o.R > 0.95) {
+        lock.above += 0.1;
+        if (lock.t === null && lock.above >= 2) { lock.t = sim.t - 2; announce("In step: R stayed above 0.95 from " + (lock.t - lock.since).toFixed(1) + " seconds."); }
+      } else lock.above = 0;
+    }
+    return o;
+  }
+
+  // ── sound ──
+  var snd = null; // { out }
+  function soundOn() {
+    var ac = Kit.sound.audio();
+    var g = ac.createGain();
+    g.gain.value = 0.55;
+    g.connect(Kit.sound.bus());
+    snd = { out: g };
+    Kit.sound.register("metronomes", g, [], function () { snd = null; syncSoundBtn(); });
+    syncSoundBtn();
+  }
+  function soundOff() { Kit.sound.stop("metronomes"); snd = null; syncSoundBtn(); }
+  function syncSoundBtn() {
+    var b = document.getElementById("b-sound");
+    b.setAttribute("aria-pressed", snd ? "true" : "false");
+    b.textContent = snd ? "Ticks on" : "Ticks off";
+  }
+  var tickQueue = [];
+  function onTick(i, sub) {
+    flash[i] = 1;
+    if (snd) tickQueue.push({ i: i, sub: sub });
+  }
+  function flushTicks() {
+    if (!snd || !tickQueue.length) { tickQueue.length = 0; return; }
+    var ac = Kit.sound.audio(), t0 = ac.currentTime + 0.05;
+    var g = 0.11 / Math.sqrt(speed);
+    for (var k = 0; k < tickQueue.length; k++) {
+      var q = tickQueue[k];
+      Kit.sound.click(t0 + q.sub * H / speed, 1700 * (1 + 0.035 * q.i), g, snd.out, 0.05);
+    }
+    tickQueue.length = 0;
+  }
+
+  // ── advancing the world ──
+  var stepDebt = 0;
+  function advance(simSec) {
+    stepDebt += simSec / H;
+    var n = Math.floor(stepDebt + 1e-9), meanOm = 0;
+    stepDebt -= n;
+    for (var i = 0; i < N; i++) meanOm += sim.Om[i];
+    meanOm /= N;
+    for (var s = 0; s < n; s++) {
+      sim.step(H, onTick, s);
+      refPhase += meanOm * H;
+      if (s % 10 === 9) { decode(); sample(false); }
+    }
+    decode(); sample(false);
+    if (refPhase > TWO_PI * 1000) refPhase -= TWO_PI * 1000;
+  }
+
+  // ── drawing ──
+  var themeStamp = 0, isDark = true, C = {};
+  function readTheme() {
+    themeStamp++;
+    ["--ground", "--panel", "--panel-2", "--rule", "--ink", "--dim", "--just", "--temper", "--sage", "--rose"].forEach(function (k) { C[k.slice(2)] = Kit.css(k); });
+    var h = C.ground.replace("#", "");
+    var n = parseInt(h.length === 3 ? h.split("").map(function (c) { return c + c; }).join("") : h, 16);
+    isDark = ((n >> 16 & 255) * 0.299 + (n >> 8 & 255) * 0.587 + (n & 255) * 0.114) < 128;
+    plankCache = null;
+  }
+  readTheme();
+
+  function fitIfNeeded(cv, st) {
+    var dpr = window.devicePixelRatio || 1, w = cv.clientWidth;
+    if (!st.ctx || st.w !== w || st.dpr !== dpr || st.stamp !== themeStamp || st.cssH !== cv.dataset.cssHeight) {
+      var r = Kit.fit(cv);
+      st.ctx = r; st.w = w; st.dpr = dpr; st.stamp = themeStamp; st.cssH = cv.dataset.cssHeight;
+    } else {
+      st.ctx.g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      st.ctx.g.clearRect(0, 0, st.ctx.w, st.ctx.h);
+    }
+    return st.ctx;
+  }
+
+  var stageCv = document.getElementById("stage"), stageSt = {};
+  var wheelCv = document.getElementById("wheel"), wheelSt = {};
+  var chartCv = document.getElementById("chart"), chartSt = {};
+
+  // geometry of the stage for a given width; the height follows from it
+  function layout(w) {
+    var L = { w: w, narrow: w < 520 };
+    L.margin = L.narrow ? 24 : 66;
+    L.exag = L.narrow ? 2.5 : 4;
+    L.pw = w - 2 * L.margin;
+    L.pT = L.narrow ? 13 : 18;
+    L.rr = Math.max(10, Math.min(19, w * 0.017));
+    L.inset = L.narrow ? 3 : 14;
+    L.spacing = (L.pw - 2 * L.inset) / N;
+    L.bw = Math.min(L.spacing * 0.78, 60);
+    L.hh = L.narrow ? 124 : Math.min(170, Math.max(L.bw * 2.7, 120));
+    L.below = L.narrow ? 24 : 32;
+    L.top = L.narrow ? 30 : 34;
+    L.h = Math.round(L.top + L.hh * 1.17 + L.pT + 2 * L.rr + L.below);
+    return L;
+  }
+  function stageHeight() { return String(layout(stageCv.clientWidth || 600).h); }
+
+  // the board itself, cached per size and theme: amber-stained pine over the panel
+  var plankCache = null;
+  function plankImage(pw, ph, dpr) {
+    var key = pw + "x" + ph + "@" + dpr + "#" + themeStamp;
+    if (plankCache && plankCache.key === key) return plankCache.cv;
+    var cv = document.createElement("canvas");
+    cv.width = Math.ceil(pw * dpr); cv.height = Math.ceil(ph * dpr);
+    var g = cv.getContext("2d");
+    g.scale(dpr, dpr);
+    g.fillStyle = C["panel-2"]; g.fillRect(0, 0, pw, ph);
+    var base = g.createLinearGradient(0, 0, 0, ph);
+    base.addColorStop(0, Kit.alpha(C.temper, isDark ? 0.78 : 0.62));
+    base.addColorStop(0.45, Kit.alpha(C.temper, isDark ? 0.62 : 0.52));
+    base.addColorStop(1, Kit.alpha(C.temper, isDark ? 0.42 : 0.70));
+    g.fillStyle = base; g.fillRect(0, 0, pw, ph);
+    g.fillStyle = Kit.alpha(C.rose, isDark ? 0.10 : 0.08); g.fillRect(0, 0, pw, ph);
+    var rng = Kit.mulberry32(42);
+    // grain: long wavering lines, swerving around a couple of knots
+    var knots = [{ x: pw * 0.23, y: ph * 0.55, r: ph * 0.22 }, { x: pw * 0.71, y: ph * 0.35, r: ph * 0.18 }];
+    var lines = Math.max(9, Math.round(ph / 1.6));
+    for (var k = 0; k < lines; k++) {
+      var y0 = (k + 0.5) / lines * ph, ph1 = rng() * 6, ph2 = rng() * 6, a1 = 0.25 + rng() * 0.6;
+      g.beginPath();
+      for (var x = -2; x <= pw + 2; x += 3) {
+        var yy = y0 + Math.sin(x * 0.011 + ph1) * a1 + Math.sin(x * 0.047 + ph2) * 0.25;
+        for (var q = 0; q < knots.length; q++) {
+          var kn = knots[q], dx = (x - kn.x) / (kn.r * 3.2), dy = yy - kn.y;
+          var push = Math.exp(-dx * dx) * kn.r * 1.1;
+          yy += (dy >= 0 ? 1 : -1) * push * Math.exp(-Math.abs(dy) / (kn.r * 1.6));
+        }
+        if (x < 0) g.moveTo(x, yy); else g.lineTo(x, yy);
+      }
+      var dark = rng() < 0.6;
+      g.strokeStyle = dark ? Kit.alpha(isDark ? C.ground : C.ink, 0.10 + rng() * 0.16) : Kit.alpha(isDark ? C.ink : C.panel, 0.05 + rng() * 0.08);
+      g.lineWidth = 0.6 + rng() * 0.9;
+      g.stroke();
+    }
+    knots.forEach(function (kn) {
+      for (var r = kn.r; r > 0.6; r -= 1.3) {
+        g.beginPath(); g.ellipse(kn.x, kn.y, r * 2.4, r, 0, 0, TWO_PI);
+        g.strokeStyle = Kit.alpha(isDark ? C.ground : C.ink, 0.10); g.lineWidth = 0.7; g.stroke();
+      }
+      g.beginPath(); g.ellipse(kn.x, kn.y, kn.r * 0.9, kn.r * 0.45, 0, 0, TWO_PI);
+      g.fillStyle = Kit.alpha(isDark ? C.ground : C.ink, 0.22); g.fill();
+    });
+    // light from above, bevels, end grain
+    var sheen = g.createLinearGradient(0, 0, 0, ph);
+    sheen.addColorStop(0, Kit.alpha(isDark ? C.ink : C.panel, 0.30));
+    sheen.addColorStop(0.18, Kit.alpha(isDark ? C.ink : C.panel, 0.0));
+    sheen.addColorStop(0.8, Kit.alpha(isDark ? C.ground : C.ink, 0.0));
+    sheen.addColorStop(1, Kit.alpha(isDark ? C.ground : C.ink, 0.35));
+    g.fillStyle = sheen; g.fillRect(0, 0, pw, ph);
+    g.fillStyle = Kit.alpha(isDark ? C.ground : C.ink, 0.25);
+    g.fillRect(0, 0, 3, ph); g.fillRect(pw - 3, 0, 3, ph);
+    plankCache = { key: key, cv: cv };
+    return cv;
+  }
+
+  function trapezoid(g, cx, yb, bw, tw, hh) {
+    g.beginPath();
+    g.moveTo(cx - bw / 2, yb); g.lineTo(cx - tw / 2, yb - hh);
+    g.lineTo(cx + tw / 2, yb - hh); g.lineTo(cx + bw / 2, yb); g.closePath();
+  }
+
+  function drawStage(dtWall) {
+    stageCv.dataset.cssHeight = stageHeight();
+    var r = fitIfNeeded(stageCv, stageSt), g = r.g, w = r.w, h = r.h;
+    if (w < 120) return;
+    var Lg = layout(w), narrow = Lg.narrow;
+
+    // the table
+    var groundY = h - Lg.below;
+    var tab = g.createLinearGradient(0, groundY, 0, h);
+    tab.addColorStop(0, C["panel-2"]); tab.addColorStop(1, Kit.alpha(C["panel-2"], 0.2));
+    g.fillStyle = tab; g.fillRect(0, groundY, w, h - groundY);
+    g.fillStyle = C.rule; g.fillRect(0, groundY, w, 1);
+
+    // ease the rollers in and out
+    var k = Kit.reduced ? 1 : 1 - Math.exp(-dtWall * 5);
+    lift += (liftTarget - lift) * k;
+    if (Math.abs(lift - liftTarget) < 0.002) lift = liftTarget;
+    var ease = lift * lift * (3 - 2 * lift);
+
+    var margin = Lg.margin, pw = Lg.pw, pT = Lg.pT, rr = Lg.rr;
+    var plankTop = groundY - 2 * rr * ease - pT;
+    var spacing = Lg.spacing, bw = Lg.bw, hh = Lg.hh;
+    var lpx = hh * 0.86;                                 // pendulum length on screen
+    var xd = sim.X * lpx * Lg.exag;                      // drawn plank offset
+
+    // rollers: two soda cans seen end-on, rolling without slipping
+    var rollAlpha = ease;
+    var cans = narrow ? [0.2, 0.8] : [0.17, 0.5, 0.83];
+    if (rollAlpha > 0.01) {
+      cans.forEach(function (fx, ci) {
+        var outward = (1 - ease) * (fx < 0.5 ? -1 : fx > 0.5 ? 1 : 0) * w * 0.35;
+        var cx = margin + pw * fx + xd / 2 + outward, cy = groundY - rr;
+        var ang = (xd / 2 + outward) / rr + ci;
+        g.save(); g.globalAlpha = rollAlpha;
+        g.beginPath(); g.ellipse(cx, groundY + 1, rr * 1.05, 2.2, 0, 0, TWO_PI);
+        g.fillStyle = Kit.alpha(isDark ? C.ground : C.ink, 0.3); g.fill();
+        var mg = g.createRadialGradient(cx - rr * 0.35, cy - rr * 0.4, rr * 0.1, cx, cy, rr);
+        mg.addColorStop(0, Kit.alpha(C.ink, isDark ? 0.75 : 0.18));
+        mg.addColorStop(0.6, Kit.alpha(C.dim, isDark ? 0.75 : 0.55));
+        mg.addColorStop(1, Kit.alpha(C.dim, isDark ? 0.45 : 0.85));
+        g.beginPath(); g.arc(cx, cy, rr, 0, TWO_PI); g.fillStyle = mg; g.fill();
+        g.lineWidth = Math.max(1.5, rr * 0.18); g.strokeStyle = Kit.alpha(C.rose, 0.85);
+        g.beginPath(); g.arc(cx, cy, rr * 0.86, ang, ang + Math.PI * 1.2); g.stroke();
+        g.lineWidth = 1; g.strokeStyle = Kit.alpha(C.ink, 0.35);
+        g.beginPath(); g.arc(cx, cy, rr * 0.55, 0, TWO_PI); g.stroke();
+        g.fillStyle = Kit.alpha(C.ink, 0.8);
+        g.beginPath(); g.arc(cx + Math.cos(ang + 3.6) * rr * 0.6, cy + Math.sin(ang + 3.6) * rr * 0.6, Math.max(1.4, rr * 0.13), 0, TWO_PI); g.fill();
+        g.restore();
+      });
+    }
+
+    // the plank and its shadow
+    var px0 = margin + xd;
+    var sh = g.createLinearGradient(0, groundY - 6, 0, groundY + 6);
+    sh.addColorStop(0, Kit.alpha(isDark ? C.ground : C.ink, 0)); sh.addColorStop(0.5, Kit.alpha(isDark ? C.ground : C.ink, isDark ? 0.6 : 0.18)); sh.addColorStop(1, Kit.alpha(isDark ? C.ground : C.ink, 0));
+    g.fillStyle = sh; g.fillRect(px0 + 6, groundY - 6, pw - 12, 12);
+    g.drawImage(plankImage(pw, pT, r.dpr), px0, plankTop, pw, pT);
+
+    // carved interval names on the front edge
+    g.font = (narrow ? "500 9px " : "500 10.5px ") + "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+    g.textAlign = "center"; g.textBaseline = "middle";
+    var xs = [];
+    for (var i = 0; i < N; i++) xs.push(px0 + Lg.inset + spacing * (i + 0.5));
+    for (i = 0; i < N; i++) {
+      var lab = SHORT[IV[i].n];
+      if (narrow && N > 6) lab = lab.replace(/(th|st|rd)$/, "");
+      g.fillStyle = Kit.alpha(isDark ? C.ground : C.panel, 0.45);
+      g.fillText(lab, xs[i], plankTop + pT / 2 + 1);
+      g.fillStyle = Kit.alpha(C.ink, isDark ? 0.85 : 0.9);
+      g.fillText(lab, xs[i], plankTop + pT / 2);
+    }
+
+    // the metronomes
+    var yb = plankTop, tw = bw * 0.42;
+    var monoBold = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+    var meanOm = 0; for (i = 0; i < N; i++) meanOm += sim.omega[i]; meanOm /= N;
+    for (i = 0; i < N; i++) {
+      var cx = xs[i];
+      // base foot
+      g.fillStyle = Kit.alpha(isDark ? C.ground : C.ink, isDark ? 0.75 : 0.55);
+      g.fillRect(cx - bw * 0.56, yb - 4, bw * 1.12, 4);
+      // housing: dark stained wood with a lit left face
+      trapezoid(g, cx, yb - 4, bw, tw, hh);
+      g.fillStyle = C.panel; g.fill();
+      var hg = g.createLinearGradient(cx - bw / 2, 0, cx + bw / 2, 0);
+      hg.addColorStop(0, Kit.alpha(C.temper, isDark ? 0.42 : 0.55));
+      hg.addColorStop(0.35, Kit.alpha(C.temper, isDark ? 0.30 : 0.42));
+      hg.addColorStop(1, Kit.alpha(isDark ? C.ground : C.ink, isDark ? 0.6 : 0.45));
+      g.fillStyle = hg; g.fill();
+      g.fillStyle = Kit.alpha(C.rose, 0.12); g.fill();
+      g.lineWidth = 1; g.strokeStyle = Kit.alpha(isDark ? C.ink : C.ink, isDark ? 0.18 : 0.35); g.stroke();
+      // face: the scale behind the arm
+      var faceTop = yb - 4 - hh * 0.9, pivotY = yb - 4 - hh * 0.27;
+      var fwTop = tw * 0.62, fwBot = bw * 0.5;
+      g.beginPath();
+      g.moveTo(cx - fwTop / 2, faceTop); g.lineTo(cx + fwTop / 2, faceTop);
+      g.lineTo(cx + fwBot / 2, pivotY); g.lineTo(cx - fwBot / 2, pivotY); g.closePath();
+      g.fillStyle = Kit.alpha(isDark ? C.ground : C.panel, isDark ? 0.55 : 0.6); g.fill();
+      g.strokeStyle = Kit.alpha(C.ink, 0.12); g.stroke();
+      if (!narrow) {
+        g.strokeStyle = Kit.alpha(C.ink, 0.22); g.lineWidth = 1;
+        for (var m = 1; m < 9; m++) {
+          var yy = faceTop + (pivotY - faceTop) * m / 9, half = (fwTop + (fwBot - fwTop) * m / 9) * 0.28;
+          g.beginPath(); g.moveTo(cx - half, yy); g.lineTo(cx - half * 0.45, yy); g.moveTo(cx + half * 0.45, yy); g.lineTo(cx + half, yy); g.stroke();
+        }
+      }
+      // letter plate under the pivot
+      var plateH = Math.min(hh * 0.2, bw * 0.75), plateW = bw * 0.62, plateY = yb - 4 - hh * 0.04 - plateH;
+      g.fillStyle = Kit.alpha(isDark ? C.ground : C.panel, isDark ? 0.82 : 0.88);
+      g.fillRect(cx - plateW / 2, plateY, plateW, plateH);
+      g.strokeStyle = Kit.alpha(C.ink, 0.15); g.strokeRect(cx - plateW / 2 + 0.5, plateY + 0.5, plateW - 1, plateH - 1);
+      var fs = Math.max(11, Math.min(plateH * 0.78, plateW * 0.95));
+      g.font = "600 " + fs.toFixed(1) + "px " + monoBold;
+      if (i === 0) {
+        g.fillStyle = Kit.alpha(C.dim, 0.9);
+        var d = fs * 0.22;
+        g.beginPath(); g.moveTo(cx, plateY + plateH / 2 - d); g.lineTo(cx + d, plateY + plateH / 2); g.lineTo(cx, plateY + plateH / 2 + d); g.lineTo(cx - d, plateY + plateH / 2); g.closePath(); g.fill();
+      } else if (msg) {
+        var lv = levelOf(i), ch = ALPHA[lv], ok = !msg.slipped[i];
+        var col = ok ? C.just : C.temper;
+        g.save();
+        if (isDark) { g.shadowColor = Kit.alpha(col, 0.9); g.shadowBlur = 8 + 10 * (paint[i] + slipFlash[i]); }
+        g.fillStyle = col;
+        g.globalAlpha = 1 - paint[i] * 0.6;
+        g.fillText(ch === " " ? "␣" : ch, cx, plateY + plateH / 2 + 1);
+        g.restore();
+      } else {
+        g.fillStyle = Kit.alpha(C.dim, 0.7);
+        g.fillText("·", cx, plateY + plateH / 2 + 1);
+      }
+
+      // the arm: an inverted pendulum, its bob hidden in the housing; it leans opposite the bob
+      var th = sim.th[i], L = lpx;
+      var tr = trails[i];
+      if (!Kit.reduced && running) {
+        tr.unshift(th); if (tr.length > 7) tr.length = 7;
+      } else tr.length = 0;
+      g.lineCap = "round";
+      if (tr.length > 1) {
+        g.save();
+        if (isDark) g.globalCompositeOperation = "lighter";
+        for (var q = tr.length - 1; q >= 1; q--) {
+          var a = -tr[q];
+          g.strokeStyle = Kit.alpha(isDark ? C.just : C.ink, (isDark ? 0.11 : 0.07) * (1 - q / tr.length));
+          g.lineWidth = narrow ? 3 : 4.5;
+          g.beginPath(); g.moveTo(cx, pivotY); g.lineTo(cx + Math.sin(a) * L, pivotY - Math.cos(a) * L); g.stroke();
+        }
+        g.restore();
+      }
+      var ang = -th, tx = cx + Math.sin(ang) * L, ty = pivotY - Math.cos(ang) * L;
+      g.strokeStyle = isDark ? Kit.alpha(C.ink, 0.92) : C.ink;
+      g.lineWidth = narrow ? 1.6 : 2.2;
+      g.beginPath(); g.moveTo(cx, pivotY); g.lineTo(tx, ty); g.stroke();
+      // sliding weight: higher on the arm means slower; drawn with the offset exaggerated
+      var wf = 0.58 + (meanOm - sim.omega[i]) / meanOm * 9;
+      wf = Math.max(0.35, Math.min(0.85, wf));
+      var wx = cx + Math.sin(ang) * L * wf, wy = pivotY - Math.cos(ang) * L * wf;
+      g.save(); g.translate(wx, wy); g.rotate(ang);
+      var ww = Math.max(6, bw * 0.3), wh = Math.max(5, hh * 0.07);
+      g.beginPath(); g.moveTo(-ww / 2, wh / 2); g.lineTo(-ww * 0.32, -wh / 2); g.lineTo(ww * 0.32, -wh / 2); g.lineTo(ww / 2, wh / 2); g.closePath();
+      g.fillStyle = isDark ? Kit.alpha(C.ink, 0.85) : C.dim; g.fill();
+      g.fillStyle = Kit.alpha(isDark ? C.ground : C.panel, 0.35); g.fillRect(-ww * 0.32, -wh / 2, ww * 0.64, wh * 0.28);
+      g.restore();
+      // the tick: a flash at the pivot and the tip
+      var fl = flash[i];
+      if (fl > 0.02) {
+        g.save();
+        if (isDark) g.globalCompositeOperation = "lighter";
+        var rad = (narrow ? 10 : 16) * (0.6 + fl);
+        var gl = g.createRadialGradient(cx, pivotY, 0, cx, pivotY, rad);
+        gl.addColorStop(0, Kit.alpha(isDark ? C.ink : C.just, 0.75 * fl)); gl.addColorStop(1, Kit.alpha(isDark ? C.just : C.just, 0));
+        g.fillStyle = gl; g.beginPath(); g.arc(cx, pivotY, rad, 0, TWO_PI); g.fill();
+        g.restore();
+      }
+      g.fillStyle = isDark ? C.ink : C.ink;
+      g.beginPath(); g.arc(cx, pivotY, narrow ? 1.8 : 2.6, 0, TWO_PI); g.fill();
+      g.beginPath(); g.arc(tx, ty, narrow ? 1.4 : 2, 0, TWO_PI); g.fill();
+    }
+
+    // decay flashes in wall time
+    var dk = Math.exp(-dtWall / 0.11), dp = Math.exp(-dtWall / 0.35);
+    for (i = 0; i < N; i++) { flash[i] *= dk; paint[i] *= dp; slipFlash[i] *= dp; }
+
+    // corner labels
+    g.font = "500 " + (narrow ? 10 : 11) + "px " + monoBold;
+    g.textBaseline = "top"; g.textAlign = "left";
+    g.fillStyle = C.dim;
+    g.fillText("t = " + sim.t.toFixed(1) + " s" + (speed > 1 ? "  ·  " + speed + "×" : "") + (running ? "" : "  ·  paused"), 8, 8);
+    g.textAlign = "right";
+    g.fillText(P.ratio > 0 ? "plank motion drawn " + Lg.exag + "× actual" : "on the floor: plank cannot move", w - 8, 8);
+  }
+
+  function drawWheel() {
+    var r = fitIfNeeded(wheelCv, wheelSt), g = r.g, w = r.w, h = r.h;
+    var cx = w / 2, cy = h / 2 + 4, R0 = Math.min(w, h) / 2 - 26;
+    if (R0 < 40) return;
+    var o = sim.order();
+    var ringStep = Math.min(5, (R0 * 0.55) / Math.max(1, N - 1));
+    // the 32 notches
+    g.strokeStyle = C.rule; g.lineWidth = 1;
+    g.beginPath(); g.arc(cx, cy, R0, 0, TWO_PI); g.stroke();
+    for (var k = 0; k < 32; k++) {
+      var a = k / 32 * TWO_PI - Math.PI / 2, l = k % 8 === 0 ? 9 : 4;
+      g.beginPath(); g.moveTo(cx + Math.cos(a) * (R0 + 3), cy + Math.sin(a) * (R0 + 3));
+      g.lineTo(cx + Math.cos(a) * (R0 + 3 + l), cy + Math.sin(a) * (R0 + 3 + l)); g.stroke();
+    }
+    function pos(phase, rad) {
+      var a = phase - refPhase - Math.PI / 2;
+      return [cx + Math.cos(a) * rad, cy + Math.sin(a) * rad];
+    }
+    var i;
+    // ghosts and the gap that is the letter
+    for (i = 0; i < N; i++) {
+      var col = colorFor(i);
+      var gp = sim.gphase(i), rp = sim.phase(i);
+      if (msg || P.ratio > 0) {
+        var gpp = pos(gp, R0);
+        g.strokeStyle = Kit.alpha(col, 0.55); g.lineWidth = 1.2;
+        g.beginPath(); g.arc(gpp[0], gpp[1], dotR(i) + 2.5, 0, TWO_PI); g.stroke();
+        // the gap from ghost to metronome, one tree ring per metronome
+        if (i > 0) {
+          var d = sim.dev(i), ringR = R0 - 14 - (i - 1) * ringStep;
+          var a0 = gp - refPhase - Math.PI / 2;
+          g.strokeStyle = Kit.alpha(col, isDark ? 0.42 : 0.5); g.lineWidth = 1.6;
+          g.beginPath(); g.arc(cx, cy, ringR, a0, a0 + d, d < 0); g.stroke();
+          g.fillStyle = Kit.alpha(col, 0.7);
+          g.beginPath(); g.arc(cx + Math.cos(a0 + d) * ringR, cy + Math.sin(a0 + d) * ringR, 1.6, 0, TWO_PI); g.fill();
+        }
+      }
+    }
+    // dot trails
+    for (i = 0; i < N; i++) {
+      var p = pos(sim.phase(i), R0), tr = dotTrail[i];
+      if (!Kit.reduced && running) { tr.unshift(p); if (tr.length > 18) tr.length = 18; } else tr.length = 0;
+      if (tr.length > 1) {
+        g.save(); if (isDark) g.globalCompositeOperation = "lighter";
+        for (var q = 1; q < tr.length; q++) {
+          g.strokeStyle = Kit.alpha(colorFor(i), 0.28 * (1 - q / tr.length));
+          g.lineWidth = dotR(i) * 1.2 * (1 - q / tr.length) + 0.5;
+          g.beginPath(); g.moveTo(tr[q - 1][0], tr[q - 1][1]); g.lineTo(tr[q][0], tr[q][1]); g.stroke();
+        }
+        g.restore();
+      }
+    }
+    for (i = 0; i < N; i++) {
+      var pp = pos(sim.phase(i), R0), c = colorFor(i);
+      g.save();
+      if (isDark) { g.shadowColor = Kit.alpha(c, 0.8); g.shadowBlur = 10; }
+      g.fillStyle = c; g.beginPath(); g.arc(pp[0], pp[1], dotR(i), 0, TWO_PI); g.fill();
+      g.restore();
+    }
+    // the mean field
+    var ma = o.psi - refPhase - Math.PI / 2, ml = o.R * (R0 - 14);
+    var ex = cx + Math.cos(ma) * ml, ey = cy + Math.sin(ma) * ml;
+    g.strokeStyle = C.sage; g.fillStyle = C.sage; g.lineWidth = 2.5; g.lineCap = "round";
+    g.beginPath(); g.moveTo(cx, cy); g.lineTo(ex, ey); g.stroke();
+    if (ml > 8) {
+      g.beginPath();
+      g.moveTo(ex + Math.cos(ma) * 7, ey + Math.sin(ma) * 7);
+      g.lineTo(ex + Math.cos(ma + 2.5) * 7, ey + Math.sin(ma + 2.5) * 7);
+      g.lineTo(ex + Math.cos(ma - 2.5) * 7, ey + Math.sin(ma - 2.5) * 7); g.closePath(); g.fill();
+    }
+    g.beginPath(); g.arc(cx, cy, 3, 0, TWO_PI); g.fill();
+    g.font = "500 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+    g.textAlign = "left"; g.textBaseline = "top"; g.fillStyle = C.dim;
+    g.fillText("R = " + o.R.toFixed(2), 6, 4);
+    g.textAlign = "right";
+    g.fillText("frame turns at the mean rate", w - 6, 4);
+  }
+  function dotR(i) { return 3 + 6 * Math.abs(IV[i].err) / ERR_MAX; }
+  function colorFor(i) {
+    if (i === 0) return C.ink;
+    if (!msg) return C.dim;
+    return msg.slipped[i] ? C.temper : C.just;
+  }
+
+  function drawChart() {
+    var r = fitIfNeeded(chartCv, chartSt), g = r.g, w = r.w, h = r.h;
+    var L = 30, Rm = 30, T = 14, B = 24, cw = w - L - Rm, ch = h - T - B;
+    var tEnd = Math.max(60, sim.t), tStart = tEnd - 60;
+    function X(t) { return L + (t - tStart) / 60 * cw; }
+    g.font = "500 10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+    g.strokeStyle = C.rule; g.lineWidth = 1; g.fillStyle = C.dim;
+    g.textBaseline = "middle";
+    for (var k = 0; k <= 4; k++) {
+      var y = T + ch * (1 - k / 4);
+      g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + cw, y + 0.5); g.stroke();
+      g.textAlign = "right"; g.fillStyle = C.sage; g.fillText((k / 4).toFixed(k % 2 ? 2 : 1).replace(/0$/, "").replace(/\.$/, ""), L - 5, y);
+    }
+    g.textAlign = "left"; g.fillStyle = C.just;
+    var NL = N - 1;
+    [0, NL].forEach(function (v) { g.fillText(String(v), L + cw + 5, T + ch * (1 - v / NL)); });
+    g.textAlign = "center"; g.textBaseline = "top"; g.fillStyle = C.dim;
+    for (var s = Math.ceil(tStart / 10) * 10; s <= tEnd; s += 10) {
+      g.fillText(s + " s", X(s), T + ch + 6);
+    }
+    // R = 0.95 line
+    g.setLineDash([3, 4]); g.strokeStyle = Kit.alpha(C.sage, 0.5);
+    g.beginPath(); g.moveTo(L, T + ch * 0.05); g.lineTo(L + cw, T + ch * 0.05); g.stroke(); g.setLineDash([]);
+    g.save(); g.beginPath(); g.rect(L, T - 2, cw, ch + 4); g.clip();
+    // intact letters, as a filled step
+    g.beginPath(); var started = false, lastY = 0;
+    for (var i = 0; i < hist.length; i++) {
+      var hi = hist[i]; if (hi.t < tStart - 1 || hi.intact === null) { started = false; continue; }
+      var yy = T + ch * (1 - hi.intact / NL);
+      if (!started) { g.moveTo(X(hi.t), yy); started = true; } else { g.lineTo(X(hi.t), lastY); g.lineTo(X(hi.t), yy); }
+      lastY = yy;
+    }
+    g.strokeStyle = C.just; g.lineWidth = 2; g.stroke();
+    // R
+    g.beginPath(); started = false;
+    for (i = 0; i < hist.length; i++) {
+      var hh = hist[i]; if (hh.t < tStart - 1) continue;
+      var y2 = T + ch * (1 - hh.R);
+      if (!started) { g.moveTo(X(hh.t), y2); started = true; } else g.lineTo(X(hh.t), y2);
+    }
+    g.strokeStyle = C.sage; g.lineWidth = 1.6; g.stroke();
+    // marks
+    g.textBaseline = "top"; g.textAlign = "left";
+    hist.forEach(function (e) {
+      if (e.mark && e.t >= tStart) {
+        g.strokeStyle = Kit.alpha(C.just, 0.6); g.setLineDash([2, 3]);
+        g.beginPath(); g.moveTo(X(e.t), T); g.lineTo(X(e.t), T + ch); g.stroke(); g.setLineDash([]);
+        g.fillStyle = C.just; g.textBaseline = "bottom"; g.fillText("write", X(e.t) + 3, T + ch - 2); g.textBaseline = "top";
+      }
+    });
+    if (lock.t !== null && lock.t >= tStart) {
+      g.strokeStyle = Kit.alpha(C.sage, 0.8); g.setLineDash([2, 3]);
+      g.beginPath(); g.moveTo(X(lock.t), T); g.lineTo(X(lock.t), T + ch); g.stroke(); g.setLineDash([]);
+      g.fillStyle = C.sage; g.fillText("in step", X(lock.t) + 3, T + 14);
+    }
+    g.restore();
+    g.textAlign = "left"; g.textBaseline = "top"; g.fillStyle = C.sage; g.fillText("R", 4, 0);
+    g.textAlign = "right"; g.fillStyle = C.just; g.fillText("letters", w - 2, 0);
+  }
+
+  // ── readouts ──
+  var liveEl = document.getElementById("r-live"), lastMain = "", lastLog = "";
+  function announce(t) { liveEl.textContent = t; }
+  function updateText() {
+    var o = sim.order();
+    var parts = [];
+    parts.push("R <b>" + o.R.toFixed(2) + "</b>");
+    if (P.ratio <= 0) parts.push("plank <b>on the floor</b>");
+    else parts.push(lock.t !== null ? "<b class='sage-t'>in step</b> at " + (lock.t - lock.since).toFixed(1) + " s" : "not in step yet");
+    if (msg) {
+      var ic = intactCount();
+      parts.push("<b class='" + (ic === N - 1 ? "just-t" : "temp-t") + "'>" + ic + " of " + (N - 1) + "</b> letters intact");
+      parts.push("reads <b class='" + (ic === N - 1 ? "just-t" : "temp-t") + "'>" + readText().replace(/ /g, "␣") + "</b>");
+    } else parts.push("no message written");
+    var html = parts.join(" &middot; ");
+    if (html !== lastMain) { lastMain = html; document.getElementById("r-main").innerHTML = html; }
+    var lg;
+    if (!msg) lg = "Write a message and the slip log starts here.";
+    else if (!logLines.length) lg = "Slip log: <i>nothing has slipped</i> in " + (sim.t - msg.tWrite).toFixed(0) + " s.";
+    else lg = "Slip log, seconds after writing: " + logLines.map(function (e) {
+      return "<b>" + SHORT[IV[e.i].n] + "</b> " + e.t.toFixed(1);
+    }).join(", ") + ".";
+    if (lg !== lastLog) { lastLog = lg; document.getElementById("r-log").innerHTML = lg; }
+  }
+
+  // ── the loop ──
+  var visible = true, raf = 0, lastTs = null;
+  function want() { return !document.hidden && visible; }
+  function wake() { if (!raf && want()) { lastTs = null; raf = requestAnimationFrame(frame); } }
+  function frame(ts) {
+    raf = 0;
+    if (!want()) { lastTs = null; return; }
+    var dt = lastTs === null ? 1 / 60 : Math.min(MAX_FRAME, (ts - lastTs) / 1000);
+    lastTs = ts;
+    if (running) { advance(dt * speed); flushTicks(); }
+    drawAll(dt);
+    var settling = Math.abs(lift - liftTarget) > 0.002;
+    if (running || settling || anyFlash()) raf = requestAnimationFrame(frame);
+  }
+  function anyFlash() { for (var i = 0; i < N; i++) if (flash[i] > 0.02 || paint[i] > 0.02 || slipFlash[i] > 0.02) return true; return false; }
+  function drawAll(dt) { drawStage(dt || 0); drawWheel(); drawChart(); updateText(); }
+  function redraw() { if (!running) drawAll(0); wake(); }
+
+  if ("IntersectionObserver" in window) {
+    var seen = new Map();
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { seen.set(e.target, e.isIntersecting); });
+      var any = false; seen.forEach(function (v) { if (v) any = true; });
+      visible = any; wake();
+    });
+    [stageCv, wheelCv, chartCv].forEach(function (c) { io.observe(c); });
+  }
+  document.addEventListener("visibilitychange", wake);
+  Kit.onTheme(function () { readTheme(); redraw(); });
+
+  // ── controls ──
+  function $(id) { return document.getElementById(id); }
+  function press(ids, on) { ids.forEach(function (id) { $(id).setAttribute("aria-pressed", id === on ? "true" : "false"); }); }
+  function syncFree() {
+    var v = +$("s-free").value;
+    $("v-free").textContent = P.ratio > 0 ? "mass ratio " + P.ratio.toFixed(3) : "on the floor";
+    press(["b-floor", "b-rollers"], P.ratio > 0 ? "b-rollers" : "b-floor");
+    return v;
+  }
+  function syncSpread() {
+    var om = omegasFor(N, spread);
+    var lo = Math.min.apply(null, om) * OM_RATIO / TWO_PI, hi = Math.max.apply(null, om) * OM_RATIO / TWO_PI;
+    $("v-spread").textContent = "spread " + (spread * 100).toFixed(1) + "% · " + lo.toFixed(3) + "–" + hi.toFixed(3) + " Hz";
+  }
+  $("s-free").addEventListener("input", function () { setRatio(sliderToRatio(+this.value)); syncFree(); redraw(); });
+  $("s-spread").addEventListener("input", function () { setSpread(+this.value / 1000); syncSpread(); redraw(); });
+  $("b-floor").addEventListener("click", function () { setRatio(0); $("s-free").value = 0; syncFree(); redraw(); });
+  $("b-rollers").addEventListener("click", function () {
+    setRatio(lastRollerRatio); $("s-free").value = ratioToSlider(lastRollerRatio); syncFree(); redraw();
+  });
+  $("b-x1").addEventListener("click", function () { speed = 1; press(["b-x1", "b-x4"], "b-x1"); redraw(); });
+  $("b-x4").addEventListener("click", function () { speed = 4; press(["b-x1", "b-x4"], "b-x4"); redraw(); });
+  function syncRun() {
+    $("b-run").textContent = running ? "Pause" : "Run";
+    $("b-run").setAttribute("aria-pressed", running ? "false" : "true");
+  }
+  $("b-run").addEventListener("click", function () { running = !running; syncRun(); redraw(); });
+  function setN(n) {
+    N = n; press(["b-n11", "b-n5"], n === 11 ? "b-n11" : "b-n5");
+    $("msg").maxLength = n - 1;
+    build(); syncSpread();
+    writeMessage($("msg").value);
+    redraw();
+  }
+  $("b-n11").addEventListener("click", function () { setN(11); });
+  $("b-n5").addEventListener("click", function () { setN(5); });
+  $("b-write").addEventListener("click", function () { writeMessage($("msg").value); redraw(); });
+  $("msg").addEventListener("keydown", function (e) { if (e.key === "Enter") { writeMessage(this.value); redraw(); } });
+  $("b-reset").addEventListener("click", function () { seed++; build(); redraw(); });
+  $("b-sound").addEventListener("click", function () { if (snd) soundOff(); else soundOn(); });
+
+  // ── boot ──
+  P.ratio = sliderToRatio(+$("s-free").value); lastRollerRatio = P.ratio;
+  build(); syncFree(); syncSpread(); syncRun(); syncSoundBtn();
+  writeMessage($("msg").value);
+  drawAll(0);
+  wake();
+
+  // the measured paragraph: the page runs its own default case off-screen,
+  // a few simulated seconds per frame, and reports what it saw
+  (function measure() {
+    var out = $("p-measured");
+    out.textContent = "Measuring the default case with this page's own integrator…";
+    var seeds = [1, 2, 3], res = [];
+    function* job() {
+      for (var si = 0; si < seeds.length; si++) {
+        var om = omegasFor(11, 0.015), PP = { mu: P.mu, thv: P.thv, gam: P.gam, kc: P.kc, ratio: 0.0807 };
+        var S = makePlank(11, om, PP), rng = Kit.mulberry32(seeds[si] * 7919 + 11);
+        for (var i = 0; i < 11; i++) {
+          S.Om[i] = om[i] * OM_RATIO;
+          var p = rng() * TWO_PI; S.th[i] = LC.amp * Math.cos(p); S.w[i] = -LC.amp * S.Om[i] * Math.sin(p);
+        }
+        S.resetGhosts();
+        var lv = [], gone = [], first = null, last = null, above = 0, tLock = null;
+        for (i = 1; i < 11; i++) { lv[i] = (i * 3) % 32; S.kick(i, lv[i] / 32 * TWO_PI, H); gone[i] = false; }
+        for (var st = 0; st < 120000; st++) {
+          S.step(H);
+          if (st % 20 === 19) {
+            for (i = 1; i < 11; i++) if (!gone[i]) {
+              var d = Math.round(S.dev(i) / TWO_PI * 32); d = ((d % 32) + 32) % 32;
+              if (d !== lv[i]) { gone[i] = true; if (first === null) first = S.t; last = S.t; }
+            }
+          }
+          if (st % 100 === 99) {
+            if (S.order().R > 0.95) { above += 0.1; if (tLock === null && above >= 2) tLock = S.t - 2; } else above = 0;
+            if (tLock !== null && gone.slice(1).every(Boolean)) break;
+          }
+          if (st % 2000 === 1999) yield si + st / 120000;
+        }
+        res.push({ first: first, last: last, lock: tLock });
+      }
+    }
+    Kit.drive(job(), function () {
+      window.__plankMeasured = res;
+      function rng2(k) {
+        var v = res.map(function (r) { return r[k]; }).filter(function (x) { return x !== null; });
+        if (!v.length) return "never, inside 120 s";
+        var lo = Math.min.apply(null, v), hi = Math.max.apply(null, v);
+        return lo.toFixed(1) + " to " + hi.toFixed(1) + " s";
+      }
+      out.innerHTML = "Measured at load, by this page's own integrator, on three scatterings of the default plank (eleven metronomes, mass ratio 0.081, spread 1.5%) with ten letters written at the start: the first letter slipped after <b>" + rng2("first") +
+        "</b>, the last after <b>" + rng2("last") + "</b>, and the arms got in step (R above 0.95 and staying there) after <b>" + rng2("lock") + "</b>.";
+    }, null, 6);
+  })();
+
+  // a handle for tests: read the state, run the clock forward without drawing
+  window.__plank = {
+    state: function () {
+      return { N: N, t: sim.t, ratio: P.ratio, spread: spread, R: sim.order().R, written: !!msg,
+        intact: intactCount(), text: msg ? readText() : null, wrote: msg ? msg.text : null,
+        lock: lock.t === null ? null : lock.t - lock.since, X: sim.X, running: running, speed: speed,
+        sound: !!snd, slips: logLines.map(function (e) { return { name: IV[e.i].name, t: e.t }; }) };
+    },
+    advance: function (sec) { for (var s = 0; s < sec; s += 1) advance(Math.min(1, sec - s)); drawAll(0); return this.state(); },
+    maxDevError: function () {
+      if (!msg) return null; var m = 0;
+      for (var i = 1; i < N; i++) { var e = sim.dev(i) - msg.level[i] / 32 * TWO_PI; e -= TWO_PI * Math.round(e / TWO_PI); m = Math.max(m, Math.abs(e)); }
+      return m * 180 / Math.PI;
+    }
+  };
+})();
+</script>
+</body>
+</html>

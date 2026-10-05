@@ -120,7 +120,7 @@ tbody tr:hover { background: var(--panel-2); }
   padding: 0.3rem 0.35rem; background: var(--panel); border: 1px solid var(--rule); border-radius: 3px;
   box-shadow: 0 6px 22px rgba(0, 0, 0, 0.3);
 }
-.sound-bar button { font-size: 0.72rem; padding: 0.42rem 0.62rem; }
+.sound-bar button { font-size: 0.72rem; padding: 0.42rem 0.62rem; min-height: 40px; }
 .sound-dot { width: 7px; height: 7px; flex: none; margin-left: 0.25rem; border-radius: 50%; background: var(--rule); transition: background 0.2s; }
 .sound-bar.live .sound-dot { background: var(--just); animation: sound-pulse 1.1s ease-in-out infinite; }
 @keyframes sound-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
