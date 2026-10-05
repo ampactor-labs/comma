@@ -310,6 +310,34 @@ console.log("— the listening test's beat meter (lab/listen.html) —");
   claim("and a fifth mistuned to beat 4.4 Hz", Math.abs(est2.hz - 4.4) / 4.4 < 0.01, est2.hz.toFixed(3) + " Hz");
 }
 
+console.log("— a letter in a piano: Reed–Solomon over GF(32) (lab/channel.html) —");
+{
+  const RS = labBlock("channel.html", "rs", ["gfTables", "rsEncode", "rsDecode"]);
+  const rng = Kit.mulberry32(2024);
+  const ri = (n) => Math.floor(rng() * n);
+  let exact = 0, trials = 0, loud = 0, over = 0;
+  for (let e = 0; e <= 4; e++) for (let t = 0; t < 400; t++) {
+    const data = Array.from({ length: 15 }, () => ri(32));
+    const cw = RS.rsEncode(data, 8).slice();
+    const pos = new Set(); while (pos.size < e) pos.add(ri(23));
+    pos.forEach((q) => { cw[q] = (cw[q] ^ (1 + ri(31))) & 31; });
+    const r = RS.rsDecode(cw, 8);
+    trials++; if (r.ok && r.data.length === 15 && r.data.every((v, i) => v === data[i])) exact++;
+  }
+  for (let t = 0; t < 400; t++) {
+    const data = Array.from({ length: 15 }, () => ri(32));
+    const cw = RS.rsEncode(data, 8).slice();
+    const pos = new Set(); while (pos.size < 6) pos.add(ri(23));
+    pos.forEach((q) => { cw[q] = (cw[q] ^ (1 + ri(31))) & 31; });
+    const r = RS.rsDecode(cw, 8); over++;
+    if (!r.ok) loud++;
+  }
+  claim("RS(23,15) fixes every pattern of up to four wrong letters",
+    exact === trials, exact + " of " + trials + " decoded exactly");
+  claim("and with six wrong it nearly always says so instead of guessing",
+    loud / over > 0.97, (100 * loud / over).toFixed(1) + "% refused");
+}
+
 console.log(failures.length
   ? "\n" + failures.length + " claim(s) FAILED"
   : "\nevery claim on the page and in the back country reproduces");

@@ -48,7 +48,7 @@
     <li><b>The bank on a breadboard.</b> The <a href="../notes/breadboard.md">build sheet</a> has the circuit and every component value worked out from the piano's detunings. Nobody has soldered it.</li>
     <li><b>Metronomes on a real plank.</b> The page simulates them. Five metronomes, a board, and two soda cans would settle whether the letters die in the order the simulation says.</li>
     <li><b>The sunflower itself.</b> The comodulogram page is the analysis, waiting for a recording. The protocol is in <a href="../notes/plant-comodulogram.md">the plant note</a>.</li>
-    <li><b>A spoken-digit benchmark.</b> Not done. It needs a dataset of recorded digits, and the machine this was built on couldn't fetch one. It would be the first honest number for how this bank does on a real task, and the number would probably be poor.</li>
+    <li><b>A spoken-digit benchmark.</b> Cut, but it has no page; it's a script, <code>tools/digits.mjs</code>, run on the Free Spoken Digit Dataset. Fed only the loudness of each spoken digit, the readout alone gets 26% right and the piano's bank lifts it to 50%. Shrink the bank's errors to zero and it falls back to 26%, the same as no bank at all. Hand the readout eleven frequency bands instead and it gets 91% on its own, and the bank adds nothing. So the errors earn their keep when the input is poor, and a good ear doesn't need them.</li>
     <li><b>Tuner forensics, dueling banks, a commit hash buried in the register.</b> Still in the notebook.</li>
   </ul>
   <div class="foot">
