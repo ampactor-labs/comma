@@ -46,42 +46,43 @@
 <div class="wrap">
 
 <header class="hero">
-  <span class="eyebrow">Back country &middot; 07 &middot; The bank with a hand on it</span>
+  <span class="eyebrow">Lab &middot; 07 &middot; Live input</span>
   <h1>Play the Bank</h1>
-  <p class="lede">Up the trail, on the main page, the bank only ever hears dice: a seeded random signal, the same one every time, fed in by a machine that never gets bored. Down here you are the weather. Put a hand on it and it answers.</p>
-  <p>Eleven damped oscillators, each one turning at the speed of a piano interval's mistake, from the fifth's lazy <span class="num" data-fill="beatLo">0.37</span>&nbsp;Hz to the 11th harmonic's <span class="num" data-fill="beatHi">8.63</span>. Same equations as the main page, same constants, stepped <span class="num" data-fill="rate">50</span> times a second in your browser. Drag the pad, hit the keys, holler at it if you like.</p>
+  <p class="lede">On this page you drive the oscillator bank yourself. Drag the pad, press keys, or use your microphone, and watch how the bank responds.</p>
+  <p>On the main page the bank only hears a seeded random signal, the same one on every run. Here the input comes from you. The bank is eleven damped oscillators. Each one spins, and winds down slowly when nothing pushes it. Each spins at the beat rate of one piano interval, a pair of notes sounded together. A beat is the slow pulse two close tones make together, like two guitar strings slightly out of tune. Here it is the gap between a pure interval (an exact frequency ratio, such as 3:2 for the fifth) and the piano's version of it. The rates run from <span class="num" data-fill="beatLo">0.37</span>&nbsp;Hz for the fifth to <span class="num" data-fill="beatHi">8.63</span>&nbsp;Hz for the 11th harmonic. The equations and constants match the main page, stepped <span class="num" data-fill="rate">50</span> times a second in your browser.</p>
 </header>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">01</span>
-    <div><h2>Put a hand on it.</h2></div>
+    <div><h2>Drive the bank</h2></div>
   </div>
-  <p>Each comet is one oscillator, a point in the complex plane around a shared origin. Distance out is how hard it rings. Angle is where it is in its turn. Push the input and all eleven take the same shove, then each one spins it off at its own wrong speed, the way one thunderstorm comes down eleven side canyons and reaches the river at eleven different hours.</p>
-  <p>The hot amber ones are the intervals the piano gets most wrong, and they spin fastest. The cool cyan stragglers are the near misses, nearly tame.</p>
+  <p>Each glowing comet is one oscillator. Push the input and all eleven move at once, then spread apart, each at its own speed.</p>
+  <p>Each comet is a point in the complex plane, a flat map where each point has a distance from the center and an angle around it. The distance is how strongly it rings (its amplitude, |z|). The angle is where it is in its cycle (its phase). Every input pushes all eleven by the same amount. Each oscillator then turns that push at its own beat rate, so one push fans out into eleven different rotations.</p>
+  <p>Color shows how far each interval is from its piano key, in cents. A cent is a hundredth of a piano semitone. Amber marks the largest errors, and these generally spin fastest. Cyan marks the near misses, which spin slowly.</p>
 
   <div class="panel">
-    <h3>The bank, live</h3>
+    <h3>The live bank</h3>
     <div class="inst">
       <div class="col col-l">
       <div class="a-comets">
-        <canvas id="comets" height="440" aria-label="Eleven oscillators drawn as glowing comets in the complex plane around a shared origin, with fading trails and the mean field as a line from the center. Hover or tap a comet to name its interval."></canvas>
+        <canvas id="comets" height="440" aria-label="Eleven oscillators drawn as comets with fading trails in the complex plane. A line from the center shows the mean field. Hover or tap a comet to see its interval."></canvas>
       </div>
       <div class="a-legend">
         <ul class="legend" id="legend" aria-label="Which comet is which interval"></ul>
-        <div class="readout cap">Size and color: how far each interval sits from its piano key, in cents, cyan for the least wrong and amber for the most. Hover or tap a comet to name it. Rings mark |z| = 0.25, 0.5, 1 and 2 on a gently squashed scale, so a hard shove stays on the canvas. The pale arrow is the mean field, the average the coupling pulls everyone toward.</div>
+        <div class="readout cap">Size and color show how far each interval is from its piano key, in cents: cyan for the smallest error, amber for the largest. Hover or tap a comet to see its name. The rings mark |z| = 0.25, 0.5, 1 and 2 on a compressed scale, so a hard push stays on the canvas. The pale arrow is the mean field, the average of all eleven oscillators. Coupling pulls each oscillator toward it.</div>
       </div>
       </div>
       <div class="col col-r">
       <div class="a-pad">
         <canvas id="pad" height="132" tabindex="0" aria-label="Input pad. Press and drag left for negative input, right for positive, up to plus or minus 0.8. Release and it falls back to zero."></canvas>
-        <div class="readout cap">Press and drag. Left pushes negative, right positive, up to &plusmn;0.8, the range the random input uses. Let go and it falls back to zero.</div>
-        <div class="keys" id="keys" role="group" aria-label="Impulse keys, also on your keyboard"></div>
-        <div class="readout">Or the keyboard: each key is a short kick of the size shown, minus on the left hand, plus on the right.</div>
+        <div class="readout cap">Press and drag. Left pushes negative and right pushes positive, up to &plusmn;0.8, the same range as the random input. Let go and the input returns to zero.</div>
+        <div class="keys" id="keys" role="group" aria-label="Kick keys, also on your keyboard"></div>
+        <div class="readout">You can also use the keyboard. Each key gives a short kick of the size shown: negative on the left hand (A S D F), positive on the right (H J K L).</div>
       </div>
       <div class="a-ctl">
         <div class="btn-row">
-          <button id="b-noise" aria-pressed="false">Let it hear noise</button>
+          <button id="b-noise" aria-pressed="false">Add random input</button>
           <button id="b-mic" aria-pressed="false">Use the microphone</button>
           <button id="b-midi" aria-pressed="false" hidden>Listen for MIDI</button>
         </div>
@@ -93,7 +94,7 @@
           <button id="oct-hi" aria-pressed="true">Phone speaker</button>
           <button id="oct-lo" aria-pressed="false">Headphones</button>
         </div>
-        <div class="readout">Eleven sines at the pure intervals above A3, each as loud as its comet is far out. Phone speaker plays two octaves up, so the beats run four times as fast; Headphones plays at concert pitch.</div>
+        <div class="readout">Hear the bank plays eleven sine tones at the pure intervals above A3 (220&nbsp;Hz). Each tone is as loud as its comet is far from the center. Phone speaker plays everything two octaves up, where a small speaker can produce it. Headphones plays at concert pitch.</div>
         <div class="readout" id="live-read" style="margin-top:0.8rem" aria-live="off">u = <b class="num">0.00</b></div>
       </div>
       </div>
@@ -104,27 +105,28 @@
 <section>
   <div class="sec-head">
     <span class="sec-mark">02</span>
-    <div><h2>It remembers you, a little.</h2></div>
+    <div><h2>How well the bank remembers your input</h2></div>
   </div>
-  <p>Nobody trains the bank. A readout learns to read it: <span class="num" data-fill="nf">34</span> weights fit by least squares on the main page's random signal. This page fits the same kind of readout when it loads, one for each delay, then turns them loose on you. The amber line is the bank's guess at what you did k steps ago. When it lands on the dashed line, that is the bank remembering you.</p>
-  <p>Crank the coupling and the oscillators start agreeing with each other, like a county commission. Shrink the errors toward nothing and the eleven comets fold into one. Watch what either does to the scores.</p>
+  <p>The amber line is the bank's estimate of your input k steps ago. One step is 0.02&nbsp;s, so k = 25 means half a second ago. When the amber line lies on the dashed line, the bank still holds a usable memory of what you did.</p>
+  <p>The bank itself is never trained. A readout learns to read it. The readout is a weighted sum of <span class="num" data-fill="nf">34</span> numbers taken from the oscillators, with the weights fitted by least squares on the main page's random signal. A fixed dynamical system with a trained linear readout like this is called reservoir computing. When the page loads, it fits one readout for each delay k. It then applies them, unchanged, to your input. The score is a squared correlation: 1 means a perfect match, 0 means no match.</p>
+  <p>Two sliders change the bank. Coupling (K) pulls each oscillator toward the average of all of them, the way a clapping crowd drifts into time. Raise it and the oscillators start to agree with each other. Size of the errors scales every beat rate. Shrink it toward zero and the eleven comets fold into one. Watch what either change does to the scores.</p>
 
   <div class="panel">
     <h3>The readout</h3>
-    <canvas id="strip" height="200" aria-label="Scrolling chart of the last eight seconds: your input in cyan, your input k steps ago dashed, and the bank's reconstruction of it in amber."></canvas>
+    <canvas id="strip" height="200" aria-label="Scrolling chart of the last eight seconds: your input in cyan, your input k steps ago dashed, and the readout's estimate of it in amber."></canvas>
     <div class="slider-row">
-      <label for="kdel">Remember back</label>
+      <label for="kdel">Delay k</label>
       <input type="range" id="kdel" min="0" max="4" step="1" value="2">
       <span class="readout num" id="kdel-val">k = 25 steps &middot; 0.50 s</span>
     </div>
-    <div class="kchips" id="kchips" aria-label="Held-out scores for each delay"></div>
+    <div class="kchips" id="kchips" aria-label="Held-out score for each delay"></div>
     <div class="meter" id="train-meter" aria-hidden="true"><i></i></div>
     <div class="readout" id="score-read" aria-live="polite">Training the readouts&hellip;</div>
     <div class="readout" id="you-read"></div>
     <div class="btn-row">
-      <button id="b-remember" data-tone="temper" data-needs-sound>Hear it remember</button>
+      <button id="b-remember" data-tone="temper" data-needs-sound>Hear the readout</button>
     </div>
-    <div class="readout">One tone, as loud as the amber line is far from zero. Hit a key and wait: your gesture comes back k steps later, or a smeared version of it, which is the honest part.</div>
+    <div class="readout">Hear the readout plays one tone. Its loudness follows how far the amber line is from zero. Press a key and wait. The kick comes back k steps later, usually smeared, because the bank does not keep an exact copy.</div>
     <div class="slider-row" style="margin-top:1.4rem">
       <label for="coupling">Coupling</label>
       <input type="range" id="coupling" min="0" max="800" value="12">
@@ -135,20 +137,21 @@
       <input type="range" id="spread" min="0" max="150" value="100">
       <span class="readout num" id="spread-val">&times;1.00</span>
     </div>
-    <div class="readout">Both act on the live bank at once. The readouts are refit in the background a moment after you let go, on the same seeded random input at the new settings.</div>
+    <div class="readout">Both sliders change the live bank immediately. A moment after you let go, the readouts are refitted in the background on the same seeded random input at the new settings.</div>
   </div>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">03</span>
-    <div><h2>A drift clock.</h2></div>
+    <div><h2>Use the register as a clock</h2></div>
   </div>
-  <p>The main page has a second machine, a register that holds ten letters as phase offsets and loses them as the coupling argues the oscillators back toward agreement. Write the time into it and walk away. Before it starts, this page runs the same register ahead in fast-forward and writes down when each letter will die. After that, counting the dead tells you roughly how long it has been, the way a geologist reads a cutbank if she knows how fast the river lays down mud.</p>
-  <p>It is a lousy clock. It tells time by forgetting, which is how most clocks in the desert work.</p>
+  <p>This register stores ten characters and loses them one at a time, at times the page can predict. Press Write the time. Each character turns cyan while it holds and amber once it is lost. Count the lost characters to estimate how long ago you wrote it.</p>
+  <p>The register is the main page's second machine. It stores each character as a phase offset, a small shift in where an oscillator sits in its cycle. Coupling slowly pulls the oscillators back into agreement, and that erases the offsets. Before the live run starts, the page runs an identical copy ahead in fast-forward and records the second each character will be lost. With those times known, the number of lost characters tells you roughly how much time has passed.</p>
+  <p>This is a coarse clock. It can only say that the elapsed time falls between two of the predicted losses.</p>
 
   <div class="panel">
-    <h3>Write the time into the drift</h3>
+    <h3>Write the time into the register</h3>
     <div class="slider-row">
       <label for="ck">Register coupling</label>
       <input type="range" id="ck" min="0" max="800" value="150">
@@ -162,14 +165,14 @@
     <div class="meter" id="survey-meter" aria-hidden="true"><i></i></div>
     <p class="big" id="clock-reg" aria-live="polite">Nothing written yet.</p>
     <p class="big" id="clock-true" style="color:var(--dim)"></p>
-    <div class="readout" id="clock-note">Under each letter: how far its interval is off, in cents, and once surveyed, the second it will die. A strong coupling makes it run fast enough to watch; the main page's whisper of 0.12 would keep the first letter for minutes.</div>
+    <div class="readout" id="clock-note">Under each character: how far its interval is off, in cents, and, once the forecast finishes, the second it will be lost (marked &dagger;). The default coupling here is strong, so characters drop out fast enough to watch. At the main page's default of 0.12, the first character would last for minutes.</div>
   </div>
 </section>
 
 <div class="foot">
-  <p class="note"><strong>What this is.</strong> The live bank is <code>Kit.bench(OMEGA).makeLive(K)</code>, the same equations and constants as the main page (damping 0.6 per second, input gain 0.30, step 0.02 s, mean-field coupling K), with the eleven detunings of 12-tone equal temperament above A3 = 220&nbsp;Hz. It is stepped at exactly 50 steps per second of wall-clock time; if the tab stalls it skips ahead rather than racing to catch up, and it stops when the tab is hidden. Your input is clamped to &plusmn;0.8. Keys and MIDI notes are short kicks that decay with a 0.12 s time constant; the microphone maps loudness from &minus;60 to &minus;10 dBFS onto 0 to 0.8; the noise button feeds uniform random values in &plusmn;0.8 each step, the same distribution the experiment uses.</p>
-  <p class="note">The readouts are ridge fits on the main page's seeded random input (500 steps to settle, 3,500 to fit, 3,500 to score), one per delay k &isin; {0, 10, 25, 50, 100}, at the current coupling and error size. The scores shown are held-out squared correlations on that random input. They are then applied, unchanged, to whatever you feed in. Your gestures are nothing like white noise: slow drags and held values push the oscillators into their nonlinear range, where the fit was never trained, so the reconstruction can be better or worse than the score says. The "on your input" line measures that directly, as the squared correlation between the amber line and your actual input k steps back over the last eight seconds. Even at k = 0 the readout is far from perfect, because the fresh input arrives mixed into eleven states that already hold the past.</p>
-  <p class="note">The drift clock is the main page's phase register (<code>Kit.registerStep</code>, a Kuramoto model at the same eleven rates) with its own 32-symbol alphabet so it can spell digits. The forecast and the live register run the identical arithmetic with the identical fixed step, so the live letters die at exactly the forecast steps. The live register is advanced by the browser's own clock, so it can never be more accurate than the clock that drives it. What it shows is that a known rate of forgetting is a clock, and a coarse one: the bracket is as wide as the gap between two deaths.</p>
+  <p class="note"><strong>The live bank.</strong> It is <code>Kit.bench(OMEGA).makeLive(K)</code>, with the same equations and constants as the main page: damping 0.6 per second, input gain 0.30, step 0.02 s, mean-field coupling K. The eleven detunings are those of 12-tone equal temperament above A3 = 220&nbsp;Hz. The bank advances exactly 50 steps per second of wall-clock time. If the tab stalls, it skips ahead instead of racing to catch up, and it stops while the tab is hidden. Input is clamped to &plusmn;0.8. Keys and MIDI notes add short kicks that decay with a 0.12 s time constant. The microphone maps loudness from &minus;60 to &minus;10 dBFS onto 0 to 0.8. Add random input feeds uniform random values in &plusmn;0.8 each step, the same distribution the experiment uses.</p>
+  <p class="note"><strong>The readouts.</strong> Each is a ridge fit (least squares with a small penalty on large weights) on the main page's seeded random input: 500 steps to settle, 3,500 to fit, 3,500 to score. There is one per delay k &isin; {0, 10, 25, 50, 100}, fitted at the current coupling and error size. The 34 features are the real part, imaginary part and squared amplitude of each oscillator, plus a constant. The scores shown are held-out squared correlations on that random input, meaning they are measured on steps the fit never saw. The weights are then applied unchanged to whatever you feed in. Your gestures are nothing like white noise. Slow drags and held values push the oscillators into their nonlinear range, where the fit was never trained, so the reconstruction can be better or worse than the score says. The "On your input" line measures this directly: the squared correlation between the amber line and your actual input k steps back, over the last eight seconds. Even at k = 0 the readout is far from perfect, because the new input arrives mixed into eleven states that already hold the past.</p>
+  <p class="note"><strong>The register clock.</strong> It is the main page's phase register (<code>Kit.registerStep</code>, a Kuramoto model, the standard model of oscillators that pull each other into sync) at the same eleven rates. It uses its own 32-symbol alphabet so it can spell digits. A character counts as lost when its stored offset rounds to a different one of the 32 symbols. The forecast and the live register run identical arithmetic with an identical fixed step, so live characters are lost at exactly the forecast steps. The forecast looks at most 20 minutes ahead. The live register is advanced by the browser's own clock, so it can never be more accurate than that clock. A known rate of forgetting works as a clock, but a coarse one: the bracket is as wide as the gap between two losses.</p>
 </div>
 
 </div>
@@ -312,8 +315,8 @@
   bNoise.addEventListener("click", function () {
     inp.noise = !inp.noise;
     bNoise.setAttribute("aria-pressed", inp.noise ? "true" : "false");
-    bNoise.textContent = inp.noise ? "Stop the noise" : "Let it hear noise";
-    status(inp.noise ? "Feeding it uniform random input in ±0.8, the kind the readouts were trained on." : "");
+    bNoise.textContent = inp.noise ? "Stop random input" : "Add random input";
+    status(inp.noise ? "Adding uniform random input in ±0.8 each step, the same kind the readouts were trained on." : "");
   });
 
   // ── microphone (permission-gated) ──
@@ -327,8 +330,8 @@
   }
   bMic.addEventListener("click", function () {
     if (mic) { stopMic(); status(""); return; }
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { status("No microphone access in this browser. The pad still works."); return; }
-    status("Asking for the microphone…");
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { status("No microphone access in this browser. The pad and keys still work."); return; }
+    status("Asking for microphone permission…");
     navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } })
       .then(function (stream) {
         var c = Kit.sound.audio();
@@ -338,9 +341,9 @@
         micBuf = new Float32Array(an.fftSize);
         mic = { stream: stream, src: src, an: an, env: 0 };
         bMic.setAttribute("aria-pressed", "true"); bMic.textContent = "Stop the microphone";
-        status("Listening. Loudness becomes positive input; silence is zero. Nothing is recorded or sent anywhere.");
+        status("Listening. Louder sound gives larger positive input, and silence gives zero. Nothing is recorded or sent anywhere.");
       })
-      .catch(function () { status("No microphone, or permission refused. The pad and keys still work."); });
+      .catch(function () { status("No microphone found, or permission was refused. The pad and keys still work."); });
   });
   function micLevel() {
     if (!mic) return 0;
@@ -370,8 +373,8 @@
     var bindMidi = function () {
       var n = 0;
       midiAcc.inputs.forEach(function (port) { port.onmidimessage = onMidi; n++; });
-      status(n ? "MIDI: listening to " + n + " input" + (n > 1 ? "s" : "") + ". Notes above middle C push plus, below push minus; farther and harder push more."
-               : "MIDI is on, but no instrument is plugged in.");
+      status(n ? "MIDI: listening to " + n + " input" + (n > 1 ? "s" : "") + ". Notes above middle C push positive and notes below push negative. Notes farther from middle C, or played harder, push more."
+               : "MIDI is on, but no instrument is connected.");
     };
     bMidi.addEventListener("click", function () {
       if (midiAcc) {
@@ -508,7 +511,7 @@
       scoreRead.innerHTML = "Training the readouts on the seeded random input&hellip;";
     } else {
       scoreRead.innerHTML = "Held-out score for k = <b>" + KS[sel] + "</b>: <b class='temp-t'>" + s2.toFixed(3) +
-        "</b> (squared correlation on random input it never saw, at K = " + RO.K.toFixed(2) + ", errors &times;" + RO.scale.toFixed(2) + ")" +
+        "</b> (squared correlation on random input the fit never saw, at K = " + RO.K.toFixed(2) + ", errors &times;" + RO.scale.toFixed(2) + ")" +
         (RO.busy || stale ? ". <span class='temp-t'>Retraining for the new settings&hellip;</span>" : ".");
     }
   }
@@ -602,7 +605,7 @@
     bHear.setAttribute("aria-pressed", hb ? "true" : "false");
     bHear.textContent = hb ? "Stop the bank" : "Hear the bank";
     bRem.setAttribute("aria-pressed", hr ? "true" : "false");
-    bRem.textContent = hr ? "Stop remembering" : "Hear it remember";
+    bRem.textContent = hr ? "Stop the readout" : "Hear the readout";
   }
   S.onChange(syncSoundButtons);
   bHear.addEventListener("click", function () { if (S.playing("bank")) S.stop("bank"); else startBankSound(); syncSoundButtons(); });
@@ -793,7 +796,7 @@
     g.fillText("K " + K.toFixed(2) + " · errors ×" + SCALE.toFixed(2), w - 8, 14);
     if (maxA < 0.02) {
       g.textAlign = "center"; g.fillStyle = rgba(PAL.dim, 0.9); g.font = "11px " + PAL.mono;
-      g.fillText("quiet. the bank is waiting for you", cx, cy + R * 0.32);
+      g.fillText("At rest. Drag the pad or press a key.", cx, cy + R * 0.32);
     }
 
     // the label for a hovered or pinned comet
@@ -953,9 +956,9 @@
       g.fillStyle = rgba(PAL.dim, 1); g.fillText(txt, kx + 18, 13);
       kx += 18 + g.measureText(txt).width + 14;
     }
-    key(rgba(PAL.just, 1), "you, u(t)");
-    if (kk > 0 && w > 420) key(rgba(PAL.just, 0.5), "you, " + kk + " steps ago", [3, 3]);
-    key(rgba(PAL.temper, 1), (RO.w[sel] && RO.K === K && RO.scale === SCALE) ? "the bank's guess at that" : "training…");
+    key(rgba(PAL.just, 1), "your input, u(t)");
+    if (kk > 0 && w > 420) key(rgba(PAL.just, 0.5), "your input " + kk + " steps ago", [3, 3]);
+    key(rgba(PAL.temper, 1), (RO.w[sel] && RO.K === K && RO.scale === SCALE) ? "readout's estimate" : "training…");
   }
 
   // live match on the visitor's own input, last 8 s
@@ -970,10 +973,10 @@
     }
     if (n < 100) { youRead.textContent = ""; return; }
     var vy = syy / n - (sy / n) * (sy / n), vp = spp / n - (sp / n) * (sp / n);
-    if (vy < 1e-4) { youRead.innerHTML = "On your input: nothing to remember yet. Give it something."; return; }
+    if (vy < 1e-4) { youRead.innerHTML = "On your input: no movement yet, so there is nothing to compare. Drag the pad or press a key."; return; }
     var r = (syp / n - (sy / n) * (sp / n)) / Math.sqrt(vy * Math.max(vp, 1e-12));
     youRead.innerHTML = "On your input, last " + (n * DT).toFixed(0) + " s: squared correlation <b class='just-t'>" +
-      Math.max(0, r * r).toFixed(2) + "</b> between the amber line and what you actually did " + kk + " steps back.";
+      Math.max(0, r * r).toFixed(2) + "</b> between the amber line and your actual input " + kk + " steps earlier.";
   }
 
   var liveRead = document.getElementById("live-read");
@@ -1062,7 +1065,7 @@
       dead: new Array(SLOTS).fill(-1), death: null, sorted: null
     };
     var me = clock;
-    regOut.innerHTML = "Wrote <b class='just-t'>" + txt.trim() + "</b>. Surveying the road ahead&hellip;";
+    regOut.innerHTML = "Wrote <b class='just-t'>" + txt.trim() + "</b>. Forecasting when each character will be lost&hellip;";
     cancelSurvey = Kit.drive(surveyGen(reg, CK), function (death) {
       if (clock !== me) return;
       cancelSurvey = null;
@@ -1111,17 +1114,17 @@
     trueOut.innerHTML = "By the stopwatch: <b>" + fmtLong(tTrue) + "</b>" +
       (clock.lag > 5 ? " <span class='temp-t'>(register catching up)</span>" : "");
     if (!clock.sorted) {
-      regOut.innerHTML = "Wrote <b class='just-t'>" + clock.text.trim() + "</b>. Surveying the road ahead&hellip;";
+      regOut.innerHTML = "Wrote <b class='just-t'>" + clock.text.trim() + "</b>. Forecasting when each character will be lost&hellip;";
       return;
     }
     var lo = nDead > 0 ? clock.sorted[nDead - 1] * DT : 0;
     var hi = nDead < SLOTS ? clock.sorted[nDead] * DT : Infinity;
     clock.bracket = { lo: lo, hi: hi, dead: nDead, t: clock.steps * DT, wall: tTrue };
-    var deadTxt = "<b class='temp-t'>" + nDead + "</b> of " + SLOTS + " dead";
+    var deadTxt = "<b class='temp-t'>" + nDead + "</b> of " + SLOTS + " lost";
     if (nDead === SLOTS) {
-      regOut.innerHTML = deadTxt + ". By the register: <b>more than " + fmtLong(lo) + "</b> since you wrote it. It has forgotten everything and can't say how much more.";
+      regOut.innerHTML = deadTxt + ". By the register: <b>more than " + fmtLong(lo) + "</b> since you wrote it. Every character is lost, so it cannot say how much longer.";
     } else if (!isFinite(hi)) {
-      regOut.innerHTML = deadTxt + ". By the register: <b>more than " + fmtLong(lo) + "</b>; the rest outlast the 20-minute survey.";
+      regOut.innerHTML = deadTxt + ". By the register: <b>more than " + fmtLong(lo) + "</b>. The remaining characters last beyond the 20-minute forecast.";
     } else {
       regOut.innerHTML = deadTxt + ". By the register: between <b class='just-t'>" + fmtLong(lo) + "</b> and <b class='just-t'>" + fmtLong(hi) + "</b> since you wrote it.";
     }
@@ -1131,7 +1134,7 @@
   ckS.addEventListener("input", function () {
     CK = parseInt(this.value, 10) / 100;
     ckV.textContent = "K = " + CK.toFixed(2);
-    if (clock) eraseClock("The coupling changed, so the forecast no longer holds. Write the time again.");
+    if (clock) eraseClock("The coupling changed, so the forecast no longer applies. Write the time again.");
   });
 
   // ══════════════════════════════════════════════════════════
