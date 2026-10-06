@@ -456,9 +456,9 @@
 
 <header class="hero">
   <span class="eyebrow">Tuning &middot; Memory &middot; Machines</span>
-  <h1>Every note on a piano is slightly out of tune.</h1>
-  <p class="lede">On purpose. This page shows you how to hear it, why pianos are tuned that way, and how the leftover errors can be used to build a small machine that remembers what it hears.</p>
-  <p>You'll need sound. Buttons that hold a note keep playing until you press them again. The box in the bottom-right corner stops everything, and so does the Escape key.</p>
+  <h1>Why no piano is perfectly in tune</h1>
+  <p class="lede">Pianos are deliberately tuned so that almost every interval is slightly off. Below you can hear the difference and see where it comes from. The second half of the page uses those small errors to build a simple machine that stores and processes information.</p>
+  <p>Turn your sound on. Buttons that play a held note keep playing until you press them again. To stop everything, use the Stop button in the bottom-right corner or press Escape.</p>
 
   <div class="panel">
     <h3>Two fifths</h3>
@@ -490,9 +490,9 @@
     </div>
   </div>
 
-  <p>Start on C and go up by a fifth twelve times: C, G, D, A, E, B, F&sharp;, C&sharp;, G&sharp;, D&sharp;, A&sharp;, E&sharp;, B&sharp;. You pass through every note on the keyboard and land on B&sharp;, which is the same key as C, seven octaves higher. That's the theory.</p>
+  <p>Start on C and go up by a fifth twelve times: C, G, D, A, E, B, F&sharp;, C&sharp;, G&sharp;, D&sharp;, A&sharp;, E&sharp;, B&sharp;. You pass through every note on the keyboard and land on B&sharp;, which on a piano is the same key as C, seven octaves higher.</p>
 
-  <p>In practice, twelve <em>pure</em> fifths overshoot seven octaves by a small but clearly audible amount. Press the buttons to hear the climb and where it lands.</p>
+  <p>With pure fifths, though, you overshoot that C by a small but clearly audible amount. Use the buttons below to hear both climbs and where each one lands.</p>
 
   <div class="panel">
     <h3>The stack</h3>
@@ -548,7 +548,7 @@
 
   <p class="wide">Read the last column as a set of speeds. The piano's errors produce eleven slow rhythms, each at its own rate, and no rate is a simple multiple of another.</p>
 
-  <p>That matters because <strong>a set of oscillators running at unrelated speeds is a good starting point for a machine that stores and processes information.</strong> The rest of the page builds one.</p>
+  <p>A set of oscillators running at unrelated speeds is a good starting point for a machine that stores and processes information. The rest of the page builds one from these eleven rates.</p>
 </section>
 
 <section>
@@ -618,7 +618,7 @@
 
   <p class="wide">With no coupling, the bank can be read back almost three seconds. At the strongest coupling it reaches one second, while mixing rises close to eightfold. If you count only the first 30 delays, 0.6 seconds, you miss this trade-off, because the memory being lost lies further back. That is why the test keeps probing past the edge of the chart.</p>
 
-  <p class="wide">Capacity never gets near its ceiling of 34, the number of values the readout sees. At most about half of them are useful. The reason is that <strong>the oscillators are very similar</strong>: their speeds differ by only 0.37 to 8.63 Hz, out of 220, so much of what they hold is duplicated.</p>
+  <p class="wide">Capacity never gets near its ceiling of 34, the number of values the readout sees. At most about half of them are useful. The reason is that the oscillators are very similar: their speeds differ by only 0.37 to 8.63 Hz, out of 220, so much of what they hold is duplicated.</p>
 
   <p class="wide">This links back to the comma. The piano's intervals are nearly right, which is why the piano sounds acceptable. But nearly identical oscillators carry nearly identical information. The size of the tuning errors sets how much the bank can hold.</p>
 
@@ -671,11 +671,11 @@
     </div>
   </div>
 
-  <p class="wide">You can't hear phase directly; the ear barely notices it in a steady tone, as Helmholtz showed in the 1860s. So the page reads the register the way a piano tuner checks a string: it plays each slot against a reference tone set to the written value. If the slot still matches, the two tones reinforce and ring loudly. If it has drifted, they partly cancel and the slot goes quiet. <strong>Interference turns phase into loudness</strong>, and the ear judges loudness well.</p>
+  <p class="wide">You can't hear phase directly; the ear barely notices it in a steady tone, as Helmholtz showed in the 1860s. So the page reads the register the way a piano tuner checks a string: it plays each slot against a reference tone set to the written value. If the slot still matches, the two tones reinforce and ring loudly. If it has drifted, they partly cancel and the slot goes quiet. This turns a difference in phase, which you can't hear, into a difference in loudness, which you can.</p>
 
-  <p class="wide">At the default coupling of 0.12 the message holds: the first slot slips after about four and a half minutes. Press <em>Let it decay</em> to raise the coupling to 2. The oscillators pull each other into step, the stored offsets are erased, and the letters fail one at a time. <strong>Read it back while it decays and you hear the voices drop out.</strong></p>
+  <p class="wide">At the default coupling of 0.12 the message holds: the first slot slips after about four and a half minutes. Press <em>Let it decay</em> to raise the coupling to 2. The oscillators pull each other into step, the stored offsets are erased, and the letters fail one at a time. If you press <em>Read it back, out loud</em> during the decay, you can hear slots go quiet as they fail.</p>
 
-  <p class="wide"><strong>Watch which letters fail first.</strong> Slots held by the most accurate intervals tend to go early, because their oscillators are slow and closest in speed to the group, so they are the easiest to pull into step. Slots held by the intervals the piano gets most wrong hold their letters longest.</p>
+  <p class="wide">The order in which letters fail is not random. Slots held by the most accurate intervals tend to go early, because their oscillators are slow and closest in speed to the group, so they are the easiest to pull into step. Slots held by the intervals the piano gets most wrong hold their letters longest.</p>
 </section>
 
 <section>
@@ -688,9 +688,9 @@
 
   <p class="wide">Both readings use the same eleven oscillators at the same time. The fast reading, the computer, uses their moment-to-moment state. The slow reading, the storage, uses their accumulated phase offsets. They don't interfere, because they work on different timescales.</p>
 
-  <p class="wide">Coupling affects both, and every coupling slider on this page is the same control. More coupling makes the bank mix about eightfold better. It also cuts reach from three seconds to under one and erases the stored message. <strong>More agreement between the oscillators makes a better mixer and a worse memory</strong>, in both readings at once. How much you trade is set by how different the oscillators' speeds are, which is set by the tuning errors.</p>
+  <p class="wide">Coupling affects both, and every coupling slider on this page is the same control. More coupling makes the bank mix about eightfold better. It also cuts reach from three seconds to under one and erases the stored message. In both readings, more agreement between the oscillators means better mixing and worse memory. How much of one you give up for the other depends on how different the oscillators' speeds are, which depends on the tuning errors.</p>
 
-  <p class="wide"><strong>The errors are what make the machine work.</strong> With perfect tuning, all eleven oscillators would be identical and would act as one. The bank would remember nothing and compute nothing.</p>
+  <p class="wide">With perfect tuning, all eleven oscillators would turn at the same speed and act as one. The bank would remember almost nothing and compute nothing, as the error-size panel above shows when you set it to zero.</p>
 
   <div class="poem">
     &ldquo;Harmony cultivates wanting by metabolizing our error as remainder. A music with no remainder leaves nothing to want in a world where wanting is the product.&rdquo;
@@ -705,9 +705,9 @@
     </div>
   </div>
 
-  <p class="wide">The same idea sits at the center of Claude Shannon's information theory, published in 1948. Shannon defined the information in a message as how surprising it is. An event with a 1-in-2 chance carries 1 bit. A 1-in-4 event carries 2 bits, and a 1-in-1,000 event about 10 bits. An event you were certain of carries 0 bits. <strong>A message you could have predicted perfectly tells you nothing.</strong></p>
+  <p class="wide">The same idea sits at the center of Claude Shannon's information theory, published in 1948. Shannon defined the information in a message as how surprising it is. An event with a 1-in-2 chance carries 1 bit. A 1-in-4 event carries 2 bits, and a 1-in-1,000 event about 10 bits. An event you were certain of carries 0 bits, so a message you could have predicted perfectly gives you no new information.</p>
 
-  <p class="wide">Everyday compression is built on this. A phone's voice codec predicts what your voice will do next and sends only the prediction error. The receiving phone makes the same prediction and adds the error back. Video works the same way, frame by frame. The better the prediction, the less there is to send. The prediction error <em>is</em> the information.</p>
+  <p class="wide">Everyday compression is built on this. A phone's voice codec predicts what your voice will do next and sends only the prediction error. The receiving phone makes the same prediction and adds the error back. Video works the same way, frame by frame. The better the prediction, the less there is to send, and what does get sent is exactly the part the receiver couldn't predict.</p>
 
   <p class="wide">Tuning works the same way. Everyone knows the textbook tuning, so a piano only tells you something new where it differs from the textbook. The panel below shows this with numbers.</p>
 
@@ -734,8 +734,7 @@
 
   <p class="wide"><strong>Agreement erases information.</strong> When the phases are spread out, many arrangements are possible, and each can stand for a different message. Coupling pulls the phases together, which shrinks the number of arrangements that can be told apart, and with it the number of bits the register can hold. That is why turning up coupling helps mixing but costs memory.</p>
 
-  <p class="wide">Equal temperament was designed to hide the comma, but the error never went away. It was spread across every interval. Those leftover errors are exactly what lets the bank hold information.</p>
-</section>
+  </section>
 
 <section>
   <div class="sec-head">
