@@ -1,0 +1,1207 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Play the Bank</title>
+<link rel="stylesheet" href="lab.css">
+<style>
+  .inst { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "comets" "pad" "legend" "ctl"; gap: 1.1rem 1.4rem; }
+  .inst .col { display: contents; }
+  .inst .col > div { min-width: 0; }
+  @media (min-width: 54rem) {
+    .inst { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); grid-template-areas: "left right"; align-items: start; }
+    .inst .col { display: block; min-width: 0; }
+    .inst .col-l { grid-area: left; } .inst .col-r { grid-area: right; }
+    .inst .col > div + div { margin-top: 1.1rem; }
+  }
+  .a-comets { grid-area: comets; } .a-pad { grid-area: pad; } .a-legend { grid-area: legend; } .a-ctl { grid-area: ctl; }
+  #comets { cursor: crosshair; touch-action: manipulation; }
+  #pad { touch-action: none; cursor: ew-resize; border: 1px solid var(--rule); background: var(--panel-2); user-select: none; -webkit-user-select: none; }
+  #pad:focus-visible { outline: 2px solid var(--temper); outline-offset: 2px; }
+  .legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.6rem, 1fr)); gap: 0.1rem 0.8rem; margin: 0.7rem 0 0; padding: 0; list-style: none; font-family: var(--mono); font-size: 0.7rem; color: var(--dim); }
+  .legend li { display: flex; align-items: center; gap: 0.45rem; padding: 0.12rem 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; }
+  .legend li.hot { color: var(--ink); }
+  .legend i { flex: none; display: inline-block; border-radius: 50%; }
+  .legend .c { margin-left: auto; font-variant-numeric: tabular-nums; }
+  .keys { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 0.3rem; margin: 0.9rem 0 0.4rem; }
+  .keys button { padding: 0.35rem 0; min-height: 3rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.1rem; line-height: 1.1; font-size: 0.9rem; transition: background 0.25s, border-color 0.25s, color 0.25s; }
+  .keys button small { font-size: 0.58rem; color: var(--dim); letter-spacing: 0; }
+  .keys button.neg { border-color: var(--temper); }
+  .keys button.pos { border-color: var(--just); }
+  .keys button.hit { background: var(--just-soft); border-color: var(--just); transition: none; }
+  .keys button.neg.hit { background: var(--temper-soft); border-color: var(--temper); }
+  .keys .gap { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 0.7rem; color: var(--dim); border: 1px dashed var(--rule); border-radius: 2px; min-height: 3rem; }
+  .kchips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.6rem 0; }
+  .kchips .chip { font-variant-numeric: tabular-nums; }
+  .kchips .chip.sel { border-color: var(--temper); color: var(--ink); }
+  .clockslots { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 0.3rem; margin: 1.1rem 0; max-width: 34rem; }
+  .slot { height: 3.9rem; border: 1px solid var(--rule); border-radius: 2px; background: var(--panel-2); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: var(--mono); gap: 0.12rem; min-width: 0; transition: border-color 0.3s; }
+  .slot .ch { font-size: 1.15rem; line-height: 1; }
+  .slot .hz, .slot .dd { font-size: 0.56rem; color: var(--dim); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .slot.ok { border-color: var(--just); } .slot.ok .ch { color: var(--just); }
+  .slot.bad { border-color: var(--temper); } .slot.bad .ch { color: var(--temper); }
+  .big { font-family: var(--mono); font-size: clamp(1.05rem, 0.95rem + 0.6vw, 1.35rem); line-height: 1.45; font-variant-numeric: tabular-nums; margin: 0.4rem 0; }
+  .big b { font-weight: 500; }
+  .status { font-family: var(--mono); font-size: 0.72rem; color: var(--dim); letter-spacing: 0.04em; min-height: 1.2em; }
+  .cap { margin-top: 0.5rem; }
+  [hidden] { display: none !important; }
+</style>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">Lab &middot; 07 &middot; Live input</span>
+  <h1>Play the Bank</h1>
+  <p class="lede">On this page you drive the oscillator bank yourself. Drag the pad, press keys, or use your microphone, and watch how the bank responds.</p>
+  <p>On the main page the bank only hears a seeded random signal, the same one on every run. Here the input comes from you. The bank is eleven damped oscillators. Each one spins, and winds down slowly when nothing pushes it. Each spins at the beat rate of one piano interval, a pair of notes sounded together. A beat is the slow pulse two close tones make together, like two guitar strings slightly out of tune. Here it is the gap between a pure interval (an exact frequency ratio, such as 3:2 for the fifth) and the piano's version of it. The rates run from <span class="num" data-fill="beatLo">0.37</span>&nbsp;Hz for the fifth to <span class="num" data-fill="beatHi">8.63</span>&nbsp;Hz for the 11th harmonic. The equations and constants match the main page, stepped <span class="num" data-fill="rate">50</span> times a second in your browser.</p>
+</header>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">01</span>
+    <div><h2>Drive the bank</h2></div>
+  </div>
+  <p>Each glowing comet is one oscillator. Push the input and all eleven move at once, then spread apart, each at its own speed.</p>
+  <p>Each comet is a point in the complex plane, a flat map where each point has a distance from the center and an angle around it. The distance is how strongly it rings (its amplitude, |z|). The angle is where it is in its cycle (its phase). Every input pushes all eleven by the same amount. Each oscillator then turns that push at its own beat rate, so one push fans out into eleven different rotations.</p>
+  <p>Color shows how far each interval is from its piano key, in cents. A cent is a hundredth of a piano semitone. Amber marks the largest errors, and these generally spin fastest. Cyan marks the near misses, which spin slowly.</p>
+
+  <div class="panel">
+    <h3>The live bank</h3>
+    <div class="inst">
+      <div class="col col-l">
+      <div class="a-comets">
+        <canvas id="comets" height="440" aria-label="Eleven oscillators drawn as comets with fading trails in the complex plane. A line from the center shows the mean field. Hover or tap a comet to see its interval."></canvas>
+      </div>
+      <div class="a-legend">
+        <ul class="legend" id="legend" aria-label="Which comet is which interval"></ul>
+        <div class="readout cap">Size and color show how far each interval is from its piano key, in cents: cyan for the smallest error, amber for the largest. Hover or tap a comet to see its name. The rings mark |z| = 0.25, 0.5, 1 and 2 on a compressed scale, so a hard push stays on the canvas. The pale arrow is the mean field, the average of all eleven oscillators. Coupling pulls each oscillator toward it.</div>
+      </div>
+      </div>
+      <div class="col col-r">
+      <div class="a-pad">
+        <canvas id="pad" height="132" tabindex="0" aria-label="Input pad. Press and drag left for negative input, right for positive, up to plus or minus 0.8. Release and it falls back to zero."></canvas>
+        <div class="readout cap">Press and drag. Left pushes negative and right pushes positive, up to &plusmn;0.8, the same range as the random input. Let go and the input returns to zero.</div>
+        <div class="keys" id="keys" role="group" aria-label="Kick keys, also on your keyboard"></div>
+        <div class="readout">You can also use the keyboard. Each key gives a short kick of the size shown: negative on the left hand (A S D F), positive on the right (H J K L).</div>
+      </div>
+      <div class="a-ctl">
+        <div class="btn-row">
+          <button id="b-noise" aria-pressed="false">Add random input</button>
+          <button id="b-mic" aria-pressed="false">Use the microphone</button>
+          <button id="b-midi" aria-pressed="false" hidden>Listen for MIDI</button>
+        </div>
+        <div class="status" id="src-status" aria-live="polite"></div>
+        <div class="btn-row" style="margin-top:1.2rem">
+          <button id="b-hear" data-tone="just" data-needs-sound>Hear the bank</button>
+        </div>
+        <div class="btn-row" role="group" aria-label="Playback register">
+          <button id="oct-hi" aria-pressed="true">Phone speaker</button>
+          <button id="oct-lo" aria-pressed="false">Headphones</button>
+        </div>
+        <div class="readout">Hear the bank plays eleven sine tones at the pure intervals above A3 (220&nbsp;Hz). Each tone is as loud as its comet is far from the center. Phone speaker plays everything two octaves up, where a small speaker can produce it. Headphones plays at concert pitch.</div>
+        <div class="readout" id="live-read" style="margin-top:0.8rem" aria-live="off">u = <b class="num">0.00</b></div>
+      </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">02</span>
+    <div><h2>How well the bank remembers your input</h2></div>
+  </div>
+  <p>The amber line is the bank's estimate of your input k steps ago. One step is 0.02&nbsp;s, so k = 25 means half a second ago. When the amber line lies on the dashed line, the bank still holds a usable memory of what you did.</p>
+  <p>The bank itself is never trained. A readout learns to read it. The readout is a weighted sum of <span class="num" data-fill="nf">34</span> numbers taken from the oscillators, with the weights fitted by least squares on the main page's random signal. A fixed dynamical system with a trained linear readout like this is called reservoir computing. When the page loads, it fits one readout for each delay k. It then applies them, unchanged, to your input. The score is a squared correlation: 1 means a perfect match, 0 means no match.</p>
+  <p>Two sliders change the bank. Coupling (K) pulls each oscillator toward the average of all of them, the way a clapping crowd drifts into time. Raise it and the oscillators start to agree with each other. Size of the errors scales every beat rate. Shrink it toward zero and the eleven comets fold into one. Watch what either change does to the scores.</p>
+
+  <div class="panel">
+    <h3>The readout</h3>
+    <canvas id="strip" height="200" aria-label="Scrolling chart of the last eight seconds: your input in cyan, your input k steps ago dashed, and the readout's estimate of it in amber."></canvas>
+    <div class="slider-row">
+      <label for="kdel">Delay k</label>
+      <input type="range" id="kdel" min="0" max="4" step="1" value="2">
+      <span class="readout num" id="kdel-val">k = 25 steps &middot; 0.50 s</span>
+    </div>
+    <div class="kchips" id="kchips" aria-label="Held-out score for each delay"></div>
+    <div class="meter" id="train-meter" aria-hidden="true"><i></i></div>
+    <div class="readout" id="score-read" aria-live="polite">Training the readouts&hellip;</div>
+    <div class="readout" id="you-read"></div>
+    <div class="btn-row">
+      <button id="b-remember" data-tone="temper" data-needs-sound>Hear the readout</button>
+    </div>
+    <div class="readout">Hear the readout plays one tone. Its loudness follows how far the amber line is from zero. Press a key and wait. The kick comes back k steps later, usually smeared, because the bank does not keep an exact copy.</div>
+    <div class="slider-row" style="margin-top:1.4rem">
+      <label for="coupling">Coupling</label>
+      <input type="range" id="coupling" min="0" max="800" value="12">
+      <span class="readout num" id="coupling-val">K = 0.12</span>
+    </div>
+    <div class="slider-row">
+      <label for="spread">Size of the errors</label>
+      <input type="range" id="spread" min="0" max="150" value="100">
+      <span class="readout num" id="spread-val">&times;1.00</span>
+    </div>
+    <div class="readout">Both sliders change the live bank immediately. A moment after you let go, the readouts are refitted in the background on the same seeded random input at the new settings.</div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">03</span>
+    <div><h2>Use the register as a clock</h2></div>
+  </div>
+  <p>This register stores ten characters and loses them one at a time, at times the page can predict. Press Write the time. Each character turns cyan while it holds and amber once it is lost. Count the lost characters to estimate how long ago you wrote it.</p>
+  <p>The register is the main page's second machine. It stores each character as a phase offset, a small shift in where an oscillator sits in its cycle. Coupling slowly pulls the oscillators back into agreement, and that erases the offsets. Before the live run starts, the page runs an identical copy ahead in fast-forward and records the second each character will be lost. With those times known, the number of lost characters tells you roughly how much time has passed.</p>
+  <p>This is a coarse clock. It can only say that the elapsed time falls between two of the predicted losses.</p>
+
+  <div class="panel">
+    <h3>Write the time into the register</h3>
+    <div class="slider-row">
+      <label for="ck">Register coupling</label>
+      <input type="range" id="ck" min="0" max="800" value="150">
+      <span class="readout num" id="ck-val">K = 1.50</span>
+    </div>
+    <div class="btn-row">
+      <button id="b-write" data-tone="just">Write the time</button>
+      <button id="b-erase">Erase</button>
+    </div>
+    <div class="clockslots" id="cslots" aria-label="The ten register slots"></div>
+    <div class="meter" id="survey-meter" aria-hidden="true"><i></i></div>
+    <p class="big" id="clock-reg" aria-live="polite">Nothing written yet.</p>
+    <p class="big" id="clock-true" style="color:var(--dim)"></p>
+    <div class="readout" id="clock-note">Under each character: how far its interval is off, in cents, and, once the forecast finishes, the second it will be lost (marked &dagger;). The default coupling here is strong, so characters drop out fast enough to watch. At the main page's default of 0.12, the first character would last for minutes.</div>
+  </div>
+</section>
+
+<div class="foot">
+  <p class="note"><strong>The live bank.</strong> It is <code>Kit.bench(OMEGA).makeLive(K)</code>, with the same equations and constants as the main page: damping 0.6 per second, input gain 0.30, step 0.02 s, mean-field coupling K. The eleven detunings are those of 12-tone equal temperament above A3 = 220&nbsp;Hz. The bank advances exactly 50 steps per second of wall-clock time. If the tab stalls, it skips ahead instead of racing to catch up, and it stops while the tab is hidden. Input is clamped to &plusmn;0.8. Keys and MIDI notes add short kicks that decay with a 0.12 s time constant. The microphone maps loudness from &minus;60 to &minus;10 dBFS onto 0 to 0.8. Add random input feeds uniform random values in &plusmn;0.8 each step, the same distribution the experiment uses.</p>
+  <p class="note"><strong>The readouts.</strong> Each is a ridge fit (least squares with a small penalty on large weights) on the main page's seeded random input: 500 steps to settle, 3,500 to fit, 3,500 to score. There is one per delay k &isin; {0, 10, 25, 50, 100}, fitted at the current coupling and error size. The 34 features are the real part, imaginary part and squared amplitude of each oscillator, plus a constant. The scores shown are held-out squared correlations on that random input, meaning they are measured on steps the fit never saw. The weights are then applied unchanged to whatever you feed in. Your gestures are nothing like white noise. Slow drags and held values push the oscillators into their nonlinear range, where the fit was never trained, so the reconstruction can be better or worse than the score says. The "On your input" line measures this directly: the squared correlation between the amber line and your actual input k steps back, over the last eight seconds. Even at k = 0 the readout is far from perfect, because the new input arrives mixed into eleven states that already hold the past.</p>
+  <p class="note"><strong>The register clock.</strong> It is the main page's phase register (<code>Kit.registerStep</code>, a Kuramoto model, the standard model of oscillators that pull each other into sync) at the same eleven rates. It uses its own 32-symbol alphabet so it can spell digits. A character counts as lost when its stored offset rounds to a different one of the 32 symbols. The forecast and the live register run identical arithmetic with an identical fixed step, so live characters are lost at exactly the forecast steps. The forecast looks at most 20 minutes ahead. The live register is advanced by the browser's own clock, so it can never be more accurate than that clock. A known rate of forgetting works as a clock, but a coarse one: the bracket is as wide as the gap between two losses.</p>
+</div>
+
+</div>
+<script src="kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  Kit.nav("instrument.html");
+  Kit.soundBar();
+
+  // ══════════════════════════════════════════════════════════
+  //  THE BANK
+  // ══════════════════════════════════════════════════════════
+  var IV = Kit.intervals(Kit.edo(12));
+  var OMEGA = Kit.omegas(IV);
+  var N = OMEGA.length;
+  var bank = Kit.bench(OMEGA);
+  var NF = bank.NF;
+  var DT = Kit.DT;                       // 0.02 s, 50 steps a second
+  var KS = [0, 10, 25, 50, 100];
+  var TWO_PI = Math.PI * 2;
+  var reduced = Kit.reduced;
+
+  var K = 0.12, SCALE = 1;
+  var live = bank.makeLive(K);
+
+  var maxErr = 0;
+  IV.forEach(function (v) { maxErr = Math.max(maxErr, Math.abs(v.err)); });
+  var WRONG = IV.map(function (v) { return Math.abs(v.err) / maxErr; });
+  var ORDER = IV.map(function (v, i) { return i; }).sort(function (a, b) { return WRONG[a] - WRONG[b]; });
+
+  // fill numbers the prose states from the page's own tables
+  (function () {
+    var beats = IV.map(function (v) { return v.beat; });
+    var fills = {
+      beatLo: Math.min.apply(null, beats).toFixed(2),
+      beatHi: Math.max.apply(null, beats).toFixed(2),
+      rate: String(Math.round(1 / DT)), nf: String(NF)
+    };
+    document.querySelectorAll("[data-fill]").forEach(function (el) { el.textContent = fills[el.dataset.fill]; });
+  })();
+
+  // ── colors ──
+  function rgb(hex) {
+    var h = hex.replace("#", "");
+    if (h.length === 3) h = h.split("").map(function (c) { return c + c; }).join("");
+    var n = parseInt(h, 16);
+    return [n >> 16 & 255, n >> 8 & 255, n & 255];
+  }
+  function mixRGB(a, b, t) { return [0, 1, 2].map(function (i) { return Math.round(a[i] + (b[i] - a[i]) * t); }); }
+  function rgba(c, a) { return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + a + ")"; }
+  var PAL = {};
+  function readPalette() {
+    var g = rgb(Kit.css("--ground"));
+    PAL.dark = (0.2126 * g[0] + 0.7152 * g[1] + 0.0722 * g[2]) < 128;
+    PAL.just = rgb(Kit.css("--just"));
+    PAL.temper = rgb(Kit.css("--temper"));
+    PAL.ink = rgb(Kit.css("--ink"));
+    PAL.dim = rgb(Kit.css("--dim"));
+    PAL.rule = rgb(Kit.css("--rule"));
+    PAL.sage = rgb(Kit.css("--sage"));
+    PAL.comet = WRONG.map(function (w) { return mixRGB(PAL.just, PAL.temper, Math.pow(w, 0.8)); });
+    PAL.mono = Kit.css("--mono");
+  }
+  readPalette();
+
+  // ══════════════════════════════════════════════════════════
+  //  INPUTS: pad, keys, MIDI, microphone, noise
+  // ══════════════════════════════════════════════════════════
+  var UMAX = 0.8;
+  var inp = { padActive: false, padTarget: 0, padU: 0, kick: 0, micU: 0, noise: false, u: 0 };
+  var KEYMAP = [
+    { key: "A", amp: -0.8 }, { key: "S", amp: -0.55 }, { key: "D", amp: -0.3 }, { key: "F", amp: -0.12 },
+    { key: "G", amp: 0 },
+    { key: "H", amp: 0.12 }, { key: "J", amp: 0.3 }, { key: "K", amp: 0.55 }, { key: "L", amp: 0.8 }
+  ];
+  var keyBtns = {};
+  var keysHost = document.getElementById("keys");
+  KEYMAP.forEach(function (km) {
+    if (km.amp === 0) {
+      var gp = document.createElement("div");
+      gp.className = "gap"; gp.textContent = "0"; gp.setAttribute("aria-hidden", "true");
+      keysHost.appendChild(gp); return;
+    }
+    var b = document.createElement("button");
+    b.className = km.amp < 0 ? "neg" : "pos";
+    b.innerHTML = km.key + "<small>" + (km.amp > 0 ? "+" : "−") + Math.abs(km.amp).toFixed(2).replace(/^0/, "") + "</small>";
+    b.setAttribute("aria-label", "Kick " + (km.amp > 0 ? "plus " : "minus ") + Math.abs(km.amp) + ", key " + km.key);
+    b.addEventListener("click", function () { hit(km); });
+    keysHost.appendChild(b);
+    keyBtns[km.key] = b;
+  });
+  function hit(km) {
+    inp.kick = Math.max(-UMAX, Math.min(UMAX, inp.kick + km.amp));
+    var b = keyBtns[km.key];
+    if (b) { b.classList.add("hit"); setTimeout(function () { b.classList.remove("hit"); }, 140); }
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = e.target;
+    if (t && (t.tagName === "TEXTAREA" || (t.tagName === "INPUT" && t.type !== "range"))) return;
+    var k = (e.key || "").toUpperCase();
+    for (var i = 0; i < KEYMAP.length; i++) {
+      if (KEYMAP[i].key === k && KEYMAP[i].amp !== 0) { hit(KEYMAP[i]); e.preventDefault(); return; }
+    }
+  });
+
+  // ── the pad ──
+  var padCv = document.getElementById("pad");
+  var PADM = 18;
+  function padU(ev) {
+    var r = padCv.getBoundingClientRect();
+    var x = (ev.clientX - r.left - PADM) / Math.max(1, r.width - 2 * PADM);
+    return Math.max(-UMAX, Math.min(UMAX, (x * 2 - 1) * UMAX));
+  }
+  padCv.addEventListener("pointerdown", function (e) {
+    inp.padActive = true; inp.padTarget = padU(e);
+    try { padCv.setPointerCapture(e.pointerId); } catch (er) {}
+    e.preventDefault();
+  });
+  padCv.addEventListener("pointermove", function (e) { if (inp.padActive) inp.padTarget = padU(e); });
+  function padUp() { inp.padActive = false; inp.padTarget = 0; }
+  padCv.addEventListener("pointerup", padUp);
+  padCv.addEventListener("pointercancel", padUp);
+  padCv.addEventListener("lostpointercapture", padUp);
+  // arrow keys on the focused pad nudge a held value
+  padCv.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      inp.kick = Math.max(-UMAX, Math.min(UMAX, inp.kick + (e.key === "ArrowRight" ? 0.3 : -0.3)));
+      e.preventDefault();
+    }
+  });
+
+  var srcStatus = document.getElementById("src-status");
+  function status(t) { srcStatus.textContent = t; }
+
+  // ── noise ──
+  var bNoise = document.getElementById("b-noise");
+  var rng = Kit.mulberry32((Date.now() & 0x7fffffff) || 1);
+  bNoise.addEventListener("click", function () {
+    inp.noise = !inp.noise;
+    bNoise.setAttribute("aria-pressed", inp.noise ? "true" : "false");
+    bNoise.textContent = inp.noise ? "Stop random input" : "Add random input";
+    status(inp.noise ? "Adding uniform random input in ±0.8 each step, the same kind the readouts were trained on." : "");
+  });
+
+  // ── microphone (permission-gated) ──
+  var bMic = document.getElementById("b-mic");
+  var mic = null, micBuf = null;
+  function stopMic() {
+    if (!mic) return;
+    try { mic.stream.getTracks().forEach(function (t) { t.stop(); }); mic.src.disconnect(); } catch (e) {}
+    mic = null; inp.micU = 0;
+    bMic.setAttribute("aria-pressed", "false"); bMic.textContent = "Use the microphone";
+  }
+  bMic.addEventListener("click", function () {
+    if (mic) { stopMic(); status(""); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { status("No microphone access in this browser. The pad and keys still work."); return; }
+    status("Asking for microphone permission…");
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } })
+      .then(function (stream) {
+        var c = Kit.sound.audio();
+        var src = c.createMediaStreamSource(stream);
+        var an = c.createAnalyser(); an.fftSize = 1024;
+        src.connect(an);
+        micBuf = new Float32Array(an.fftSize);
+        mic = { stream: stream, src: src, an: an, env: 0 };
+        bMic.setAttribute("aria-pressed", "true"); bMic.textContent = "Stop the microphone";
+        status("Listening. Louder sound gives larger positive input, and silence gives zero. Nothing is recorded or sent anywhere.");
+      })
+      .catch(function () { status("No microphone found, or permission was refused. The pad and keys still work."); });
+  });
+  function micLevel() {
+    if (!mic) return 0;
+    mic.an.getFloatTimeDomainData(micBuf);
+    var s = 0;
+    for (var i = 0; i < micBuf.length; i++) s += micBuf[i] * micBuf[i];
+    var db = 20 * Math.log10(Math.sqrt(s / micBuf.length) + 1e-9);
+    var lvl = Math.max(0, Math.min(1, (db + 60) / 50));
+    mic.env += (lvl - mic.env) * (lvl > mic.env ? 0.5 : 0.12);
+    return UMAX * mic.env;
+  }
+
+  // ── Web MIDI, only if the browser has it ──
+  var bMidi = document.getElementById("b-midi");
+  if (navigator.requestMIDIAccess) {
+    bMidi.hidden = false;
+    var midiAcc = null;
+    var onMidi = function (e) {
+      var d = e.data; if (!d || d.length < 3) return;
+      if ((d[0] & 0xf0) === 0x90 && d[2] > 0) {
+        var off = d[1] - 60;
+        var sign = off >= 0 ? 1 : -1;
+        var amp = Math.min(1, (Math.abs(off) + 2) / 26) * (d[2] / 127);
+        inp.kick = Math.max(-UMAX, Math.min(UMAX, inp.kick + sign * UMAX * amp));
+      }
+    };
+    var bindMidi = function () {
+      var n = 0;
+      midiAcc.inputs.forEach(function (port) { port.onmidimessage = onMidi; n++; });
+      status(n ? "MIDI: listening to " + n + " input" + (n > 1 ? "s" : "") + ". Notes above middle C push positive and notes below push negative. Notes farther from middle C, or played harder, push more."
+               : "MIDI is on, but no instrument is connected.");
+    };
+    bMidi.addEventListener("click", function () {
+      if (midiAcc) {
+        midiAcc.inputs.forEach(function (port) { port.onmidimessage = null; });
+        midiAcc.onstatechange = null; midiAcc = null;
+        bMidi.setAttribute("aria-pressed", "false"); status(""); return;
+      }
+      navigator.requestMIDIAccess().then(function (acc) {
+        midiAcc = acc; acc.onstatechange = bindMidi; bindMidi();
+        bMidi.setAttribute("aria-pressed", "true");
+      }, function () { status("MIDI access was refused. The pad and keys still work."); });
+    });
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  HISTORY: rings for the strip chart and the comet trails
+  // ══════════════════════════════════════════════════════════
+  var HLEN = 512;                      // > 400 + 100 so u(t-k) is always on hand
+  var SHOW = 400;                      // 8 s at 50 steps/s
+  var uHist = new Float32Array(HLEN);
+  var pHist = KS.map(function () { var a = new Float32Array(HLEN); a.fill(NaN); return a; });
+  var hHead = 0, hCount = 0, stepCount = 0;
+
+  var TRAIL = reduced ? 30 : 110;
+  var tRe = new Float32Array(N * TRAIL), tIm = new Float32Array(N * TRAIL);
+  var tHead = 0, tCount = 0;
+  var prevRe = new Float64Array(N), prevIm = new Float64Array(N);
+
+  // readouts, one per delay
+  var RO = { w: KS.map(function () { return null; }), score: KS.map(function () { return NaN; }), K: null, scale: null, busy: false };
+  var sel = 2;
+
+  // ══════════════════════════════════════════════════════════
+  //  ONE STEP AT 50 Hz
+  // ══════════════════════════════════════════════════════════
+  var KICK_DECAY = Math.exp(-DT / 0.12);
+  var PAD_TAU_ON = Math.exp(-DT / 0.05), PAD_TAU_OFF = Math.exp(-DT / 0.14);
+  var lastPred = 0;
+
+  function stepOnce() {
+    var a = inp.padActive ? PAD_TAU_ON : PAD_TAU_OFF;
+    inp.padU = inp.padTarget + (inp.padU - inp.padTarget) * a;
+    if (Math.abs(inp.padU) < 1e-5 && !inp.padActive) inp.padU = 0;
+    inp.micU = mic ? micLevel() : 0;
+    var u = inp.padU + inp.kick + inp.micU + (inp.noise ? (rng() * 2 - 1) * UMAX : 0);
+    u = Math.max(-UMAX, Math.min(UMAX, u));
+    inp.kick *= KICK_DECAY;
+    if (Math.abs(inp.kick) < 1e-5) inp.kick = 0;
+    inp.u = u;
+
+    for (var j = 0; j < N; j++) { prevRe[j] = live.re[j]; prevIm[j] = live.im[j]; }
+    live.step(u);
+    stepCount++;
+
+    hHead = (hHead + 1) % HLEN; if (hCount < HLEN) hCount++;
+    uHist[hHead] = u;
+    // a readout fit at other settings would only talk nonsense, so it waits
+    var fresh = RO.K === K && RO.scale === SCALE;
+    for (var q = 0; q < KS.length; q++) pHist[q][hHead] = (fresh && RO.w[q]) ? live.predict(RO.w[q]) : NaN;
+    lastPred = pHist[sel][hHead];
+
+    tHead = (tHead + 1) % TRAIL; if (tCount < TRAIL) tCount++;
+    for (var j2 = 0; j2 < N; j2++) { tRe[j2 * TRAIL + tHead] = live.re[j2]; tIm[j2 * TRAIL + tHead] = live.im[j2]; }
+
+    soundStep();
+  }
+
+  // a few knocks at load, so the comets have something to say on first paint
+  var knocks = [{ at: 4, amp: 0.8 }, { at: 34, amp: -0.55 }, { at: 70, amp: 0.3 }];
+
+  // ══════════════════════════════════════════════════════════
+  //  TRAINING: the same fit as bank.trainDelay, as a generator,
+  //  all five delays off one factorisation, at the live K and scale
+  // ══════════════════════════════════════════════════════════
+  function* trainGen(Kt, sc) {
+    var WASH = Kit.WASH, TRAIN = Kit.TRAIN;
+    var sim = bank.makeSim(Kt, sc);
+    var calls = 0;
+    while (!sim.step(750)) yield 0.1 * (++calls * 750) / sim.len;
+    var XtX = new Float64Array(NF * NF);
+    for (var t0 = WASH; t0 < WASH + TRAIN; t0 += 350) {
+      bank.xtxAccumulate(sim.X, XtX, t0, Math.min(WASH + TRAIN, t0 + 350));
+      yield 0.1 + 0.6 * (t0 - WASH) / TRAIN;
+    }
+    bank.xtxFinish(XtX);
+    var A = Float64Array.from(XtX);
+    var piv = Kit.luFactor(A, NF);
+    yield 0.72;
+    var out = { w: [], score: [] };
+    for (var i = 0; i < KS.length; i++) {
+      var tgt = Kit.delayTarget(sim.u, KS[i], sim.len);
+      var w = bank.fitTarget(sim.X, A, piv, tgt);
+      out.w.push(w);
+      out.score.push(bank.scoreRange(sim.X, w, tgt, WASH + TRAIN, sim.len));
+      yield 0.75 + 0.25 * (i + 1) / KS.length;
+    }
+    return out;
+  }
+
+  var meter = document.querySelector("#train-meter > i");
+  var scoreRead = document.getElementById("score-read");
+  var cancelTrain = null, trainTimer = null, trainToken = 0;
+  function retrain() {
+    if (cancelTrain) cancelTrain();
+    var tok = ++trainToken, Kt = K, sc = SCALE;
+    RO.busy = true; renderScores();
+    meter.style.width = "2%";
+    cancelTrain = Kit.drive(trainGen(Kt, sc), function (res) {
+      if (tok !== trainToken) return;
+      RO.w = res.w; RO.score = res.score; RO.K = Kt; RO.scale = sc; RO.busy = false;
+      cancelTrain = null;
+      meter.style.width = "100%";
+      setTimeout(function () { if (!RO.busy) meter.style.width = "0"; }, 500);
+      renderScores();
+    }, function (p) { if (tok === trainToken) meter.style.width = Math.round(100 * p) + "%"; }, 8);
+  }
+  function scheduleRetrain() {
+    clearTimeout(trainTimer);
+    RO.busy = true; renderScores();
+    trainTimer = setTimeout(retrain, 380);
+  }
+
+  var kchips = document.getElementById("kchips");
+  function renderScores() {
+    var html = "";
+    for (var i = 0; i < KS.length; i++) {
+      var s = RO.score[i];
+      html += '<span class="chip' + (i === sel ? " sel" : "") + '">k=' + KS[i] + " &middot; " + (isFinite(s) ? s.toFixed(3) : "…") + "</span>";
+    }
+    kchips.innerHTML = html;
+    var s2 = RO.score[sel];
+    var stale = RO.K !== null && (RO.K !== K || RO.scale !== SCALE);
+    if (!isFinite(s2)) {
+      scoreRead.innerHTML = "Training the readouts on the seeded random input&hellip;";
+    } else {
+      scoreRead.innerHTML = "Held-out score for k = <b>" + KS[sel] + "</b>: <b class='temp-t'>" + s2.toFixed(3) +
+        "</b> (squared correlation on random input the fit never saw, at K = " + RO.K.toFixed(2) + ", errors &times;" + RO.scale.toFixed(2) + ")" +
+        (RO.busy || stale ? ". <span class='temp-t'>Retraining for the new settings&hellip;</span>" : ".");
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  CONTROLS
+  // ══════════════════════════════════════════════════════════
+  var kdel = document.getElementById("kdel"), kdelVal = document.getElementById("kdel-val");
+  function setSel(i) {
+    sel = i;
+    kdelVal.textContent = "k = " + KS[i] + " steps · " + (KS[i] * DT).toFixed(2) + " s";
+    renderScores();
+  }
+  kdel.addEventListener("input", function () { setSel(parseInt(this.value, 10)); });
+
+  var cS = document.getElementById("coupling"), cV = document.getElementById("coupling-val");
+  cS.addEventListener("input", function () {
+    K = parseInt(this.value, 10) / 100; live.K = K;
+    cV.textContent = "K = " + K.toFixed(2);
+    scheduleRetrain();
+  });
+  var sS = document.getElementById("spread"), sV = document.getElementById("spread-val");
+  function spreadText() {
+    var hi = 0; IV.forEach(function (v) { hi = Math.max(hi, v.beat); });
+    return "×" + SCALE.toFixed(2) + " · fastest " + (hi * SCALE).toFixed(2) + " Hz";
+  }
+  sS.addEventListener("input", function () {
+    SCALE = parseInt(this.value, 10) / 100; live.setScale(SCALE);
+    sV.textContent = spreadText();
+    scheduleRetrain();
+  });
+  sV.textContent = spreadText();
+
+  // ══════════════════════════════════════════════════════════
+  //  SOUND
+  // ══════════════════════════════════════════════════════════
+  var S = Kit.sound;
+  var OCT = 4;
+  var bankSnd = null, remSnd = null;
+  var bHear = document.getElementById("b-hear"), bRem = document.getElementById("b-remember");
+  var REM_F = Kit.REF;                   // A3, times OCT
+
+  function gainFor(j) {
+    var a = Math.sqrt(live.re[j] * live.re[j] + live.im[j] * live.im[j]);
+    return 0.075 * Math.tanh(a / 1.1);
+  }
+  function startBankSound() {
+    var c = S.audio(), t = c.currentTime;
+    var master = c.createGain(); master.gain.value = 0;
+    master.connect(S.bus());
+    master.gain.setTargetAtTime(1, t, 0.08);
+    var oscs = [], gains = [];
+    for (var j = 0; j < N; j++) {
+      var o = c.createOscillator(); o.type = "sine"; o.frequency.value = IV[j].fJust * OCT;
+      var g = c.createGain(); g.gain.value = gainFor(j);
+      o.connect(g); g.connect(master); o.start(t);
+      oscs.push(o); gains.push(g);
+    }
+    bankSnd = { master: master, oscs: oscs, gains: gains };
+    S.register("bank", master, oscs, function () { bankSnd = null; });
+  }
+  function startRemSound() {
+    var c = S.audio(), t = c.currentTime;
+    var master = c.createGain(); master.gain.value = 0;
+    master.connect(S.bus());
+    var o1 = c.createOscillator(); o1.type = "sine"; o1.frequency.value = REM_F * OCT;
+    var o2 = c.createOscillator(); o2.type = "sine"; o2.frequency.value = REM_F * OCT * 2;
+    var g2 = c.createGain(); g2.gain.value = 0.25;
+    o1.connect(master); o2.connect(g2); g2.connect(master);
+    o1.start(t); o2.start(t);
+    remSnd = { master: master, oscs: [o1, o2] };
+    S.register("remember", master, [o1, o2], function () { remSnd = null; });
+  }
+  function soundStep() {
+    if (!bankSnd && !remSnd) return;
+    var c = S.audio(), t = c.currentTime;
+    if (bankSnd) for (var j = 0; j < N; j++) bankSnd.gains[j].gain.setTargetAtTime(gainFor(j), t, 0.035);
+    if (remSnd) {
+      var v = isFinite(lastPred) ? Math.min(1, Math.abs(lastPred) / 0.6) : 0;
+      remSnd.master.gain.setTargetAtTime(0.32 * v, t, 0.03);
+    }
+  }
+  function silence() {
+    if (!bankSnd && !remSnd) return;
+    var t = S.audio().currentTime;
+    if (bankSnd) bankSnd.gains.forEach(function (g) { g.gain.setTargetAtTime(0, t, 0.05); });
+    if (remSnd) remSnd.master.gain.setTargetAtTime(0, t, 0.05);
+  }
+  function syncSoundButtons() {
+    var hb = S.playing("bank"), hr = S.playing("remember");
+    bHear.setAttribute("aria-pressed", hb ? "true" : "false");
+    bHear.textContent = hb ? "Stop the bank" : "Hear the bank";
+    bRem.setAttribute("aria-pressed", hr ? "true" : "false");
+    bRem.textContent = hr ? "Stop the readout" : "Hear the readout";
+  }
+  S.onChange(syncSoundButtons);
+  bHear.addEventListener("click", function () { if (S.playing("bank")) S.stop("bank"); else startBankSound(); syncSoundButtons(); });
+  bRem.addEventListener("click", function () { if (S.playing("remember")) S.stop("remember"); else startRemSound(); syncSoundButtons(); });
+
+  var octHi = document.getElementById("oct-hi"), octLo = document.getElementById("oct-lo");
+  function setOct(v) {
+    OCT = v;
+    octHi.setAttribute("aria-pressed", v === 4 ? "true" : "false");
+    octLo.setAttribute("aria-pressed", v === 1 ? "true" : "false");
+    if (bankSnd) bankSnd.oscs.forEach(function (o, j) { o.frequency.setTargetAtTime(IV[j].fJust * OCT, S.audio().currentTime, 0.02); });
+    if (remSnd) { remSnd.oscs[0].frequency.value = REM_F * OCT; remSnd.oscs[1].frequency.value = REM_F * OCT * 2; }
+  }
+  octHi.addEventListener("click", function () { setOct(4); });
+  octLo.addEventListener("click", function () { setOct(1); });
+
+  // ══════════════════════════════════════════════════════════
+  //  DRAWING
+  // ══════════════════════════════════════════════════════════
+  // Kit.fit on size changes only; per frame we just clear
+  var themeStamp = 0;
+  function sized(cv, hFn) {
+    var w = cv.clientWidth, dpr = window.devicePixelRatio || 1;
+    var h = hFn ? hFn(w) : null;
+    var key = w + "x" + h + "@" + dpr + "#" + themeStamp;
+    if (cv._key !== key) {
+      if (h) cv.dataset.cssHeight = String(h);
+      cv._f = Kit.fit(cv); cv._key = key;
+    }
+    cv._f.g.setTransform(cv._f.dpr, 0, 0, cv._f.dpr, 0, 0);
+    cv._f.g.clearRect(0, 0, cv._f.w, cv._f.h);
+    return cv._f;
+  }
+
+  var cometCv = document.getElementById("comets");
+  var stripCv = document.getElementById("strip");
+  var hover = -1, pinned = -1, legendHot = -1;
+  var geo = { cx: 0, cy: 0, R: 1 };
+  var RINGS = [0.25, 0.5, 1, 2];
+  function rmap(a) { return Math.tanh(a / 1.1); }  // |z| -> 0..1, gently squashed
+
+  function cometHeight(w) { return Math.round(Math.max(300, Math.min(500, w * 0.92))); }
+
+  // the head position between the last two steps, for smooth motion
+  function headPos(j, frac, out) {
+    var r0 = prevRe[j], i0 = prevIm[j], r1 = live.re[j], i1 = live.im[j];
+    var a0 = Math.hypot(r0, i0), a1 = Math.hypot(r1, i1);
+    var p0 = Math.atan2(i0, r0), p1 = Math.atan2(i1, r1);
+    var dp = p1 - p0; while (dp > Math.PI) dp -= TWO_PI; while (dp < -Math.PI) dp += TWO_PI;
+    var a = a0 + (a1 - a0) * frac, p = p0 + dp * frac;
+    out[0] = a; out[1] = p;
+    return out;
+  }
+
+  var tmp = [0, 0];
+  var BUCKETS = 14, SUB = 4;
+  function drawComets(frac) {
+    var f = sized(cometCv, cometHeight), g = f.g, w = f.w, h = f.h;
+    var cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.47;
+    geo.cx = cx; geo.cy = cy; geo.R = R;
+
+    // guide rings and axes
+    g.lineWidth = 1;
+    g.strokeStyle = rgba(PAL.rule, 0.9);
+    g.beginPath(); g.moveTo(cx - R, cy); g.lineTo(cx + R, cy); g.moveTo(cx, cy - R); g.lineTo(cx, cy + R); g.stroke();
+    g.font = "10px " + PAL.mono; g.fillStyle = rgba(PAL.dim, 0.85); g.textAlign = "left";
+    RINGS.forEach(function (rv) {
+      var rr = R * rmap(rv);
+      g.strokeStyle = rgba(PAL.rule, rv === 1 ? 1 : 0.75);
+      g.setLineDash(rv === 1 ? [] : [2, 4]);
+      g.beginPath(); g.arc(cx, cy, rr, 0, TWO_PI); g.stroke();
+      if (rv >= 0.5) g.fillText(String(rv), cx + rr * 0.7071 + 3, cy - rr * 0.7071 - 3);
+    });
+    g.setLineDash([]);
+    g.fillText("Re", cx + R - 16, cy - 5);
+    g.fillText("Im", cx + 5, cy - R + 11);
+
+    var comp = PAL.dark ? "lighter" : "source-over";
+    var sumR = 0, sumI = 0, maxA = 0;
+    for (var jj = 0; jj < N; jj++) { sumR += live.re[jj]; sumI += live.im[jj]; maxA = Math.max(maxA, Math.hypot(live.re[jj], live.im[jj])); }
+
+    // trails: polar interpolation between steps so fast clocks read as spirals
+    g.globalCompositeOperation = comp;
+    g.lineCap = "round"; g.lineJoin = "round";
+    var n = tCount;
+    for (var oi = 0; oi < N; oi++) {
+      var j = ORDER[oi];
+      var col = PAL.comet[j], wr = WRONG[j];
+      var focus = (hover === j || pinned === j || legendHot === j);
+      var dimOthers = (hover >= 0 || pinned >= 0 || legendHot >= 0) && !focus;
+      if (n > 1) {
+        var per = Math.ceil(n / BUCKETS);
+        for (var b = 0; b < BUCKETS; b++) {
+          var q0 = b * per, q1 = Math.min(n - 1, (b + 1) * per);
+          if (q0 >= q1) continue;
+          var age = (q1) / (n - 1);                 // 0 oldest .. 1 newest
+          var al = Math.pow(age, 1.8) * (PAL.dark ? 0.5 : 0.8) * (dimOthers ? 0.2 : 1) * (focus ? 1.4 : 1);
+          g.strokeStyle = rgba(col, Math.min(1, al));
+          g.lineWidth = (0.4 + (0.8 + 1.7 * wr) * age) * (focus ? 1.6 : 1);
+          g.beginPath();
+          var first = true;
+          for (var q = q0; q < q1; q++) {
+            var ia = (tHead - (n - 1 - q) + TRAIL * 4) % TRAIL, ib = (ia + 1) % TRAIL;
+            var r0 = tRe[j * TRAIL + ia], i0 = tIm[j * TRAIL + ia], r1 = tRe[j * TRAIL + ib], i1 = tIm[j * TRAIL + ib];
+            var A0 = Math.hypot(r0, i0), A1 = Math.hypot(r1, i1);
+            var P0 = Math.atan2(i0, r0), P1 = Math.atan2(i1, r1);
+            var dP = P1 - P0; while (dP > Math.PI) dP -= TWO_PI; while (dP < -Math.PI) dP += TWO_PI;
+            for (var s = (first ? 0 : 1); s <= SUB; s++) {
+              var tt = s / SUB, aa = A0 + (A1 - A0) * tt, pp = P0 + dP * tt;
+              var rr2 = R * rmap(aa);
+              var x = cx + Math.cos(pp) * rr2, y = cy - Math.sin(pp) * rr2;
+              if (first) { g.moveTo(x, y); first = false; } else g.lineTo(x, y);
+            }
+          }
+          g.stroke();
+        }
+        // join the last trail point to the moving head
+        headPos(j, frac, tmp);
+        var ib2 = tHead, ia2 = (tHead - 1 + TRAIL) % TRAIL;
+        var rr3 = R * rmap(Math.hypot(tRe[j * TRAIL + ia2], tIm[j * TRAIL + ia2]));
+        var pa = Math.atan2(tIm[j * TRAIL + ia2], tRe[j * TRAIL + ia2]);
+        g.strokeStyle = rgba(col, (PAL.dark ? 0.5 : 0.8) * (dimOthers ? 0.2 : 1));
+        g.beginPath(); g.moveTo(cx + Math.cos(pa) * rr3, cy - Math.sin(pa) * rr3);
+        var pb = Math.atan2(prevIm[j], prevRe[j]);
+        var dpb = tmp[1] - pb;
+        for (var s2 = 1; s2 <= SUB; s2++) {
+          var t2 = s2 / SUB;
+          var aa2 = Math.hypot(prevRe[j], prevIm[j]) + (tmp[0] - Math.hypot(prevRe[j], prevIm[j])) * t2;
+          var pp2 = pb + dpb * t2, r4 = R * rmap(aa2);
+          g.lineTo(cx + Math.cos(pp2) * r4, cy - Math.sin(pp2) * r4);
+        }
+        g.stroke();
+        void ib2;
+      }
+    }
+
+    // heads: radial glow then a bright core
+    var heads = [];
+    for (var oj = 0; oj < N; oj++) {
+      var j3 = ORDER[oj];
+      headPos(j3, frac, tmp);
+      var rr5 = R * rmap(tmp[0]);
+      var hx = cx + Math.cos(tmp[1]) * rr5, hy = cy - Math.sin(tmp[1]) * rr5;
+      heads[j3] = [hx, hy, tmp[0]];
+      var c3 = PAL.comet[j3], wr3 = WRONG[j3];
+      var foc = (hover === j3 || pinned === j3 || legendHot === j3);
+      var dimO = (hover >= 0 || pinned >= 0 || legendHot >= 0) && !foc;
+      var glowR = (9 + 16 * wr3) * (0.7 + 0.6 * Math.min(1, tmp[0])) * (foc ? 1.4 : 1);
+      var grd = g.createRadialGradient(hx, hy, 0, hx, hy, glowR);
+      grd.addColorStop(0, rgba(c3, (PAL.dark ? 0.42 : 0.3) * (dimO ? 0.3 : 1)));
+      grd.addColorStop(0.35, rgba(c3, (PAL.dark ? 0.13 : 0.1) * (dimO ? 0.3 : 1)));
+      grd.addColorStop(1, rgba(c3, 0));
+      g.fillStyle = grd;
+      g.beginPath(); g.arc(hx, hy, glowR, 0, TWO_PI); g.fill();
+      g.fillStyle = rgba(c3, dimO ? 0.4 : 1);
+      g.beginPath(); g.arc(hx, hy, 2.2 + 3 * wr3, 0, TWO_PI); g.fill();
+      if (PAL.dark && !dimO) {
+        g.fillStyle = "rgba(255,255,255,0.55)";
+        g.beginPath(); g.arc(hx, hy, 0.6 + 1.1 * wr3, 0, TWO_PI); g.fill();
+      }
+    }
+    g.globalCompositeOperation = "source-over";
+    geo.heads = heads;
+
+    // the mean field
+    var mr = sumR / N, mi = sumI / N, ma = Math.hypot(mr, mi);
+    if (ma > 1e-3) {
+      var rr6 = R * rmap(ma), ang = Math.atan2(mi, mr);
+      var ex = cx + Math.cos(ang) * rr6, ey = cy - Math.sin(ang) * rr6;
+      g.strokeStyle = rgba(PAL.ink, 0.55); g.fillStyle = rgba(PAL.ink, 0.55); g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(cx, cy); g.lineTo(ex, ey); g.stroke();
+      if (rr6 > 8) {
+        var ah = 7, ux = Math.cos(ang), uy = -Math.sin(ang);
+        g.beginPath(); g.moveTo(ex, ey);
+        g.lineTo(ex - ux * ah - uy * ah * 0.5, ey - uy * ah + ux * ah * 0.5);
+        g.lineTo(ex - ux * ah + uy * ah * 0.5, ey - uy * ah - ux * ah * 0.5);
+        g.closePath(); g.fill();
+      }
+    }
+    g.fillStyle = rgba(PAL.ink, 0.8);
+    g.beginPath(); g.arc(cx, cy, 1.6, 0, TWO_PI); g.fill();
+
+    // corner text
+    g.font = "10px " + PAL.mono; g.textAlign = "left"; g.fillStyle = rgba(PAL.dim, 1);
+    g.fillText("zⱼ in the complex plane", 8, 14);
+    g.fillText("mean field |m| = " + ma.toFixed(2), 8, 28);
+    g.textAlign = "right";
+    g.fillText("K " + K.toFixed(2) + " · errors ×" + SCALE.toFixed(2), w - 8, 14);
+    if (maxA < 0.02) {
+      g.textAlign = "center"; g.fillStyle = rgba(PAL.dim, 0.9); g.font = "11px " + PAL.mono;
+      g.fillText("At rest. Drag the pad or press a key.", cx, cy + R * 0.32);
+    }
+
+    // the label for a hovered or pinned comet
+    var lab = hover >= 0 ? hover : (pinned >= 0 ? pinned : legendHot);
+    if (lab >= 0 && heads[lab]) {
+      var v = IV[lab], hp = heads[lab];
+      var l1 = v.name, l2 = (v.err > 0 ? "+" : "−") + Math.abs(v.err).toFixed(2) + "¢ · " + (v.beat * SCALE).toFixed(2) + " Hz · |z| " + hp[2].toFixed(2);
+      g.font = "11px " + PAL.mono;
+      var tw = Math.max(g.measureText(l1).width, g.measureText(l2).width) + 14;
+      var bx = hp[0] + 14, by = hp[1] - 36;
+      if (bx + tw > w - 4) bx = hp[0] - 14 - tw;
+      if (bx < 4) bx = 4;
+      if (by < 4) by = hp[1] + 14;
+      g.fillStyle = Kit.alpha(Kit.css("--panel"), 0.92);
+      g.strokeStyle = rgba(PAL.comet[lab], 0.9); g.lineWidth = 1;
+      g.beginPath(); g.rect(bx, by, tw, 34); g.fill(); g.stroke();
+      g.textAlign = "left";
+      g.fillStyle = rgba(PAL.comet[lab], 1); g.fillText(l1, bx + 7, by + 14);
+      g.fillStyle = rgba(PAL.dim, 1); g.fillText(l2, bx + 7, by + 27);
+      g.strokeStyle = rgba(PAL.comet[lab], 0.9);
+      g.beginPath(); g.arc(hp[0], hp[1], 9 + 4 * WRONG[lab], 0, TWO_PI); g.stroke();
+    }
+  }
+
+  function nearestComet(ev) {
+    if (!geo.heads) return -1;
+    var r = cometCv.getBoundingClientRect();
+    var x = ev.clientX - r.left, y = ev.clientY - r.top, best = -1, bd = 26 * 26;
+    for (var j = 0; j < N; j++) {
+      var hp = geo.heads[j]; if (!hp) continue;
+      var d = (hp[0] - x) * (hp[0] - x) + (hp[1] - y) * (hp[1] - y);
+      if (d < bd) { bd = d; best = j; }
+    }
+    return best;
+  }
+  cometCv.addEventListener("pointermove", function (e) { if (e.pointerType === "mouse") hover = nearestComet(e); });
+  cometCv.addEventListener("pointerleave", function () { hover = -1; });
+  cometCv.addEventListener("click", function (e) { var j = nearestComet(e); pinned = (j === pinned) ? -1 : j; });
+
+  // legend
+  var legend = document.getElementById("legend");
+  function buildLegend() {
+    legend.innerHTML = "";
+    ORDER.slice().reverse().forEach(function (j) {
+      var v = IV[j], li = document.createElement("li");
+      var sz = Math.round(6 + 5 * WRONG[j]);
+      li.innerHTML = '<i style="width:' + sz + 'px;height:' + sz + 'px;background:' + rgba(PAL.comet[j], 1) + '"></i>' +
+        "<span>" + v.name + '</span><span class="c">' + (v.err > 0 ? "+" : "−") + Math.abs(v.err).toFixed(1) + "¢</span>";
+      li.addEventListener("pointerenter", function () { legendHot = j; li.classList.add("hot"); });
+      li.addEventListener("pointerleave", function () { legendHot = -1; li.classList.remove("hot"); });
+      li.addEventListener("click", function () { pinned = (pinned === j) ? -1 : j; });
+      legend.appendChild(li);
+    });
+  }
+  buildLegend();
+
+  function drawPad() {
+    var f = sized(padCv), g = f.g, w = f.w, h = f.h;
+    var x0 = PADM, x1 = w - PADM, mid = (x0 + x1) / 2;
+    function X(u) { return mid + (u / UMAX) * (x1 - x0) / 2; }
+    // track shading: amber on the minus side, cyan on the plus side
+    var grd = g.createLinearGradient(x0, 0, x1, 0);
+    grd.addColorStop(0, rgba(PAL.temper, 0.12)); grd.addColorStop(0.5, rgba(PAL.rule, 0)); grd.addColorStop(1, rgba(PAL.just, 0.12));
+    g.fillStyle = grd; g.fillRect(x0, 8, x1 - x0, h - 34);
+    g.strokeStyle = rgba(PAL.rule, 1); g.lineWidth = 1;
+    g.font = "10px " + PAL.mono; g.fillStyle = rgba(PAL.dim, 1); g.textAlign = "center";
+    [-0.8, -0.4, 0, 0.4, 0.8].forEach(function (v) {
+      var x = X(v);
+      g.beginPath(); g.moveTo(x, 8); g.lineTo(x, h - 26); g.stroke();
+      g.fillText((v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1), x, h - 10);
+    });
+    // what's going in
+    var u = inp.u, xu = X(u);
+    var col = u >= 0 ? PAL.just : PAL.temper;
+    g.fillStyle = rgba(col, 0.25);
+    g.fillRect(Math.min(mid, xu), 14, Math.abs(xu - mid), h - 46);
+    g.globalCompositeOperation = PAL.dark ? "lighter" : "source-over";
+    var gl = g.createRadialGradient(xu, (h - 26) / 2 + 4, 0, xu, (h - 26) / 2 + 4, 34);
+    gl.addColorStop(0, rgba(col, 0.5)); gl.addColorStop(1, rgba(col, 0));
+    g.fillStyle = gl; g.beginPath(); g.arc(xu, (h - 26) / 2 + 4, 34, 0, TWO_PI); g.fill();
+    g.globalCompositeOperation = "source-over";
+    g.strokeStyle = rgba(col, 1); g.lineWidth = 2.5;
+    g.beginPath(); g.moveTo(xu, 10); g.lineTo(xu, h - 28); g.stroke();
+    if (inp.padActive) {
+      var xt = X(inp.padTarget);
+      g.strokeStyle = rgba(PAL.ink, 0.7); g.lineWidth = 1.5;
+      g.beginPath(); g.arc(xt, (h - 26) / 2 + 4, 13, 0, TWO_PI); g.stroke();
+    } else if (Math.abs(u) < 0.005) {
+      g.fillStyle = rgba(PAL.dim, 1); g.font = "11px " + PAL.mono; g.textAlign = "left";
+      g.fillText("press and drag", x0 + 6, 24);
+    }
+  }
+
+  function drawStrip(frac) {
+    var f = sized(stripCv), g = f.g, w = f.w, h = f.h;
+    var L = 34, Rm = 8, T = 22, B = 22;
+    var pw = w - L - Rm, ph = h - T - B;
+    function Y(v) { v = Math.max(-1.15, Math.min(1.15, v)); return T + ph / 2 - (v / 1.15) * ph / 2; }
+    var dx = pw / (SHOW - 1);
+    function Xi(i) { return L + pw - (i + frac) * dx; }    // i = steps ago
+    g.font = "10px " + PAL.mono; g.textAlign = "right"; g.fillStyle = rgba(PAL.dim, 1);
+    g.strokeStyle = rgba(PAL.rule, 1); g.lineWidth = 1;
+    [-0.8, 0, 0.8].forEach(function (v) {
+      g.setLineDash(v === 0 ? [] : [2, 4]);
+      g.beginPath(); g.moveTo(L, Y(v)); g.lineTo(L + pw, Y(v)); g.stroke();
+      g.fillText((v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1), L - 5, Y(v) + 3);
+    });
+    g.setLineDash([]);
+    g.textAlign = "center";
+    for (var s = 0; s <= 8; s += 2) {
+      var x = L + pw - s / DT * dx;
+      g.fillText(s === 0 ? "now" : "−" + s + " s", Math.max(L + 10, Math.min(L + pw - 10, x)), h - 6);
+    }
+    var kk = KS[sel];
+    // the k-ago marker
+    var xk = L + pw - kk * dx;
+    if (kk > 0) {
+      g.strokeStyle = rgba(PAL.temper, 0.35); g.setLineDash([1, 3]);
+      g.beginPath(); g.moveTo(xk, T); g.lineTo(xk, T + ph); g.stroke(); g.setLineDash([]);
+    }
+    g.save(); g.beginPath(); g.rect(L, T - 2, pw, ph + 4); g.clip();
+    var cnt = Math.min(hCount, SHOW);
+    function line(get, n0) {
+      g.beginPath(); var started = false;
+      for (var i = n0 || 0; i < cnt; i++) {
+        var v = get(i);
+        if (!isFinite(v)) { started = false; continue; }
+        var x = Xi(i), y = Y(v);
+        if (!started) { g.moveTo(x, y); started = true; } else g.lineTo(x, y);
+      }
+      g.stroke();
+    }
+    function at(arr, i) { return arr[(hHead - i + HLEN * 2) % HLEN]; }
+    // you, k steps ago (the target), dashed
+    if (kk > 0) {
+      g.strokeStyle = rgba(PAL.just, 0.45); g.lineWidth = 1.2; g.setLineDash([3, 3]);
+      line(function (i) { return (i + kk < hCount) ? at(uHist, i + kk) : NaN; });
+      g.setLineDash([]);
+    }
+    // you
+    g.strokeStyle = rgba(PAL.just, 1); g.lineWidth = 1.6;
+    line(function (i) { return at(uHist, i); });
+    // the bank's guess
+    g.globalCompositeOperation = PAL.dark ? "lighter" : "source-over";
+    g.strokeStyle = rgba(PAL.temper, 0.35); g.lineWidth = 4.5;
+    line(function (i) { return at(pHist[sel], i); });
+    g.strokeStyle = rgba(PAL.temper, 1); g.lineWidth = 1.6;
+    line(function (i) { return at(pHist[sel], i); });
+    g.globalCompositeOperation = "source-over";
+    g.restore();
+    // key
+    g.textAlign = "left"; g.font = "10px " + PAL.mono;
+    var kx = L;
+    function key(col, txt, dash) {
+      g.strokeStyle = col; g.lineWidth = 2; g.setLineDash(dash || []);
+      g.beginPath(); g.moveTo(kx, 10); g.lineTo(kx + 14, 10); g.stroke(); g.setLineDash([]);
+      g.fillStyle = rgba(PAL.dim, 1); g.fillText(txt, kx + 18, 13);
+      kx += 18 + g.measureText(txt).width + 14;
+    }
+    key(rgba(PAL.just, 1), "your input, u(t)");
+    if (kk > 0 && w > 420) key(rgba(PAL.just, 0.5), "your input " + kk + " steps ago", [3, 3]);
+    key(rgba(PAL.temper, 1), (RO.w[sel] && RO.K === K && RO.scale === SCALE) ? "readout's estimate" : "training…");
+  }
+
+  // live match on the visitor's own input, last 8 s
+  var youRead = document.getElementById("you-read");
+  function liveMatch() {
+    var kk = KS[sel], n = 0, sy = 0, syy = 0, sp = 0, spp = 0, syp = 0;
+    for (var i = 0; i < SHOW && i + kk < hCount; i++) {
+      var p = pHist[sel][(hHead - i + HLEN * 2) % HLEN];
+      if (!isFinite(p)) continue;
+      var y = uHist[(hHead - i - kk + HLEN * 2) % HLEN];
+      sy += y; syy += y * y; sp += p; spp += p * p; syp += y * p; n++;
+    }
+    if (n < 100) { youRead.textContent = ""; return; }
+    var vy = syy / n - (sy / n) * (sy / n), vp = spp / n - (sp / n) * (sp / n);
+    if (vy < 1e-4) { youRead.innerHTML = "On your input: no movement yet, so there is nothing to compare. Drag the pad or press a key."; return; }
+    var r = (syp / n - (sy / n) * (sp / n)) / Math.sqrt(vy * Math.max(vp, 1e-12));
+    youRead.innerHTML = "On your input, last " + (n * DT).toFixed(0) + " s: squared correlation <b class='just-t'>" +
+      Math.max(0, r * r).toFixed(2) + "</b> between the amber line and your actual input " + kk + " steps earlier.";
+  }
+
+  var liveRead = document.getElementById("live-read");
+  function writeLive() {
+    var src = [];
+    if (inp.padActive || Math.abs(inp.padU) > 0.01) src.push("pad");
+    if (Math.abs(inp.kick) > 0.01) src.push("kick");
+    if (mic) src.push("mic");
+    if (inp.noise) src.push("noise");
+    var mr = 0, mi = 0; for (var j = 0; j < N; j++) { mr += live.re[j]; mi += live.im[j]; }
+    liveRead.innerHTML = "u = <b class='num'>" + (inp.u >= 0 ? "+" : "−") + Math.abs(inp.u).toFixed(2) + "</b>" +
+      " &middot; mean field <b class='num'>" + (Math.hypot(mr, mi) / N).toFixed(2) + "</b>" +
+      " &middot; step <b class='num'>" + stepCount + "</b>" + (src.length ? " &middot; from " + src.join(" + ") : "");
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  THE DRIFT CLOCK
+  // ══════════════════════════════════════════════════════════
+  var CALPHA = "0123456789: ABCDEFGHIJKLMNOPQRST";   // 32 symbols, 5 bits a slot
+  var SLOTS = N - 1;
+  var HORIZON = 50 * 60 * 20;                        // survey at most 20 minutes ahead
+  var CK = 1.5;
+  var clock = null;
+  var cslots = document.getElementById("cslots");
+  var ckS = document.getElementById("ck"), ckV = document.getElementById("ck-val");
+  var regOut = document.getElementById("clock-reg"), trueOut = document.getElementById("clock-true");
+  var surveyMeter = document.querySelector("#survey-meter > i");
+
+  function idxOf(ph) { var i = Math.round(ph / TWO_PI * 32); return ((i % 32) + 32) % 32; }
+  function buildCSlots() {
+    cslots.innerHTML = "";
+    for (var i = 0; i < SLOTS; i++) {
+      var el = document.createElement("div");
+      el.className = "slot";
+      el.innerHTML = "<span class='ch'>·</span><span class='hz'>" + Math.abs(IV[i + 1].err).toFixed(0) + "¢</span><span class='dd'>&nbsp;</span>";
+      el.title = IV[i + 1].name + ", off by " + IV[i + 1].err.toFixed(2) + " cents";
+      cslots.appendChild(el);
+    }
+  }
+  buildCSlots();
+
+  function timeText() {
+    var d = new Date();
+    function p(n) { return String(n).padStart(2, "0"); }
+    return " " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds()) + " ";
+  }
+  function freshRegister(txt) {
+    var ph = new Float64Array(N), dev = new Float64Array(N), st = new Float64Array(N);
+    for (var j = 0; j < N; j++) ph[j] = (j * TWO_PI) / N;
+    for (var i = 0; i < SLOTS; i++) {
+      var phi = (CALPHA.indexOf(txt[i]) / 32) * TWO_PI;
+      ph[i + 1] = (ph[i + 1] + (phi - dev[i + 1])) % TWO_PI;
+      dev[i + 1] = phi; st[i + 1] = phi;
+    }
+    return { phase: ph, dev: dev, stored: st };
+  }
+  // the forecast: the same register, same K, same fixed step, run ahead
+  function* surveyGen(reg, Kc) {
+    var ph = Float64Array.from(reg.phase), dev = Float64Array.from(reg.dev), st = reg.stored;
+    var death = new Array(SLOTS).fill(-1), left = SLOTS;
+    for (var s = 1; s <= HORIZON; s++) {
+      Kit.registerStep(OMEGA, ph, dev, Kc, DT);
+      for (var i = 0; i < SLOTS; i++) {
+        if (death[i] < 0 && idxOf(dev[i + 1]) !== idxOf(st[i + 1])) { death[i] = s; left--; }
+      }
+      if (!left) break;
+      if (s % 200 === 0) yield s / HORIZON;
+    }
+    return death;
+  }
+  var cancelSurvey = null;
+  function eraseClock(msg) {
+    if (cancelSurvey) { cancelSurvey(); cancelSurvey = null; }
+    clock = null;
+    buildCSlots();
+    surveyMeter.style.width = "0";
+    regOut.textContent = msg || "Nothing written yet.";
+    trueOut.textContent = "";
+  }
+  function writeClock() {
+    eraseClock();
+    var txt = timeText();
+    var reg = freshRegister(txt);
+    clock = {
+      text: txt, K: CK, reg: reg, steps: 0, t0: performance.now(),
+      dead: new Array(SLOTS).fill(-1), death: null, sorted: null
+    };
+    var me = clock;
+    regOut.innerHTML = "Wrote <b class='just-t'>" + txt.trim() + "</b>. Forecasting when each character will be lost&hellip;";
+    cancelSurvey = Kit.drive(surveyGen(reg, CK), function (death) {
+      if (clock !== me) return;
+      cancelSurvey = null;
+      me.death = death;
+      me.sorted = death.map(function (d) { return d < 0 ? Infinity : d; }).sort(function (a, b) { return a - b; });
+      surveyMeter.style.width = "100%";
+      setTimeout(function () { surveyMeter.style.width = "0"; }, 500);
+      var dd = cslots.querySelectorAll(".dd");
+      for (var i = 0; i < SLOTS; i++) dd[i].textContent = death[i] < 0 ? ">20m" : "†" + fmtS(death[i] * DT);
+    }, function (p) { if (clock === me) surveyMeter.style.width = Math.max(2, Math.round(100 * Math.sqrt(p))) + "%"; }, 8);
+  }
+  function fmtS(s) { return s < 10 ? s.toFixed(1) : Math.round(s) + ""; }
+  function fmtLong(s) {
+    if (!isFinite(s)) return "∞";
+    if (s < 120) return s.toFixed(s < 10 ? 2 : 1) + " s";
+    return Math.floor(s / 60) + " min " + (s % 60).toFixed(0).padStart(2, "0") + " s";
+  }
+
+  // advance the live register by the wall clock, at the same fixed step
+  function clockAdvance(now) {
+    if (!clock) return;
+    var target = Math.floor((now - clock.t0) / (DT * 1000));
+    var budget = 600;
+    while (clock.steps < target && budget-- > 0) {
+      Kit.registerStep(OMEGA, clock.reg.phase, clock.reg.dev, clock.K, DT);
+      clock.steps++;
+      for (var i = 0; i < SLOTS; i++) {
+        if (clock.dead[i] < 0 && idxOf(clock.reg.dev[i + 1]) !== idxOf(clock.reg.stored[i + 1])) clock.dead[i] = clock.steps;
+      }
+    }
+    clock.lag = target - clock.steps;
+  }
+  var lastClockDraw = 0;
+  function drawClock(now) {
+    if (!clock || now - lastClockDraw < 100) return;
+    lastClockDraw = now;
+    var els = cslots.children, nDead = 0;
+    for (var i = 0; i < SLOTS; i++) {
+      var ch = CALPHA[idxOf(clock.reg.dev[i + 1])];
+      var dead = clock.dead[i] >= 0;
+      if (dead) nDead++;
+      els[i].querySelector(".ch").textContent = ch === " " ? "␣" : ch;
+      els[i].className = "slot " + (dead ? "bad" : "ok");
+    }
+    var tTrue = (now - clock.t0) / 1000;
+    trueOut.innerHTML = "By the stopwatch: <b>" + fmtLong(tTrue) + "</b>" +
+      (clock.lag > 5 ? " <span class='temp-t'>(register catching up)</span>" : "");
+    if (!clock.sorted) {
+      regOut.innerHTML = "Wrote <b class='just-t'>" + clock.text.trim() + "</b>. Forecasting when each character will be lost&hellip;";
+      return;
+    }
+    var lo = nDead > 0 ? clock.sorted[nDead - 1] * DT : 0;
+    var hi = nDead < SLOTS ? clock.sorted[nDead] * DT : Infinity;
+    clock.bracket = { lo: lo, hi: hi, dead: nDead, t: clock.steps * DT, wall: tTrue };
+    var deadTxt = "<b class='temp-t'>" + nDead + "</b> of " + SLOTS + " lost";
+    if (nDead === SLOTS) {
+      regOut.innerHTML = deadTxt + ". By the register: <b>more than " + fmtLong(lo) + "</b> since you wrote it. Every character is lost, so it cannot say how much longer.";
+    } else if (!isFinite(hi)) {
+      regOut.innerHTML = deadTxt + ". By the register: <b>more than " + fmtLong(lo) + "</b>. The remaining characters last beyond the 20-minute forecast.";
+    } else {
+      regOut.innerHTML = deadTxt + ". By the register: between <b class='just-t'>" + fmtLong(lo) + "</b> and <b class='just-t'>" + fmtLong(hi) + "</b> since you wrote it.";
+    }
+  }
+  document.getElementById("b-write").addEventListener("click", writeClock);
+  document.getElementById("b-erase").addEventListener("click", function () { eraseClock(); });
+  ckS.addEventListener("input", function () {
+    CK = parseInt(this.value, 10) / 100;
+    ckV.textContent = "K = " + CK.toFixed(2);
+    if (clock) eraseClock("The coupling changed, so the forecast no longer applies. Write the time again.");
+  });
+
+  // ══════════════════════════════════════════════════════════
+  //  THE LOOP: fixed 50 Hz steps, real dt, capped catch-up
+  // ══════════════════════════════════════════════════════════
+  var acc = 0, last = performance.now(), rafId = 0, frameN = 0;
+  var MAX_CATCHUP = 10;
+  var vis = { comets: true, pad: true, strip: true };
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.target === cometCv) vis.comets = e.isIntersecting;
+        else if (e.target === padCv) vis.pad = e.isIntersecting;
+        else if (e.target === stripCv) vis.strip = e.isIntersecting;
+      });
+    });
+    io.observe(cometCv); io.observe(padCv); io.observe(stripCv);
+  }
+  var lastSlow = 0, lastDrawT = 0;
+  function frame(now) {
+    var dt = (now - last) / 1000; last = now;
+    if (dt < 0) dt = 0;
+    acc += dt;
+    var n = 0;
+    while (acc >= DT && n < MAX_CATCHUP) {
+      if (knocks.length && stepCount >= knocks[0].at) { inp.kick += knocks.shift().amp; }
+      stepOnce(); acc -= DT; n++;
+    }
+    if (n === MAX_CATCHUP && acc > DT) acc = 0;     // fell behind: skip ahead, don't race
+    clockAdvance(now);
+    var frac = Math.max(0, Math.min(1, acc / DT));
+    // reduced motion: same physics, fewer redraws
+    if (!reduced || now - lastDrawT > 120) {
+      lastDrawT = now;
+      if (vis.comets) drawComets(frac);
+      if (vis.pad) drawPad();
+      if (vis.strip) drawStrip(frac);
+    }
+    drawClock(now);
+    if (now - lastSlow > 250) { lastSlow = now; writeLive(); liveMatch(); }
+    frameN++;
+    rafId = requestAnimationFrame(frame);
+  }
+  function start() { if (rafId) return; last = performance.now(); acc = 0; rafId = requestAnimationFrame(frame); }
+  function stop() { if (rafId) cancelAnimationFrame(rafId); rafId = 0; }
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) { stop(); silence(); padUp(); } else start();
+  });
+
+  Kit.onTheme(function () {
+    themeStamp++; readPalette(); buildLegend();
+    if (!rafId) { drawComets(0); drawPad(); drawStrip(0); }
+  });
+
+  // boot: paint at once, train in the background
+  setSel(2);
+  renderScores();
+  drawComets(0); drawPad(); drawStrip(0);
+  if (!document.hidden) start();
+  retrain();
+
+  // for tests
+  window.__inst = {
+    live: live, bank: bank, inp: inp, RO: RO, KS: KS,
+    get clock() { return clock; }, get stepCount() { return stepCount; },
+    get K() { return K; }, get SCALE() { return SCALE; }, get busy() { return RO.busy; }
+  };
+})();
+</script>
+</body></html>

@@ -133,6 +133,8 @@
     color: var(--ink);
   }
 
+  a { color: var(--just); text-underline-offset: 0.18em; }
+  a:focus-visible { outline: 2px solid var(--temper); outline-offset: 2px; }
   em { font-style: italic; }
   strong { font-weight: 600; }
 
@@ -454,13 +456,13 @@
 
 <header class="hero">
   <span class="eyebrow">Tuning &middot; Memory &middot; Machines</span>
-  <h1>The piano is<br>lying to you.</h1>
-  <p class="lede">Every note on it is slightly wrong, on purpose, and has been for three hundred years. This page is about that lie: how to hear it, why we agreed to it, and what you can build out of the leftover.</p>
-  <p>Press a button. You'll need sound. Anything that holds a note keeps holding it until you press the same button again, and the control in the corner stops everything at once.</p>
+  <h1>Every note on a piano is slightly out of tune.</h1>
+  <p class="lede">On purpose. This page shows you how to hear it, why pianos are tuned that way, and how the leftover errors can be used to build a small machine that remembers what it hears.</p>
+  <p>You'll need sound. Buttons that hold a note keep playing until you press them again. The box in the bottom-right corner stops everything, and so does the Escape key.</p>
 
   <div class="panel">
     <h3>Two fifths</h3>
-    <p style="max-width:40rem">A fifth is C up to G. There are two ways to tune it: the way the string wants, and the way your piano does. They are not the same interval.</p>
+    <p style="max-width:40rem">A fifth is the interval from C up to G. In a pure fifth, the higher string vibrates exactly 3 times for every 2 vibrations of the lower one. A piano's fifth is slightly smaller than that. Play both and compare.</p>
     <div class="btn-row">
       <button data-tone="just" id="b-just">Play the true fifth</button>
       <button data-tone="temper" id="b-temp">Play the piano's fifth</button>
@@ -471,26 +473,26 @@
       <button id="oct-lo" aria-pressed="false">Headphones</button>
     </div>
     <p class="note" style="margin:0 0 1rem">
-      Phone speakers can't reproduce anything below about 500&nbsp;Hz, so the low setting is silent-ish on one. The high setting moves everything up two octaves; same intervals, same errors, beats twice as fast and clearly audible on a handset.
+      Phone speakers can't play much below about 500&nbsp;Hz, so <em>Phone speaker</em> moves everything up two octaves. The intervals and their errors stay the same, and every beat runs four times as fast. <em>Headphones</em> plays at concert pitch.
     </p>
     <div class="strobe"><div class="strobe-inner" id="strobe-1"></div></div>
-    <span class="strobe-label" id="strobe-1-label">Stripes stand still when the interval is pure. They crawl when it isn't.</span>
+    <span class="strobe-label" id="strobe-1-label">The stripes stand still when an interval is pure and move when it beats.</span>
   </div>
 
-  <p>The true fifth sits perfectly still. The piano's fifth <em>wobbles</em>: a steady pulse you can count, and the band above tells you its exact speed at the register you're hearing. That pulse is two notes disagreeing about where they are. Once you hear it you can't unhear it, and I'm sorry.</p>
+  <p>The pure fifth sounds steady. The piano's fifth has a slow, regular pulse, called a <strong>beat</strong>. Beats happen whenever two tones are close but not equal in frequency: their waves drift in and out of step, so the sound swells and fades. The beat rate equals the difference between the two frequencies, and the striped band moves at that rate.</p>
 </header>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">01</span>
     <div>
-      <h2>Twelve fifths should come home. They don't.</h2>
+      <h2>Twelve fifths don't add up to seven octaves.</h2>
     </div>
   </div>
 
-  <p>Stack fifths and you eventually name every note: C, G, D, A, E, B, F&sharp;, C&sharp;, G&sharp;, D&sharp;, A&sharp;, E&sharp;. And E&sharp; is spelled the same as F, one more fifth lands on B&sharp;, and B&sharp; is spelled the same as C. Twelve fifths, and you're home.</p>
+  <p>Start on C and go up by a fifth twelve times: C, G, D, A, E, B, F&sharp;, C&sharp;, G&sharp;, D&sharp;, A&sharp;, E&sharp;, B&sharp;. You pass through every note on the keyboard and land on B&sharp;, which is the same key as C, seven octaves higher. That's the theory.</p>
 
-  <p>Except you aren't. Twelve pure fifths land <em>past</em> the octave. Not by a rounding error you can wave away; by a gap you can hear across a room.</p>
+  <p>In practice, twelve <em>pure</em> fifths overshoot seven octaves by a small but clearly audible amount. Press the buttons to hear the climb and where it lands.</p>
 
   <div class="panel">
     <h3>The stack</h3>
@@ -499,10 +501,10 @@
       <button data-tone="temper" id="b-stack-temp">Climb twelve piano fifths</button>
     </div>
     <canvas id="spiral" height="380" aria-label="Spiral of twelve fifths showing the gap where it fails to close"></canvas>
-    <div class="readout" id="spiral-read">Twelve pure fifths overshoot home by <b class="temp-t">23.46 cents</b>, about a quarter of a semitone. The piano's fifths land exactly on it, because each one was shaved.</div>
+    <div class="readout" id="spiral-read">Twelve pure fifths overshoot the starting note by <b class="temp-t">23.46 cents</b>, about a quarter of a semitone. Twelve piano fifths land on it exactly, because each one is made slightly narrow.</div>
   </div>
 
-  <p>That overshoot has a name: the <strong>Pythagorean comma</strong>. And it isn't a mistake anyone made. It's arithmetic. A fifth is a 3:2 ratio; an octave is 2:1; and no number of 3s ever equals a number of 2s. The spiral is guaranteed never to close, forever, for the same reason 1/3 never finishes in decimal.</p>
+  <p>The overshoot is called the <strong>Pythagorean comma</strong>. It measures 23.46 cents, where a <strong>cent</strong> is one hundredth of a piano semitone. It comes from simple arithmetic. Twelve fifths multiply the frequency by (3/2)<sup>12</sup> &asymp; 129.75. Seven octaves multiply it by 2<sup>7</sup> = 128. A power of 3 can never equal a power of 2, so no number of pure fifths ever lands exactly on an octave.</p>
 
   <div class="poem">
     &ldquo;Any point at which one might first settle down is arbitrary. There is no end or beginning, twelve fifths overshoot home and miss forever. As every note carries its octave within, the nature of the space is to fold, but never close.&rdquo;
@@ -513,17 +515,17 @@
   <div class="sec-head">
     <span class="sec-mark">02</span>
     <div>
-      <h2>So we cheated, and we called it fair.</h2>
+      <h2>Equal temperament spreads the error around.</h2>
     </div>
   </div>
 
-  <p>Equal temperament is the treaty. Take the gap, cut it into twelve equal pieces, and shave one piece off every fifth. Now the spiral closes. Every key works. Nothing is in tune, and nothing is more out of tune than anything else.</p>
+  <p>Modern pianos use <strong>equal temperament</strong>. The comma is split into twelve equal pieces, and every fifth is made one piece smaller, 1.96 cents narrow. Now twelve fifths close the circle exactly, and music sounds equally good in every key. The cost is that almost no interval is pure.</p>
 
-  <p>It is the most successful compromise in the history of music, and it is a compromise. Your piano cannot play a pure major third. It has never played one. It plays something <span class="temp-t">14 cents</span> sharp of one and we've agreed to call that a third.</p>
+  <p>The major third shows the cost most clearly. A pure major third has a frequency ratio of 5 to 4. The piano's major third is <span class="temp-t">14 cents</span> wider than that, and every piano has been built that way for about three hundred years.</p>
 
   <div class="panel">
     <h3>How wrong, exactly</h3>
-    <p style="max-width:40rem">Here's the part that matters later. The piano isn't wrong by <em>one</em> amount. Every interval is wrong by its <em>own</em> amount, and they're wildly different.</p>
+    <p style="max-width:40rem">Each interval is off by a different amount. The table lists eleven pure intervals, how far the piano's nearest note misses each one, and how fast each pair beats. Tap a row to hear it.</p>
     <div class="table-scroll">
       <table id="err-table">
         <thead>
@@ -540,26 +542,26 @@
       </table>
     </div>
     <div class="readout" id="beat-note">
-      Beat rate is how fast the two versions pulse against each other, at the register you're listening at. Right now it runs from a lazy <b class="just-t"><span id="beat-lo">0.37</span> per second</b> to a nervous <b class="temp-t"><span id="beat-hi">8.63</span> per second</b>, a <span id="beat-x">23</span>-fold spread.
+      The beat rate is the difference between the two frequencies at the register you're listening at. Right now it runs from <b class="just-t"><span id="beat-lo">0.37</span> per second</b> to <b class="temp-t"><span id="beat-hi">8.63</span> per second</b>, a <span id="beat-x">23</span>-fold spread.
     </div>
   </div>
 
-  <p class="wide">Look at that last column for a second longer than feels necessary. Those are <em>speeds</em>. The piano's mistakes aren't a flat tax; they're a fan of different clocks, spread across more than an order of magnitude, and no two of them are simple multiples of each other.</p>
+  <p class="wide">Read the last column as a set of speeds. The piano's errors produce eleven slow rhythms, each at its own rate, and no rate is a simple multiple of another.</p>
 
-  <p><strong>A fan of incommensurate clocks is the most useful thing you can hand a physicist.</strong> That's the turn. Everything after this is what happens when you stop apologising for the errors and start using them.</p>
+  <p>That matters because <strong>a set of oscillators running at unrelated speeds is a good starting point for a machine that stores and processes information.</strong> The rest of the page builds one.</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">03</span>
     <div>
-      <h2>Build the thing out of the errors.</h2>
+      <h2>A machine built from the errors.</h2>
     </div>
   </div>
 
-  <p class="wide">Here is one machine. Eleven oscillators &mdash; eleven tuning forks, if you like &mdash; each one a pure interval from the table above. Each is detuned from the piano's version of itself by exactly the amount the piano gets it wrong. They're weakly coupled, so they can pull on each other.</p>
+  <p class="wide">The machine is a <strong>bank</strong> of eleven oscillators. Picture each one as a pendulum swinging at one interval's beat rate, from 0.37 to 8.63 times a second. Each one slowly loses energy, so it needs input to keep moving. They are also weakly <strong>coupled</strong>: each oscillator is pulled a little toward the average of all eleven.</p>
 
-  <p>Play it. It's a chord made of everything the piano can't say.</p>
+  <p>Press <em>Play the bank</em> to hear the eleven pure intervals together.</p>
 
   <div class="panel">
     <h3>The bank</h3>
@@ -567,13 +569,13 @@
       <button id="b-bank" data-tone="just">Play the bank</button>
     </div>
     <canvas id="phase" height="300" aria-label="Phase portrait of eleven coupled oscillators"></canvas>
-    <div class="readout" id="phase-read">Each dot is one oscillator's phase. They drift apart at their own rate; that spreading is the machine thinking.</div>
+    <div class="readout" id="phase-read">Each dot shows one oscillator's position in its cycle, called its phase. The dots drift apart because each turns at its own speed.</div>
     <div class="slider-row">
       <label for="coupling">Coupling</label>
       <input type="range" id="coupling" min="0" max="800" value="12">
       <span class="readout num" id="coupling-val">K = 0.12</span>
     </div>
-    <div class="readout">Turn coupling up and the oscillators start listening to each other. Turn it far enough and anything held in their differences is erased in seconds. This knob comes back twice more below; it is the same knob each time, driving the same bank.</div>
+    <div class="readout">Coupling, K, sets how strongly each oscillator is pulled toward the group average. At low coupling each keeps its own time. At high coupling they fall into step, and anything stored in their differences is lost. This slider controls the same bank in every section below.</div>
   </div>
 </section>
 
@@ -581,17 +583,17 @@
   <div class="sec-head">
     <span class="sec-mark">04</span>
     <div>
-      <h2>Read it fast: it listens.</h2>
+      <h2>Read it fast: the bank as a computer.</h2>
     </div>
   </div>
 
-  <p class="wide">Feed a random signal into the bank and watch what sticks. Because the oscillators run at different speeds, each one holds a different slice of the recent past; the slow ones hold further back, the fast ones hold sharper. Train a readout on top and you can ask the bank questions about what it just heard. How well it answers is a number, and the number is measurable.</p>
+  <p class="wide">Send a random signal into the bank. Because the oscillators turn at different speeds, the input leaves a different trace in each one, and each trace fades over about two seconds. So at any moment the bank's state holds a blurred record of what it heard recently.</p>
 
-  <p>The technique is called <strong>reservoir computing</strong>. You don't train the bank. You only train one linear layer that reads it. Everything hard is done by physics.</p>
+  <p class="wide"><strong>Reservoir computing</strong> uses exactly this. The oscillators are never adjusted. Only a simple readout is trained: a weighted sum of the bank's 34 state values, fitted to answer questions such as "what was the input 20 steps ago?" Its answers are scored on data it was not trained on.</p>
 
   <div class="panel">
     <h3>Live measurement</h3>
-    <p class="note" style="margin-bottom:1rem">Your browser integrates the bank and fits the readout; every number below comes out of that fit. Give it a second.</p>
+    <p class="note" style="margin-bottom:1rem">Your browser simulates the bank and fits the readout. Every number below comes from that fit, and it takes a second or two.</p>
     <div class="btn-row">
       <button id="b-run">Run the experiment</button>
       <button id="b-sweep">Sweep the coupling</button>
@@ -600,31 +602,29 @@
     <div class="grid-2">
       <div>
         <canvas id="mc" height="240" aria-label="Memory capacity by delay; tap a bar to inspect that delay"></canvas>
-        <div class="readout" style="margin-top:0.5rem">How much of the input from <span class="num">k</span> steps ago is still recoverable, one fit at a time. When the bars run out, the probe keeps going until the memory actually dies.</div>
+        <div class="readout" style="margin-top:0.5rem">Each bar shows how well the readout recovers the input from <span class="num">k</span> steps ago, where 1.0 is perfect. Past step 30 the test keeps probing further back until the score drops below 0.01.</div>
       </div>
       <div>
         <canvas id="tradeoff" height="240" aria-label="Memory versus nonlinear capacity as coupling varies"></canvas>
-        <div class="readout" style="margin-top:0.5rem">Reach against mixing, as coupling rises. These two cross.</div>
+        <div class="readout" style="margin-top:0.5rem">Reach, how far back the bank remembers, against mixing, how well it combines past inputs, as coupling increases.</div>
       </div>
     </div>
     <canvas id="recon" height="200" style="margin-top:1.2rem" aria-label="Input signal versus what the readout reconstructs at the selected delay"></canvas>
-    <div class="readout" id="recon-read" style="margin-top:0.5rem">After a run, this shows the readout remembering: the input as it actually was <span class="num">k</span> steps ago against what the bank reconstructs from its present state. Tap a bar above to change <span class="num">k</span>.</div>
+    <div class="readout" id="recon-read" style="margin-top:0.5rem">After a run, this compares the real input from <span class="num">k</span> steps ago with what the readout reconstructs from the bank's current state. Tap a bar above to change <span class="num">k</span>.</div>
     <div class="readout" id="run-read" style="margin-top:1rem">Not run yet.</div>
   </div>
 
-  <p class="wide">A bank like this can remember or it can mix, and it can't do both. Turn the coupling up and the oscillators start agreeing with each other. Agreement is what mixing is made of, and mixing is what lets a readout answer questions harder than <em>what did you hear twenty steps ago</em>. Sweep it and watch what that buys, and what it costs.</p>
+  <p class="wide">Memory and mixing trade off against each other. <strong>Mixing</strong> means combining past inputs, for example multiplying the input from one step ago by the input from three steps ago. More coupling makes the oscillators agree more, which helps mixing and shortens memory.</p>
 
-  <p class="wide">Uncoupled, the bank can be read almost three seconds back. At the top of the sweep it reaches one second, and mixing has gone up close to eightfold. The exchange lives in <em>reach</em>, not in any single capacity number, and that's worth knowing before you measure one: count only the first thirty delays and you're looking through a six-tenths-of-a-second window at a memory nearly three seconds long. The window hides the whole effect.</p>
+  <p class="wide">With no coupling, the bank can be read back almost three seconds. At the strongest coupling it reaches one second, while mixing rises close to eightfold. If you count only the first 30 delays, 0.6 seconds, you miss this trade-off, because the memory being lost lies further back. That is why the test keeps probing past the edge of the chart.</p>
 
-  <p class="wide">One number stays stubborn through all of it. Capacity never gets near thirty-four, which is its own ceiling: thirty-four numbers the readout sees, and never more than half of them in use. The rest exist on paper and hold nothing new, because <strong>the oscillators are very nearly the same oscillator.</strong> Their frequencies differ by between 0.37 and 8.63 Hz out of 220.</p>
+  <p class="wide">Capacity never gets near its ceiling of 34, the number of values the readout sees. At most about half of them are useful. The reason is that <strong>the oscillators are very similar</strong>: their speeds differ by only 0.37 to 8.63 Hz, out of 220, so much of what they hold is duplicated.</p>
 
-  <p class="wide">Which is the comma again, wearing a different hat. The intervals are nearly right; that's the whole reason a piano nearly works. But nearly-right oscillators are nearly-redundant oscillators, and a bank of them holds far less than its size promises. The shortfall is the smallness of the error, measured this time in units of memory.</p>
-
-  <p>The comma isn't noise in this machine. It's the budget.</p>
+  <p class="wide">This links back to the comma. The piano's intervals are nearly right, which is why the piano sounds acceptable. But nearly identical oscillators carry nearly identical information. The size of the tuning errors sets how much the bank can hold.</p>
 
   <div class="panel">
-    <h3>Shrink the comma</h3>
-    <p style="max-width:40rem">That's a claim you can test. This slider scales the piano's errors — all eleven detunings together — from nothing up to half again their real size. Shrink them to zero and the bank becomes eleven copies of one tuning fork; measure it and watch the memory go with them.</p>
+    <h3>Shrink the errors</h3>
+    <p style="max-width:40rem">You can test that directly. This slider scales all eleven errors together, from zero to one and a half times their real size. At zero, the eleven oscillators are identical and behave like one. Measure at a few sizes and watch capacity follow the size of the errors.</p>
     <div class="slider-row">
       <label for="spread">Size of the errors</label>
       <input type="range" id="spread" min="0" max="150" value="100">
@@ -634,7 +634,7 @@
       <button id="b-spread">Measure at this size</button>
     </div>
     <canvas id="budget" height="220" aria-label="Capacity as a function of how large the tuning errors are"></canvas>
-    <div class="readout" id="spread-read" style="margin-top:0.5rem">Each measurement adds a point: capacity against the size of the error fan. The curve that appears is the budget line.</div>
+    <div class="readout" id="spread-read" style="margin-top:0.5rem">Each measurement adds one point: capacity against the size of the errors.</div>
   </div>
 </section>
 
@@ -642,13 +642,13 @@
   <div class="sec-head">
     <span class="sec-mark">05</span>
     <div>
-      <h2>Read it slow: it remembers.</h2>
+      <h2>Read it slow: the bank as storage.</h2>
     </div>
   </div>
 
-  <p class="wide">Now the same bank, read on a different clock. Instead of the instantaneous state, look at how far each oscillator has <em>slipped</em> from where it should be by now. That slippage is a number. Nudge it deliberately and it's a number you chose, which makes it storage.</p>
+  <p class="wide">The same oscillators can also store a message. Each oscillator's phase can be nudged ahead of or behind where it would otherwise be. That offset stays put as long as nothing disturbs it, so it can hold a value.</p>
 
-  <p>Ten oscillator pairs, thirty-two possible positions each. Write something.</p>
+  <p>Ten oscillators each hold one character, using 32 possible offsets: 5 bits each, 50 bits in all. The eleventh oscillator is the reference. Type up to ten characters and press <em>Write it in</em>.</p>
 
   <div class="panel">
     <h3>Write into the drift</h3>
@@ -671,41 +671,88 @@
     </div>
   </div>
 
-  <p class="wide">You can't hear a phase; the ear is nearly phase-deaf for steady tones, which Helmholtz worked out in the 1860s. So the register is read the way every tuner reads one: play it against a reference standing exactly where you wrote it. Matched slots reinforce and ring out. Drifted slots cancel themselves toward silence. <strong>Interference turns phase into loudness</strong>, and loudness the ear is extremely good at.</p>
+  <p class="wide">You can't hear phase directly; the ear barely notices it in a steady tone, as Helmholtz showed in the 1860s. So the page reads the register the way a piano tuner checks a string: it plays each slot against a reference tone set to the written value. If the slot still matches, the two tones reinforce and ring loudly. If it has drifted, they partly cancel and the slot goes quiet. <strong>Interference turns phase into loudness</strong>, and the ear judges loudness well.</p>
 
-  <p class="wide">Leave the coupling at its default whisper and the message very nearly keeps: four and a half minutes pass before the first slot slips, and the slot that slips is held by one of the most in-tune intervals on the page. Turn the knob up and the oscillators start persuading each other, and as they agree, the differences the message was written in get pulled apart, and it dissolves letter by letter. Read it back as it goes and <strong>you hear voices drop out one at a time.</strong></p>
+  <p class="wide">At the default coupling of 0.12 the message holds: the first slot slips after about four and a half minutes. Press <em>Let it decay</em> to raise the coupling to 2. The oscillators pull each other into step, the stored offsets are erased, and the letters fail one at a time. <strong>Read it back while it decays and you hear the voices drop out.</strong></p>
 
-  <p><strong>Watch which letters die first.</strong> The ones held by nearly-in-tune pairs go immediately; they had the least disagreement to spend. The ones held by the <em>worst</em> intervals, the ones the piano gets most catastrophically wrong, are the last to go. The more wrong the interval, the longer it can keep a secret.</p>
+  <p class="wide"><strong>Watch which letters fail first.</strong> Slots held by the most accurate intervals tend to go early, because their oscillators are slow and closest in speed to the group, so they are the easiest to pull into step. Slots held by the intervals the piano gets most wrong hold their letters longest.</p>
 </section>
 
 <section>
   <div class="sec-head">
     <span class="sec-mark">06</span>
     <div>
-      <h2>One stone.</h2>
+      <h2>One bank, two uses.</h2>
     </div>
   </div>
 
-  <p class="wide">That was one machine the whole time. The fast reading listens; the slow reading remembers; and they are the same eleven oscillators, running at once, not interfering with each other, because they live on different clocks.</p>
+  <p class="wide">Both readings use the same eleven oscillators at the same time. The fast reading, the computer, uses their moment-to-moment state. The slow reading, the storage, uses their accumulated phase offsets. They don't interfere, because they work on different timescales.</p>
 
-  <p class="wide">Which puts both readings on one knob, and on this page it is literally one knob: every coupling slider above is the same control, driving the same bank. Turn it up and the bank mixes harder, close to eightfold across the sweep. Turn the coupling up and both of its memories go: the fast reading's reach falls from three seconds to under one, and the slow reading dissolves letter by letter as the oscillators talk themselves into agreement. <strong>The same agreement that makes the bank a better computer makes it a worse witness</strong>, on both clocks at once. There is no setting where you get everything, and the exchange rate is fixed by how badly the intervals disagree.</p>
+  <p class="wide">Coupling affects both, and every coupling slider on this page is the same control. More coupling makes the bank mix about eightfold better. It also cuts reach from three seconds to under one and erases the stored message. <strong>More agreement between the oscillators makes a better mixer and a worse memory</strong>, in both readings at once. How much you trade is set by how different the oscillators' speeds are, which is set by the tuning errors.</p>
 
-  <p class="wide">The error is not the price of the machine. <strong>The error is the machine.</strong> A bank of oscillators in perfect agreement is a single tuning fork: it computes nothing, remembers nothing, and has nothing to say. Everything it can do, it can do because it can't close.</p>
+  <p class="wide"><strong>The errors are what make the machine work.</strong> With perfect tuning, all eleven oscillators would be identical and would act as one. The bank would remember nothing and compute nothing.</p>
 
   <div class="poem">
     &ldquo;Harmony cultivates wanting by metabolizing our error as remainder. A music with no remainder leaves nothing to want in a world where wanting is the product.&rdquo;
   </div>
+</section>
 
-  <p class="wide">Which is also the whole of information theory, arrived at from the other side. A perfect prediction transmits nothing. A codec with no error tells you nothing about the world it was fitted to. The leftover is not what's <em>left</em> after the meaningful part; the leftover is the only part that was ever about anything.</p>
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">07</span>
+    <div>
+      <h2>Why this is information theory.</h2>
+    </div>
+  </div>
 
-  <p class="wide">Three hundred years ago some very practical people looked at a gap that could never be closed, split the difference twelve ways, and called it home. They thought they were papering over a flaw. They were building the only kind of instrument that can hold a thought.</p>
+  <p class="wide">The same idea sits at the center of Claude Shannon's information theory, published in 1948. Shannon defined the information in a message as how surprising it is. An event with a 1-in-2 chance carries 1 bit. A 1-in-4 event carries 2 bits, and a 1-in-1,000 event about 10 bits. An event you were certain of carries 0 bits. <strong>A message you could have predicted perfectly tells you nothing.</strong></p>
+
+  <p class="wide">Everyday compression is built on this. A phone's voice codec predicts what your voice will do next and sends only the prediction error. The receiving phone makes the same prediction and adds the error back. Video works the same way, frame by frame. The better the prediction, the less there is to send. The prediction error <em>is</em> the information.</p>
+
+  <p class="wide">Tuning works the same way. Everyone knows the textbook tuning, so a piano only tells you something new where it differs from the textbook. The panel below shows this with numbers.</p>
+
+  <div class="panel">
+    <h3>A piano, sent by mail</h3>
+    <p style="max-width:40rem">This is a made-up 88-key piano that differs from textbook tuning in two ways: a slow drift across regions of the keyboard, like the effect of humidity, and small key-to-key variation. The bars show how many bits it takes to send its tuning to half-cent precision, starting from three different assumptions.</p>
+    <canvas id="mail-keys" height="150" aria-label="Each key's offset from the textbook tuning, in cents"></canvas>
+    <div class="slider-row">
+      <label for="wander">How far it differs</label>
+      <input type="range" id="wander" min="0" max="100" value="40">
+      <span class="readout num" id="wander-val">up to 4.0 cents</span>
+    </div>
+    <canvas id="mail-bits" height="190" aria-label="Bits needed to send the tuning three ways"></canvas>
+    <div class="readout" id="mail-read">Move the slider to zero and watch what's left to send.</div>
+  </div>
+
+  <p class="wide">The first bar sends each key's pitch from scratch. The second sends only each key's difference from the textbook, because the receiver already knows the textbook. The third sends only how much each key differs from the previous key, because neighboring keys drift together. Each better assumption costs fewer bits. Move the slider to zero: the piano now matches the textbook exactly, and the second and third methods need 0 bits. There is nothing new to send.</p>
+
+  <p class="wide"><a href="notes/tuning-channel.md">The tuning-channel notes</a> apply this to a real piano and estimate that its departures from textbook tuning could hide about 300 bits before listeners noticed. Three more of Shannon's ideas explain the oscillator bank.</p>
+
+  <p class="wide"><strong>Duplicates add nothing.</strong> Two copies of a message carry the same information as one. Eleven identical oscillators hold what one holds, which is why capacity falls to 1.08 out of 34 when the errors are scaled to zero. The tuning errors keep the oscillators different from each other.</p>
+
+  <p class="wide"><strong>Resolution limits capacity.</strong> The spiral of fifths never closes, so in principle it contains infinitely many distinct pitches. But capacity depends on how many states you can tell apart above the noise, not on how many exist. The register uses 32 levels per slot because drift and a visual reading can reliably tell 32 apart. The computer's arithmetic could represent millions; no real instrument could read them.</p>
+
+  <p class="wide"><strong>Agreement erases information.</strong> When the phases are spread out, many arrangements are possible, and each can stand for a different message. Coupling pulls the phases together, which shrinks the number of arrangements that can be told apart, and with it the number of bits the register can hold. That is why turning up coupling helps mixing but costs memory.</p>
+
+  <p class="wide">Equal temperament was designed to hide the comma, but the error never went away. It was spread across every interval. Those leftover errors are exactly what lets the bank hold information.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">08</span>
+    <div>
+      <h2>More experiments.</h2>
+    </div>
+  </div>
+
+  <p class="wide"><a href="lab/index.html">The lab</a> takes the idea further on eight more pages: the comma's equivalents in calendars, planets and sunflowers; a comparison of historical tunings by how much their errors let the bank remember; metronomes falling into step on a moving plank; fireflies synchronizing; a message hidden in a piano's tuning; a test of how small a mistuning you can hear; an instrument that lets you drive the bank by hand; and a tool for finding cross-rhythm coupling in plant recordings.</p>
 
   <div class="foot">
     <p class="note">
-      <strong>Where the numbers come from.</strong> The audio is additive synthesis at the stated frequencies; the beat rates you hear are the frequency differences themselves, and they scale with the playback register, which is why the table's last column changes when you switch it. The reservoir is a bank of coupled damped resonators integrated live in your browser, with a ridge-regression readout fit on the spot; the capacity numbers come out of that fit, and its detunings stay pinned to concert pitch regardless of what you're listening at. Capacity is scored on 3,500 samples the readout never saw, fit on a different 3,500; with thirty-four features, in-sample scores carry a floor near 0.01 per task from fitting noise alone, which is enough to invent a result that isn't there. Reach is found by scanning past the edge of the chart until the held-out score dies, so it's a property of the bank rather than of the window. The budget panel reruns the entire measurement with every detuning multiplied by one factor; at zero the bank is eleven copies of one tuning fork and holds 1.08 of its ceiling of 34. The oscillators are damped rather than self-sustaining, so what they hold is what you put in, and the linear part of each step is solved exactly instead of stepped, which is what keeps the fastest detunings stable. The storage register holds phase deviation from free-running, quantised to thirty-two levels per pair, and the read is interference in the audio graph &mdash; two oscillators per slot, one at the current phase and one at the written phase, summing to 2&middot;|cos(&Delta;/2)|. Its decay is the same mean-field coupling, integrated while you watch. Nothing schedules which letter dies; the detunings decide.
+      <strong>Where the numbers come from.</strong> The audio is additive synthesis at the stated frequencies; the beat rates you hear are the frequency differences themselves, and they scale with the playback register, which is why the table's last column changes when you switch it. The reservoir is a bank of coupled damped resonators integrated live in your browser, with a ridge-regression readout fit on the spot; the capacity numbers come out of that fit, and its detunings stay pinned to concert pitch regardless of what you're listening at. Capacity is scored on 3,500 samples the readout never saw, fit on a different 3,500; with thirty-four features, in-sample scores carry a floor near 0.01 per task from fitting noise alone, which is enough to invent a result that isn't there. Reach is found by scanning past the edge of the chart until the held-out score dies, so it's a property of the bank rather than of the window. The budget panel reruns the entire measurement with every detuning multiplied by one factor; at zero the bank is eleven copies of one oscillator and holds 1.08 of its ceiling of 34. The oscillators are damped rather than self-sustaining, so what they hold is what you put in, and the linear part of each step is solved exactly instead of stepped, which is what keeps the fastest detunings stable. The storage register holds phase deviation from free-running, quantised to thirty-two levels per pair, and the read is interference in the audio graph: two oscillators per slot, one at the current phase and one at the written phase, summing to 2&middot;|cos(&Delta;/2)|. Its decay is the same mean-field coupling, integrated while you watch. Nothing schedules which letter fails; the detunings decide. The mailed piano is a seeded random tuning; each method's cost is 88 keys times log<sub>2</sub> of the number of half-cent levels its residuals span, a simple fixed-length code and an upper bound on what a cleverer code would need.
     </p>
     <p class="note" style="margin-top:1rem">
-      <strong>The size of the claim.</strong> This is not a better computer than the one you're reading it on. It's a demonstration that a physical system's <em>imperfections</em> can be its computational substrate, and that in this particular system the imperfection has a name musicians have used since Pythagoras.
+      <strong>The size of the claim.</strong> This is not a better computer than the one you're reading it on. It's a demonstration that a physical system's <em>imperfections</em> can be its computational substrate, and that in this particular system the imperfection has a name musicians have used since Pythagoras. On one real task it holds up: given recordings of spoken digits as nothing but loudness, a readout alone names 26% of them correctly, the piano's bank lifts that to 50%, and the same bank with its errors shrunk to zero falls back to 26% (<code>tools/digits.mjs</code>, on the Free Spoken Digit Dataset). Given eleven frequency bands instead, the readout reaches 91% without the bank's help.
     </p>
     <div class="sig">JJ + MO &middot; 4EVA</div>
   </div>
@@ -936,7 +983,7 @@
     if (playing("just")) { stopSound("just"); return; }
     stopSound("temp");
     dyad(cRoot(), gJust(), null, "just");
-    setStrobe(0, "Perfectly still, and it will stay still as long as you let it. The third harmonic of C and the second of G are the exact same note.");
+    setStrobe(0, "Steady. The third harmonic of C and the second harmonic of G have exactly the same frequency, so nothing beats.");
   });
 
   bTemp.addEventListener("click", function () {
@@ -944,7 +991,7 @@
     stopSound("just");
     var b = beatFifth();
     dyad(cRoot(), gTemp(), null, "temp");
-    setStrobe(b, "Crawling at " + b.toFixed(2) + " beats per second, and it never settles. That's the shave.");
+    setStrobe(b, "Beating " + b.toFixed(2) + " times per second. That pulse comes from the fifth being 1.96 cents narrow.");
   });
 
   document.getElementById("b-both").addEventListener("click", function () {
@@ -961,9 +1008,9 @@
     });
     register("both", out, oscs);
     later(function () { if (playing("both")) stopSound("both"); }, 6000);
-    setStrobe(0, "Pure first, then the piano's. Listen for the wobble arriving.");
+    setStrobe(0, "Pure fifth first, then the piano's. Listen for the pulse in the second one.");
     later(function () {
-      setStrobe(b, "There it is, " + b.toFixed(2) + " wobbles a second.");
+      setStrobe(b, "There it is: " + b.toFixed(2) + " beats per second.");
     }, 3000);
   });
 
@@ -977,8 +1024,8 @@
     stopBank();
     buildTable();
     setStrobe(0,
-      v === 4 ? "Lifted two octaves. Everything sits where a small speaker can actually produce it."
-              : "Down at concert pitch. Richer, but you'll want headphones.");
+      v === 4 ? "Two octaves up, where a phone speaker can play it."
+              : "Concert pitch. Use headphones.");
   }
   octHi.addEventListener("click", function () { setOct(4); });
   octLo.addEventListener("click", function () { setOct(1); });
@@ -1012,9 +1059,9 @@
     var b = Math.abs(landing - root);
     later(function () {
       if (pure) {
-        setStrobe(b, "Landed " + b.toFixed(2) + " Hz off home. Twelve pure fifths do not come home.");
+        setStrobe(b, "Landed " + b.toFixed(2) + " Hz away from the starting note. Twelve pure fifths overshoot.");
       } else {
-        setStrobe(0, "Dead silent. Twelve shaved fifths land exactly on home, because we made them.");
+        setStrobe(0, "No beat. Twelve piano fifths land exactly on the starting note, because each one is slightly narrow.");
       }
     }, (13 * 0.30 + 0.35) * 1000);
     later(function () { if (playing("climb")) stopSound("climb"); }, (13 * 0.30 + 0.35 + 3.5) * 1000);
@@ -1251,7 +1298,7 @@
       tr.addEventListener("click", function () {
         if (muted) return;
         dyad(v.fJust * OCT, v.fTemp * OCT, 3.2, "row");
-        setStrobe(beat, v.name + ": pure and tempered together, beating " + beat.toFixed(2) + " times a second.");
+        setStrobe(beat, v.name + ": pure and piano versions together, beating " + beat.toFixed(2) + " times per second.");
       });
       frag.appendChild(tr);
     });
@@ -1871,7 +1918,7 @@
     bRun.textContent = "Measuring…";
     var read = document.getElementById("run-read");
     var K = sharedK;
-    read.textContent = "Integrating 7,500 steps, then fitting the readout one delay at a time. Watch the bars land.";
+    read.textContent = "Simulating 7,500 steps, then fitting the readout one delay at a time. The bars appear as each fit finishes.";
     runExperiment({ K: K, commit: true, onDone: function (res) {
       read.innerHTML =
         "At <b>K = " + K.toFixed(2) + "</b>: capacity <b class='just-t'>" +
@@ -1882,8 +1929,8 @@
         (res.reach > 30 ? ", past where the chart used to end." : ".") +
         "<br>" + NF + " features, fit on 3,500 samples and <b>scored on 3,500 it never saw</b>. " +
         "The gap between " + res.total.toFixed(2) + " and " + NF +
-        " is redundancy: near-identical oscillators holding near-identical things. " +
-        "Tap a bar to watch the readout remember that delay.";
+        " is redundancy: similar oscillators holding similar information. " +
+        "Tap a bar to see the readout reconstruct that delay.";
       bThinkReady = true;
       bThink.title = "Replay eight seconds of the bank's state as sound";
       bRun.textContent = "Run the experiment";
@@ -1899,7 +1946,7 @@
     var read = document.getElementById("run-read");
     var Ks = [0, 0.12, 0.45, 1.0, 2.0, 4.0, 6.0, 8.0];
     var out = [];
-    read.textContent = "Sweeping coupling — eight full experiments, measured as they land…";
+    read.textContent = "Sweeping the coupling: eight full experiments, plotted as each one finishes…";
     function runNext(i) {
       if (i >= Ks.length) {
         var lo = out[0], hi = out[out.length - 1];
@@ -1907,13 +1954,13 @@
           "Across the sweep, mixing climbs <b class='temp-t'>" + (lo.nl * 100).toFixed(1) + "% → " +
           (hi.nl * 100).toFixed(1) + "%</b> while reach collapses <b class='just-t'>" +
           lo.reachSec.toFixed(1) + " s → " + hi.reachSec.toFixed(1) + " s</b> (" +
-          lo.reach + " steps down to " + hi.reach + "). That's the exchange, measured on held-out data: " +
-          "<b>coupling buys mixing and pays for it in reach.</b><br>" +
+          lo.reach + " steps down to " + hi.reach + "), measured on held-out data. " +
+          "<b>Coupling improves mixing and costs reach.</b><br>" +
           "Capacity counted only over the first 31 delays goes the <em>other</em> way, " +
           lo.total.toFixed(2) + " → " + hi.total.toFixed(2) +
-          ", because that window is too short to contain what's being lost. " +
-          "Neither number ever approaches the ceiling of " + hi.ceiling + ", and that shortfall is the redundancy: " +
-          "eleven oscillators this close together are close to being one oscillator.";
+          ", because that window is too short to include the memory being lost. " +
+          "Neither number approaches the ceiling of " + hi.ceiling + ". The shortfall is redundancy: " +
+          "eleven oscillators this similar carry much of the same information.";
         bSweep.textContent = "Sweep the coupling";
         setBusy(false);
         return;
@@ -1943,7 +1990,7 @@
     bSpread.textContent = "Measuring…";
     var s = parseInt(spreadSlider.value, 10) / 100;
     var read = document.getElementById("spread-read");
-    read.textContent = "Same experiment, errors at ×" + s.toFixed(2) + "…";
+    read.textContent = "Same experiment, with the errors at ×" + s.toFixed(2) + "…";
     runExperiment({ K: SPREAD_K, scale: s, commit: false, onDone: function (res) {
       var replaced = false;
       for (var i = 0; i < spreadPts.length; i++) {
@@ -1955,8 +2002,8 @@
       read.innerHTML = "At <b>&times;" + s.toFixed(2) + "</b>: capacity <b class='just-t'>" +
         res.total.toFixed(2) + "</b> of 34, readable <b>" + res.reachSec.toFixed(1) +
         " s</b> back, at K = " + SPREAD_K.toFixed(2) + " on held-out data." +
-        (s === 0 ? " Eleven identical oscillators hold about one oscillator's worth: the whole bank collapses to a single tuning fork." : "") +
-        " Measure a few sizes and compare against the piano's ×1.00.";
+        (s === 0 ? " With no errors, the eleven oscillators are identical and hold about as much as one." : "") +
+        " Measure a few sizes and compare with the piano's ×1.00.";
       bSpread.textContent = "Measure at this size";
       setBusy(false);
     } });
@@ -2020,8 +2067,8 @@
     register("think", master, oscs);
     later(function () { if (playing("think")) stopSound("think"); }, (durS + 0.4) * 1000);
     document.getElementById("run-read").innerHTML =
-      "Eight seconds of the bank thinking: the hiss is the input it was given; the eleven voices swell " +
-      "as their oscillators catch it. What you're hearing is the state the readout reads.";
+      "Eight seconds of the bank's state as sound. The hiss is the input. Each of the eleven tones gets louder " +
+      "as its oscillator responds, so you are hearing the same values the readout uses.";
   });
 
   // keep "hear it think" locked until there's a run to hear
@@ -2085,10 +2132,10 @@
     kValA.textContent = "K = " + sharedK.toFixed(2);
     kValB.textContent = "K = " + sharedK.toFixed(2);
     document.getElementById("phase-read").textContent = sharedK < 0.3
-      ? "A whisper. Each oscillator keeps its own time, and anything written into their differences stays put. This is where the memory lives."
+      ? "Low coupling. Each oscillator keeps its own time, so anything stored in their differences stays put. This is where the memory lives."
       : sharedK < 2
-        ? "Enough to talk. The nearly-in-tune oscillators lock together first and give up what they held; the worst intervals hold out longest."
-        : "Strong. Written differences are erased in seconds, the in-tune first, the most wrong last.";
+        ? "Moderate coupling. Oscillators with similar speeds fall into step first and lose what they stored. The most mistuned intervals hold out longest."
+        : "Strong coupling. The oscillators fall into step within seconds and stored values are erased, usually the most accurate intervals first.";
   }
   kSliderA.addEventListener("input", function () { setK(parseInt(this.value, 10) / 100); });
   kSliderB.addEventListener("input", function () { setK(parseInt(this.value, 10) / 100); });
@@ -2137,8 +2184,8 @@
     g.fillStyle = css("--dim"); g.font = "9px " + css("--mono"); g.textAlign = "center";
     g.fillText("agreement " + (order * 100).toFixed(0) + "%", cx, cy + R + 20);
     g.textAlign = "left";
-    g.fillText("eleven clocks at their true speeds", 10, 14);
-    g.fillText("dot size = how wrong that interval is on a piano", 10, 26);
+    g.fillText("eleven oscillators at their true speeds", 10, 14);
+    g.fillText("dot size = how far the piano misses that interval", 10, 26);
   }
 
   // ══════════════════════════════════════════════════════════
@@ -2200,7 +2247,7 @@
     var r = readBack();
     document.getElementById("store-read").innerHTML =
       "Written. Held as <b>" + SLOTS + "</b> phase offsets, <b>" + (SLOTS * 5) +
-      " bits</b>, living in the disagreement between oscillators. Reads back as <b class='just-t'>" +
+      " bits</b>, stored in the phase differences between oscillators. Reads back as <b class='just-t'>" +
       r.text.replace(/ /g, "␣") + "</b>.";
   }
 
@@ -2210,9 +2257,9 @@
     var html = "Reading back: <b class='" + (r.intact === SLOTS ? "just-t" : "temp-t") + "'>" +
       r.text.replace(/ /g, "␣") + "</b>, <b>" + r.intact + " of " + SLOTS +
       "</b> characters still intact" +
-      (sharedK < 0.3 ? ". At this whisper of coupling they'll outlast your patience."
-                     : sharedK < 2 ? ". Coupling is arguing them away, nearly-in-tune first."
-                                   : ". At this coupling the register empties in seconds.");
+      (sharedK < 0.3 ? ". At this low coupling the message holds for minutes."
+                     : sharedK < 2 ? ". Coupling is erasing them, usually the most accurate intervals first."
+                                   : ". At this coupling the register empties within seconds.");
     if (html !== lastStoreText) {
       lastStoreText = html;
       document.getElementById("store-read").innerHTML = html;
@@ -2276,9 +2323,9 @@
 
     readBack();
     document.getElementById("store-read").innerHTML =
-      "Beating the register against a reference standing where you wrote it. <b class='" +
+      "Playing each slot against a reference set to the written value. <b class='" +
       (ringing === SLOTS ? "just-t" : "temp-t") + "'>" + ringing + " of " + SLOTS +
-      "</b> voices ringing; a drifted slot cancels toward silence, so what you hear is the message checking out.";
+      "</b> slots ringing. A slot that has drifted partly cancels and sounds quieter.";
   }
 
   document.getElementById("b-listen").addEventListener("click", playVerify);
@@ -2311,6 +2358,140 @@
     stopBank();
   });
 
+
+  // ══════════════════════════════════════════════════════════
+  //  A PIANO, SENT BY MAIL — the cost of mailing a tuning three
+  //  ways: from scratch, against the textbook, against the key
+  //  before. Fixed-length code: 88 × log2(levels its residuals span).
+  // ══════════════════════════════════════════════════════════
+
+  var mailKeys = document.getElementById("mail-keys");
+  var mailBits = document.getElementById("mail-bits");
+  var wanderEl = document.getElementById("wander");
+  var MAIL_RES = 0.5; // cents
+  var MAIL = (function () {
+    var rng = mulberry32(1948);
+    var waves = [];
+    for (var w = 0; w < 4; w++) waves.push({ f: 0.6 + w * 0.9 + rng(), p: rng() * TWO_PI, a: 1 / (w + 1) });
+    var drift = new Float64Array(88), jit = new Float64Array(88), ref = new Float64Array(88);
+    var mx = 0;
+    for (var k = 0; k < 88; k++) {
+      var x = k / 87, d = 0;
+      waves.forEach(function (v) { d += v.a * Math.sin(TWO_PI * v.f * x + v.p); });
+      drift[k] = d; mx = Math.max(mx, Math.abs(d));
+      jit[k] = (rng() + rng() + rng()) / 1.5 - 1;           // roughly bell-shaped, ±1
+      var c = (k - 44) / 44;
+      ref[k] = 26 * c * c * c;                               // the textbook stretch, ±26 cents at the ends
+    }
+    for (var k2 = 0; k2 < 88; k2++) drift[k2] /= mx;
+    return { drift: drift, jit: jit, ref: ref, shown: [0, 0, 0], target: [0, 0, 0], dev: new Float64Array(88) };
+  })();
+
+  function mailLevels(arr) {
+    var lo = Infinity, hi = -Infinity;
+    for (var i = 0; i < arr.length; i++) {
+      var q = Math.round(arr[i] / MAIL_RES);
+      if (q < lo) lo = q; if (q > hi) hi = q;
+    }
+    return hi - lo + 1;
+  }
+
+  function mailCompute() {
+    var W = parseInt(wanderEl.value, 10) / 10;
+    var abs = new Float64Array(88), dev = MAIL.dev, diff = new Float64Array(88);
+    for (var k = 0; k < 88; k++) {
+      dev[k] = W * (0.8 * MAIL.drift[k] + 0.2 * MAIL.jit[k]);
+      abs[k] = k * 100 + MAIL.ref[k] + dev[k];
+    }
+    for (var k2 = 0; k2 < 88; k2++) diff[k2] = k2 === 0 ? dev[0] : dev[k2] - dev[k2 - 1];
+    MAIL.target = [abs, dev, diff].map(function (a) { return 88 * Math.log2(mailLevels(a)); });
+    document.getElementById("wander-val").textContent = "up to " + W.toFixed(1) + " cents";
+    var t = MAIL.target;
+    document.getElementById("mail-read").innerHTML = W === 0
+      ? "From scratch: <b>" + Math.round(t[0]) + " bits</b>. Against the textbook: <b class='just-t'>0 bits</b>. Against the previous key: <b class='just-t'>0 bits</b>. This piano matches the textbook exactly, so there is nothing new to send."
+      : "From scratch: <b>" + Math.round(t[0]) + " bits</b>. Against the textbook: <b class='temp-t'>" + Math.round(t[1]) +
+        " bits</b>. Against the previous key: <b class='just-t'>" + Math.round(t[2]) + " bits</b>. Same piano, same precision. Only the part the assumption misses costs anything.";
+  }
+
+  function drawMailKeys() {
+    var f = fit(mailKeys), g = f.g, w = f.w, h = f.h;
+    g.clearRect(0, 0, w, h);
+    var pad = { l: 34, r: 8, t: 12, b: 26 };
+    var pw = w - pad.l - pad.r, kh = 14, ph = h - pad.t - pad.b - kh - 4;
+    var mid = pad.t + ph / 2, CM = 10; // ±10 cents full scale
+    g.strokeStyle = css("--rule"); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(pad.l, mid); g.lineTo(pad.l + pw, mid); g.stroke();
+    g.fillStyle = css("--dim"); g.font = "9px " + css("--mono"); g.textAlign = "right";
+    g.fillText("+" + CM + "¢", pad.l - 5, pad.t + 6);
+    g.fillText("0", pad.l - 5, mid + 3);
+    g.fillText("−" + CM + "¢", pad.l - 5, pad.t + ph);
+    var kw = pw / 88;
+    for (var k = 0; k < 88; k++) {
+      var v = Math.max(-CM, Math.min(CM, MAIL.dev[k]));
+      var y = mid - (v / CM) * (ph / 2);
+      g.fillStyle = v >= 0 ? css("--temper") : css("--just");
+      g.globalAlpha = 0.85;
+      g.fillRect(pad.l + k * kw + 0.5, Math.min(y, mid), Math.max(1, kw - 1), Math.max(1, Math.abs(y - mid)));
+    }
+    g.globalAlpha = 1;
+    // a little keyboard underneath, black keys where they fall
+    var ky = pad.t + ph + 4;
+    g.fillStyle = css("--ink"); g.globalAlpha = 0.6;
+    g.fillRect(pad.l, ky, pw, kh);
+    g.globalAlpha = 1;
+    for (var k3 = 0; k3 < 88; k3++) {
+      var pc = (k3 + 9) % 12; // key 0 is A0
+      if ([1, 3, 6, 8, 10].indexOf(pc) >= 0) {
+        g.fillStyle = css("--ground");
+        g.fillRect(pad.l + k3 * kw + 0.3, ky, Math.max(1, kw - 0.6), kh * 0.62);
+      } else if (pc === 4 || pc === 11) {
+        g.fillStyle = css("--ground"); g.globalAlpha = 0.5;
+        g.fillRect(pad.l + (k3 + 1) * kw - 0.5, ky, 1, kh);
+        g.globalAlpha = 1;
+      }
+    }
+    g.fillStyle = css("--dim"); g.textAlign = "center";
+    g.fillText("each key's offset from the textbook tuning", pad.l + pw / 2, h - 6);
+  }
+
+  function drawMailBits() {
+    var f = fit(mailBits), g = f.g, w = f.w, h = f.h;
+    g.clearRect(0, 0, w, h);
+    var labels = ["Every pitch from scratch", "Only the difference from the textbook", "Only the difference from the previous key"];
+    var colors = [css("--dim"), css("--temper"), css("--just")];
+    var max = Math.max(1, MAIL.target[0]);
+    var top = 10, rowH = (h - top - 8) / 3;
+    for (var i = 0; i < 3; i++) {
+      var y = top + i * rowH;
+      g.fillStyle = css("--ink"); g.font = "11px " + css("--mono"); g.textAlign = "left";
+      g.fillText(labels[i], 0, y + 12);
+      var bw = (w - 70) * (MAIL.shown[i] / max);
+      g.fillStyle = css("--panel-2"); g.fillRect(0, y + 20, w - 70, 16);
+      g.fillStyle = colors[i]; g.fillRect(0, y + 20, Math.max(0, bw), 16);
+      g.fillStyle = css("--ink"); g.textAlign = "right";
+      g.fillText(Math.round(MAIL.shown[i]) + " bits", w, y + 33);
+    }
+  }
+
+  var mailAnim = false;
+  function mailTick() {
+    var moving = false;
+    for (var i = 0; i < 3; i++) {
+      var d = MAIL.target[i] - MAIL.shown[i];
+      if (Math.abs(d) > 0.5 && !reduced) { MAIL.shown[i] += d * 0.18; moving = true; }
+      else MAIL.shown[i] = MAIL.target[i];
+    }
+    drawMailBits();
+    if (moving) requestAnimationFrame(mailTick); else mailAnim = false;
+  }
+  function mailUpdate() {
+    mailCompute();
+    drawMailKeys();
+    if (!mailAnim) { mailAnim = true; requestAnimationFrame(mailTick); }
+  }
+  wanderEl.addEventListener("input", mailUpdate);
+  mailCompute();
+
   // ══════════════════════════════════════════════════════════
   //  BOOT
   // ══════════════════════════════════════════════════════════
@@ -2338,7 +2519,7 @@
     requestAnimationFrame(tick);
   }
 
-  function redrawAll() { drawSpiral(); drawMC(); drawSweep(); drawRecon(); drawBudget(); drawPhase(); }
+  function redrawAll() { drawSpiral(); drawMC(); drawSweep(); drawRecon(); drawBudget(); drawPhase(); drawMailKeys(); drawMailBits(); }
   window.addEventListener("resize", redrawAll);
   var mq = window.matchMedia("(prefers-color-scheme: dark)");
   if (mq.addEventListener) mq.addEventListener("change", redrawAll);
@@ -2346,7 +2527,8 @@
 
   setK(0.12);
   redrawAll();
+  mailUpdate();
   requestAnimationFrame(tick);
-  setStrobe(0, "Stripes stand still when the interval is pure. They crawl when it isn't.");
+  setStrobe(0, "The stripes stand still when an interval is pure and move when it beats.");
 })();
 </script>

@@ -1,0 +1,1056 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Fireflies</title>
+<link rel="stylesheet" href="lab.css">
+<style>
+  /* Scene colours for the two night canvases. The canvases stay dark in
+     both themes (night in dark mode, dusk in light) so a glow can read. */
+  :root {
+    --sky-top: #02040b; --sky-mid: #081022; --sky-low: #15233d;
+    --grass-far: #0a1322; --grass-mid: #060c17; --grass-near: #02050b;
+    --fly: #d6f26a; --fly-core: #fbffdc;
+    --night-ink: #e9edf5; --night-dim: #7d8aa3; --night-just: #63c4e0; --night-rose: #e07a8a;
+    --star-a: 0.85;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --sky-top: #161c38; --sky-mid: #3a355c; --sky-low: #9a6468;
+      --grass-far: #2a2640; --grass-mid: #1a1a2e; --grass-near: #0c0c18;
+      --star-a: 0.4;
+    }
+  }
+  :root[data-theme="light"] {
+    --sky-top: #161c38; --sky-mid: #3a355c; --sky-low: #9a6468;
+    --grass-far: #2a2640; --grass-mid: #1a1a2e; --grass-near: #0c0c18;
+    --star-a: 0.4;
+  }
+  .wrap button { min-height: 2.6rem; }
+  .wrap input[type="range"] { min-height: 2.5rem; }
+  #meadow, #orb { background: var(--sky-top); }
+  .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; margin: 1.1rem 0 0.8rem; }
+  @media (min-width: 46rem) { .tiles { grid-template-columns: repeat(4, 1fr); } }
+  .tile { background: var(--panel-2); border: 1px solid var(--rule); border-radius: 2px; padding: 0.5rem 0.7rem 0.55rem; min-width: 0; }
+  .tile .k { display: block; font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+  .tile .v { display: block; font-family: var(--mono); font-size: 1.2rem; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1.35; white-space: nowrap; }
+  .tile .v small { font-size: 0.68rem; color: var(--dim); letter-spacing: 0.04em; }
+  .gauge-row { display: flex; align-items: center; gap: 0.8rem; margin: 0.2rem 0 0.9rem; }
+  .gauge-row .k { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+  .gauge { position: relative; flex: 1; height: 12px; background: var(--panel-2); border: 1px solid var(--rule); border-radius: 2px; overflow: hidden; }
+  .gauge > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--temper); }
+  .gauge > b { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--dim); }
+  .gauge > u { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--rule); opacity: 0.9; }
+  .seg { display: inline-flex; gap: 0; flex-wrap: nowrap; }
+  .seg button + button { margin-left: -1px; }
+  .lbl { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dim); align-self: center; margin-right: 0.2rem; }
+  .vu-row { display: grid; grid-template-columns: 7.5rem 1fr 4.6rem; align-items: center; gap: 0.6rem; margin: 0.45rem 0; }
+  .vu-row .k { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+  .vu-row .num { font-size: 0.74rem; color: var(--dim); text-align: right; }
+  .vu { position: relative; height: 10px; background: var(--panel-2); border: 1px solid var(--rule); border-radius: 2px; overflow: hidden; }
+  .vu > i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--just); }
+  .vu > b { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--temper); }
+  .log { list-style: none; padding: 0; margin: 0.4rem 0 0; font-family: var(--mono); font-size: 0.72rem; line-height: 1.6; color: var(--dim); min-height: 11.5em; overflow: hidden; }
+  .log li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .log li.acc { color: var(--ink); }
+  .log li.acc::before { content: "\25CF  "; color: var(--just); }
+  .log li.own::before { content: "\25CF  "; color: var(--temper); }
+  .log li.ign::before { content: "\25CB  "; }
+  .log li.sys::before { content: "\2014  "; }
+  .msg { border-left: 2px solid var(--rose); background: var(--panel-2); padding: 0.6rem 0.85rem; font-size: 0.88rem; margin: 0.8rem 0; max-width: 46rem; }
+  .msg[hidden] { display: none; }
+  #join-panel .grid-2 > div { min-width: 0; }
+  .join-side h3 { margin-top: 0.2rem; }
+  .cap { margin-top: 0.55rem; }
+  .steps { max-width: var(--measure); margin: 0 0 1.1rem; padding-left: 1.4rem; }
+  .steps li { margin: 0 0 0.4rem; padding-left: 0.2rem; }
+</style>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">Lab &middot; 04 &middot; Pulse-coupled oscillators</span>
+  <h1>Fireflies</h1>
+  <p class="lede">Some fireflies flash in time with each other. A whole hillside goes dark, then lights at once, with no leader. This page shows how one simple rule produces that, and what the swarm loses when it agrees.</p>
+  <p>Each firefly here is a clock that flashes once per cycle. When it sees another firefly flash, it moves its own clock forward a little. That is the only interaction. Below, you can watch a meadow of these clocks fall into step, measure how much information disappears as they do, and run the same rule on two real phones that hear each other through the air.</p>
+</header>
+
+<section>
+  <div class="sec-head"><span class="sec-mark">01</span><div><h2>How the fireflies fall into step</h2></div></div>
+
+  <p>Set the pull above zero and watch the meadow. The flashes start out scattered, gather into clumps, and the clumps merge until every firefly flashes together.</p>
+
+  <p>Each firefly follows one rule. It carries a charge that climbs toward a threshold, quickly at first and then more slowly. When the charge reaches the threshold, the firefly flashes and the charge resets to zero. When it sees another firefly flash, its charge jumps up by a fixed step, called the pull (&epsilon;). If that jump carries it past the threshold, it flashes at once and resets in the same instant as the firefly that triggered it. The two then start their next cycle together. A firefly's phase is how far it is through its cycle, from 0 just after a flash to 1 at the next one.</p>
+
+  <p>Renato Mirollo and Steven Strogatz proved in 1990 that a group of identical fireflies built this way, each one seeing all the others, ends up flashing as one from almost any starting state. The slowing climb is what makes it work. Near the threshold, a step in charge is worth a large jump in time, so fireflies that are almost ready get pulled into the flash. Near the bottom, the same step is worth very little time, so a firefly that has just flashed is hardly moved away from the group.</p>
+
+  <p>These fireflies are not identical. Their natural rates come from the piano on the main page. Eleven of its intervals are slightly out of tune, so each one beats: two close tones make a slow pulse. Those beat rates run from <span class="num" data-beat="lo">0.37</span> to <span class="num" data-beat="hi">8.63</span>&nbsp;Hz (pulses per second). The page maps them evenly onto a range of firefly rates centred on one flash per second, plus or minus the spread you set. The slowest beat becomes the slowest firefly. With more than eleven fireflies, the same eleven rates repeat in order.</p>
+
+  <div class="panel" id="meadow-panel">
+    <h3>The meadow</h3>
+    <canvas id="meadow" height="440" aria-label="A night meadow. Each glowing point is a firefly. They flash on their own clocks and, when coupled, pull each other into flashing together."></canvas>
+    <div class="btn-row">
+      <button id="b-clock" aria-pressed="false">Show the clock</button>
+      <button id="b-scatter" data-tone="temper">Scatter them</button>
+      <span class="seg" role="group" aria-label="Sight line">
+        <button id="b-global" aria-pressed="true">Whole meadow</button>
+        <button id="b-local" aria-pressed="false">Neighbours only</button>
+      </span>
+    </div>
+
+    <div class="tiles" aria-live="off">
+      <div class="tile"><span class="k">Order r</span><span class="v num" id="t-r">0.00</span></div>
+      <div class="tile"><span class="k">Information</span><span class="v num" id="t-h">0.00 <small>bits</small></span></div>
+      <div class="tile"><span class="k">Since scatter</span><span class="v num" id="t-time">0.0 <small>s</small></span></div>
+      <div class="tile"><span class="k">In step at</span><span class="v num" id="t-lock">&mdash;</span></div>
+    </div>
+    <div class="gauge-row">
+      <span class="k">0 bits</span>
+      <div class="gauge" id="gauge" role="meter" aria-label="Entropy of the phase distribution" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
+        <u style="left:20%"></u><u style="left:40%"></u><u style="left:60%"></u><u style="left:80%"></u>
+        <i id="gauge-fill"></i><b id="gauge-max" title="the most bits this many fireflies can hold"></b>
+      </div>
+      <span class="k">5 bits</span>
+    </div>
+    <canvas id="strip" height="140" aria-label="Strip chart of the last sixty seconds: entropy of the phase distribution in bits, and the order parameter r."></canvas>
+    <div class="readout cap">The chart covers the last 60 seconds. The amber lines are the information gauge. They show the entropy of all the fireflies' phases, a measure in bits of how spread out they are, with the dial cut into 32 slices. The faint amber line is the instant value and the bold one is a 1.5-second average. The blue line is the order parameter <b>r</b>: the length of the average of every firefly's clock hand. It reads 0 when they are scattered and 1 when they all flash together. The grey dashed line is the most bits this many fireflies can hold.</div>
+
+    <div class="grid-2" style="margin-top:0.6rem">
+      <div>
+        <div class="slider-row">
+          <label for="s-eps">Pull <span style="text-transform:none">&epsilon;</span></label>
+          <input type="range" id="s-eps" min="0" max="50" value="6">
+          <span class="readout num" id="v-eps">0.06</span>
+        </div>
+        <div class="slider-row">
+          <label for="s-spread">Spread of rates</label>
+          <input type="range" id="s-spread" min="0" max="150" value="30">
+          <span class="readout num" id="v-spread">&plusmn;3.0%</span>
+        </div>
+      </div>
+      <div>
+        <div class="slider-row">
+          <label for="s-count">Fireflies</label>
+          <input type="range" id="s-count" min="1" max="27" value="7">
+          <span class="readout num" id="v-count">77</span>
+        </div>
+        <div class="slider-row">
+          <label for="s-radius">Sight radius</label>
+          <input type="range" id="s-radius" min="10" max="60" value="28" disabled>
+          <span class="readout num" id="v-radius">0.28</span>
+        </div>
+      </div>
+    </div>
+    <div class="readout" id="meadow-read">Each light is one firefly. Press <b>Show the clock</b> to place every firefly on a dial by its phase. The flash is at twelve o'clock, and each firefly goes once around per cycle. The blue hand is the average of all of them, and its length is r. Set the pull to zero and no firefly reacts to another, so they keep flashing out of step. Raise it and a clump forms on the dial, grows, and takes in the whole swarm.</div>
+    <p class="note" style="margin-top:0.8rem"><b>Neighbours only</b> lets each firefly see only the others inside a circle around it. The sight radius sets the size of that circle, as a fraction of the meadow's height. Each firefly also waits 50&nbsp;ms before it responds. A flash now has to pass from neighbour to neighbour, so it travels across the field in waves. The thin lines show which firefly triggered which. In test runs, the waves joined into one only when the pull was near 0.3.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="sec-mark">02</span><div><h2>Agreement erases information</h2></div></div>
+
+  <p>Watch the gauge while the swarm locks. It falls toward zero. A scattered swarm holds information in its differences, and falling into step uses those differences up.</p>
+
+  <p>The gauge measures how many bits it takes to say where every firefly's clock stands, with the dial cut into 32 slices. Fireflies spread evenly over all 32 slices give 5 bits, the most a 32-slice dial can show. A swarm smaller than 32 gives less, because it cannot fill every slice. As the fireflies agree, the number falls. When they all flash together it reaches zero, because knowing one firefly's clock tells you every other one. The whole swarm then tells you no more than a single firefly could: lit or dark.</p>
+
+  <p class="readout" id="p-live">This run started at <b id="p-h0">&mdash;</b> bits. It reads <b id="p-hnow">&mdash;</b> bits now<span id="p-lock"></span>.</p>
+
+  <p>The main page shows the same effect. There, a message is stored in the small offsets between oscillators, and turning up the coupling (how strongly they pull on each other) erases it, starting with the most closely tuned pairs. Here, the offsets are the scattered phases before the swarm locks, and the pull uses them up. The locked swarm is easy to see but stores nothing. The information was in the scatter, including the stragglers that have not joined yet.</p>
+
+  <p>The gauge does not stay at zero. When the spread is above zero, the faster fireflies pull ahead between flashes, so the phases drift apart a little during each cycle. The next flash pulls them back together. In the chart this shows up as a sawtooth that repeats about once a second: the piano's spread of rates reappearing every cycle.</p>
+</section>
+
+<section>
+  <div class="sec-head"><span class="sec-mark">03</span><div><h2>Sync two phones by sound</h2></div></div>
+
+  <p>This part runs the same rule on real devices. Two phones with no network connection between them fall into step using only sound.</p>
+
+  <p>Each phone acts as one firefly. On each flash it lights its screen and plays a short chirp, 40&nbsp;ms long at 3&nbsp;kHz. Its natural period is picked at random near one second. Between chirps it listens through the microphone for that pitch. It ignores what it hears just after its own chirp, so it does not react to itself. When it hears the other phone, it moves its clock forward by the same rule the fireflies use.</p>
+
+  <h3>Try it with two phones</h3>
+  <ol class="steps">
+    <li>Open this page on both phones. Phones need the page served over https before the browser will open the microphone (see the notes at the bottom).</li>
+    <li>Turn the volume up on both phones.</li>
+    <li>Place the phones about a meter apart in a quiet room. They do not use Wi-Fi or Bluetooth.</li>
+    <li>Press <b>Join as a firefly</b> on each phone. Allow the microphone when the browser asks.</li>
+    <li>Listen. At first the two chirps come at different times. Over a while they move toward each other and land together, or with one phone slightly behind.</li>
+    <li>Look at the ring around the glow on each screen. Blue ticks gather near the top once the phones agree.</li>
+    <li>To stop, press <b>Leave</b>, the <b>Stop</b> button in the corner, or Escape.</li>
+  </ol>
+
+  <h3>Try it with one phone</h3>
+  <p>Press <b>Practice with an imaginary partner</b>. This runs a second firefly inside the page with its own period. Each of the two hears the other's chirp about 70&nbsp;ms late, and each chirp has a 1 in 20 chance of being missed. The partner's chirp is lower and quieter, so you can hear the two close in on each other. The microphone stays off in practice mode.</p>
+
+  <div class="panel" id="join-panel">
+    <h3>One firefly</h3>
+    <p class="note" style="margin:0">Two phones: follow the steps above. One phone: press <b>Practice with an imaginary partner</b>.</p>
+    <div class="btn-row">
+      <button id="j-join" data-tone="just" data-needs-sound aria-pressed="false">Join as a firefly</button>
+      <button id="j-practice" data-needs-sound aria-pressed="false">Practice with an imaginary partner</button>
+    </div>
+    <div class="msg" id="j-msg" role="alert" hidden></div>
+    <div class="grid-2">
+      <div>
+        <canvas id="orb" height="320" aria-label="This device as one firefly: a glowing orb that lights on each flash, inside a ring that shows its clock, with ticks where it heard a chirp."></canvas>
+        <div class="readout cap">The ring is this phone's clock. The flash is at the top, and the hand goes once around per period. Each tick outside the ring marks where the hand was when the phone heard a chirp. Blue means the phone used it. Grey means the phone ignored it because it had just chirped or was about to. When two phones agree, the ticks gather near the top. In practice mode, the rose circle shows the partner's position on the same clock.</div>
+      </div>
+      <div class="join-side">
+        <h3>Microphone</h3>
+        <div class="vu-row"><span class="k">Room level</span><div class="vu" role="meter" aria-label="Microphone level" aria-valuemin="-70" aria-valuemax="0" id="vu-level-m"><i id="vu-level"></i></div><span class="num" id="vu-level-v">off</span></div>
+        <div class="vu-row"><span class="k">3 kHz band</span><div class="vu" role="meter" aria-label="Chirp band above the noise floor" aria-valuemin="0" aria-valuemax="30" id="vu-band-m"><i id="vu-band"></i><b style="left:40%" title="detection threshold, 12 dB"></b></div><span class="num" id="vu-band-v">off</span></div>
+        <div class="readout" id="j-status" aria-live="polite">Stopped. This phone's natural period is <b id="j-period">1.00 s</b>.</div>
+        <div class="slider-row">
+          <label for="j-eps">Pull <span style="text-transform:none">&epsilon;</span></label>
+          <input type="range" id="j-eps" min="0" max="60" value="25">
+          <span class="readout num" id="j-eps-v">0.25</span>
+        </div>
+        <h3 style="margin-top:1rem">What it heard</h3>
+        <ol class="log" id="j-log" aria-label="Detection log, newest first"><li class="sys">nothing yet</li></ol>
+      </div>
+    </div>
+    <canvas id="lanes" height="112" style="margin-top:1rem" aria-label="Timeline of the last eight seconds: when this phone chirped and when it heard a chirp."></canvas>
+    <div class="readout cap">The last eight seconds, newest at the right. Amber marks this phone's chirps. Blue marks chirps it heard and used, and grey marks chirps it ignored. In practice mode, the rose row shows when the partner actually chirped, so the gap between a rose mark and the blue mark after it is the hearing delay.</div>
+  </div>
+</section>
+
+<div class="foot">
+  <p class="note"><strong>The model.</strong> Each firefly has a phase &phi; in [0,&nbsp;1) that advances at its natural rate. Its state is x&nbsp;=&nbsp;ln(1&nbsp;+&nbsp;(e<sup>b</sup>&minus;1)&phi;)/b with b&nbsp;=&nbsp;3. This curve is concave (it rises fast, then slowly), as the Mirollo&ndash;Strogatz result requires. At x&nbsp;=&nbsp;1 the firefly flashes and resets. When a firefly sees a flash, x rises by &epsilon; divided by the number of fireflies it can see, unless it flashed within the last 150&nbsp;ms. So &epsilon; is the total jump it would get if all of them flashed at once. A firefly pushed to x&nbsp;=&nbsp;1 flashes in that same instant and resets together with the one that pushed it (absorption). Natural rates are 1&nbsp;Hz&nbsp;&times;&nbsp;(1&nbsp;&plusmn;&nbsp;spread). The piano's eleven beat rates are mapped linearly onto that range, slowest beat to slowest firefly, and fireflies past the eleventh reuse the same rates in order. The swarm is integrated in 5&nbsp;ms steps. Whole meadow is instant all-to-all coupling, the case the 1990 proof covers for identical oscillators. With a spread of rates nothing is guaranteed, so the locking you see here is measured, not proved. Neighbours only adds a 50&nbsp;ms response delay so the waves are visible. The information gauge is the plug-in entropy of a 32-bin histogram of phases. Its ceiling is log<sub>2</sub>&nbsp;32&nbsp;=&nbsp;5 bits, or log<sub>2</sub>&nbsp;n for n&nbsp;&lt;&nbsp;32 fireflies (3.46 bits for eleven), and it reads low for small swarms. The order parameter is r&nbsp;=&nbsp;|&lang;e<sup>2&pi;i&phi;</sup>&rang;|. &ldquo;In step&rdquo; is when the 2-second average of r first rises above 0.95. It resets if that average falls below 0.8.</p>
+  <p class="note"><strong>Real fireflies are more complicated.</strong> <em>Photinus carolinus</em>, in the Great Smoky Mountains, flashes in bursts of several quick flashes separated by long dark gaps, and what synchronises is mostly the bursts. Field recordings suggest that a lone male flashes irregularly and the rhythm appears only in a group. The mangrove fireflies of Southeast Asia (<em>Pteroptyx</em>) seem to adjust their own period and can delay a flash as well as advance it. Pulse coupling with a fixed period does neither. This page uses the pulse-coupling idea, not the biology.</p>
+  <p class="note"><strong>The microphone.</strong> The page asks for audio with echo cancellation, noise suppression and automatic gain control turned off, so that it can hear the other phone. As a result it also hears itself. An analyser takes a 1024-point spectrum, about 21&nbsp;ms of sound at 48&nbsp;kHz, once per animation frame. A chirp counts when the 2.8&ndash;3.2&nbsp;kHz band is 12&nbsp;dB above a noise floor and 6&nbsp;dB above the bands on either side. The noise floor follows quiet frames with a 1.5&nbsp;s time constant, and a steady tone lasting more than 0.4&nbsp;s is absorbed into it. Anything heard from 30&nbsp;ms before to 350&nbsp;ms after the phone's own chirp is ignored, and at most one detection counts per 150&nbsp;ms. A whistle, a squeaky hinge or a smoke-alarm chirp near 3&nbsp;kHz can cause a false detection. A loud or large room can stop the phones hearing each other. The page does not correct for latency. The speaker path, the microphone path and the once-per-frame check each add delay, and the total varies by device: likely tens of milliseconds, up to a couple of hundred on some phones. A locked pair therefore settles with the follower late by about that much. Some phones lower the speaker volume while the microphone is open, so turn the volume up.</p>
+  <p class="note"><strong>Opening the file.</strong> Browsers open the microphone only on a secure page. Desktop Chrome treats a file opened from disk as secure, so the two-phone mode works from file:// there. Phones need the page served over https. Practice mode needs no microphone anywhere. Everything else runs offline from the file, with no network requests.</p>
+</div>
+
+</div>
+
+<script src="kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  Kit.nav("fireflies.html");
+  Kit.soundBar();
+
+  var $ = function (id) { return document.getElementById(id); };
+  var TAU = Math.PI * 2;
+  var reduced = Kit.reduced;
+  var rnd = Math.random;
+
+  // ── the piano's fan, from the shared interval table ──
+  var IV = Kit.intervals(Kit.edo(12));
+  var BEAT = IV.map(function (v) { return v.beat; });
+  var BMIN = Math.min.apply(null, BEAT), BMAX = Math.max.apply(null, BEAT);
+  var FAN = BEAT.map(function (b) { return 2 * (b - BMIN) / (BMAX - BMIN) - 1; }); // -1..1
+  document.querySelectorAll('[data-beat="lo"]').forEach(function (el) { el.textContent = BMIN.toFixed(2); });
+  document.querySelectorAll('[data-beat="hi"]').forEach(function (el) { el.textContent = BMAX.toFixed(2); });
+
+  // ── Mirollo–Strogatz state curve: concave up-climb and its inverse ──
+  var SHAPE = 3, EB = Math.exp(SHAPE) - 1;
+  function fUp(p) { return Math.log(1 + EB * p) / SHAPE; }
+  function gDown(x) { return (Math.exp(SHAPE * x) - 1) / EB; }
+
+  // ══════════════════════════════════════════════════════════
+  //  THE SWARM
+  // ══════════════════════════════════════════════════════════
+  var MAXN = 297, BINS = 32, H = 0.005, REFRACT = 0.15, HOP = 0.05, GLOW_TAU = 0.09;
+  var S = { n: 77, eps: 0.06, spread: 0.03, local: false, radius: 0.28, clock: false,
+            t: 0, h0: null, lockedAt: -1, r: 0, Hb: 0, aspect: 1.8, nbAge: 9 };
+  var ph = new Float64Array(MAXN), rate = new Float64Array(MAXN);
+  var px = new Float64Array(MAXN), py = new Float64Array(MAXN);
+  var vx = new Float64Array(MAXN), vy = new Float64Array(MAXN);
+  var depth = new Uint8Array(MAXN), last = new Float64Array(MAXN);
+  var nb = []; for (var i0 = 0; i0 < MAXN; i0++) nb.push([]);
+  var hist = new Float64Array(BINS);
+  var events = [], evHead = 0, cascade = [], links = [];
+  var HIST = []; // {t, H, r}
+  var histAcc = 0;
+
+  function initFly(i) {
+    ph[i] = rnd(); last[i] = -99;
+    px[i] = 0.03 + 0.94 * rnd(); py[i] = 0.08 + 0.74 * rnd();
+    vx[i] = 0; vy[i] = 0; depth[i] = rnd() < 0.4 ? 0 : 1;
+  }
+  for (var i1 = 0; i1 < MAXN; i1++) initFly(i1);
+  function setRates() { for (var i = 0; i < MAXN; i++) rate[i] = 1 + S.spread * FAN[i % 11]; }
+  setRates();
+
+  function resetClock() {
+    S.t = 0; S.lockedAt = -1; HIST = []; histAcc = 0;
+    events = []; evHead = 0; links = []; cascade = [];
+    for (var i = 0; i < MAXN; i++) last[i] = -99;
+    measure(); S.h0 = S.Hb; pushHist();
+  }
+  function scatter() { for (var i = 0; i < MAXN; i++) ph[i] = rnd(); resetClock(); }
+
+  function rebuildNeighbours() {
+    var n = S.n, A = S.aspect, R2 = S.radius * S.radius;
+    for (var i = 0; i < n; i++) nb[i].length = 0;
+    for (var a = 0; a < n; a++) {
+      for (var b = a + 1; b < n; b++) {
+        var dx = (px[a] - px[b]) * A, dy = py[a] - py[b];
+        if (dx * dx + dy * dy < R2) { nb[a].push(b); nb[b].push(a); }
+      }
+    }
+    S.nbAge = 0;
+  }
+
+  function flash(i, src) {
+    ph[i] = 0; last[i] = S.t;
+    if (S.local) {
+      events.push({ t: S.t + HOP, s: i });
+      if (src >= 0) { links.push({ a: src, b: i, t: S.t }); if (links.length > 700) links.splice(0, links.length - 700); }
+    } else cascade.push(i);
+  }
+  function deliver(s) {
+    var n = S.n, list = S.local ? nb[s] : null, m = S.local ? list.length : n;
+    for (var q = 0; q < m; q++) {
+      var j = S.local ? list[q] : q;
+      if (j === s || j >= n) continue;
+      if (S.t - last[j] < REFRACT) continue;
+      var k = S.eps / Math.max(1, S.local ? nb[j].length : n - 1);
+      if (k <= 0) continue;
+      var x = fUp(ph[j]) + k;
+      if (x >= 1) flash(j, s); else ph[j] = gDown(x);
+    }
+  }
+  function step(h) {
+    S.t += h;
+    var n = S.n;
+    for (var i = 0; i < n; i++) { ph[i] += h * rate[i]; if (ph[i] >= 1) flash(i, -1); }
+    if (S.local) {
+      while (evHead < events.length && events[evHead].t <= S.t + 1e-9) deliver(events[evHead++].s);
+      if (evHead > 512) { events = events.slice(evHead); evHead = 0; }
+    } else {
+      while (cascade.length) deliver(cascade.pop());
+    }
+    if (S.local) { S.nbAge += h; if (S.nbAge > 0.25) rebuildNeighbours(); }
+    histAcc += h;
+    if (histAcc >= 0.1) { histAcc -= 0.1; measure(); pushHist(); }
+  }
+  function measure() {
+    var n = S.n, c = 0, s = 0;
+    for (var b = 0; b < BINS; b++) hist[b] = 0;
+    for (var i = 0; i < n; i++) {
+      var a = TAU * ph[i]; c += Math.cos(a); s += Math.sin(a);
+      var k = Math.floor(ph[i] * BINS); if (k >= BINS) k = BINS - 1; if (k < 0) k = 0;
+      hist[k]++;
+    }
+    var Hb = 0;
+    for (var b2 = 0; b2 < BINS; b2++) if (hist[b2] > 0) { var p = hist[b2] / n; Hb -= p * Math.log2(p); }
+    S.r = Math.sqrt(c * c + s * s) / n; S.Hb = Hb;
+    S.meanAng = Math.atan2(s, c);
+  }
+  function pushHist() {
+    HIST.push({ t: S.t, H: S.Hb, r: S.r });
+    if (HIST.length > 1200) HIST.splice(0, HIST.length - 1200);
+    // "in step": the 2-second mean of r crosses 0.95; lost again below 0.8
+    var k = Math.min(20, HIST.length), m = 0;
+    for (var i = HIST.length - k; i < HIST.length; i++) m += HIST[i].r;
+    m /= k;
+    if (k >= 20 && S.lockedAt < 0 && m >= 0.95) S.lockedAt = S.t;
+    else if (S.lockedAt >= 0 && m < 0.8) S.lockedAt = -1;
+  }
+  function smoothedH(atIdx, win) {
+    var s = 0, c = 0;
+    for (var i = Math.max(0, atIdx - win + 1); i <= atIdx; i++) { s += HIST[i].H; c++; }
+    return s / Math.max(1, c);
+  }
+
+  function wander(dt) {
+    if (reduced || dt <= 0) return;
+    var n = S.n, sq = Math.sqrt(dt);
+    for (var i = 0; i < n; i++) {
+      vx[i] += -vx[i] * 0.6 * dt + 0.014 * sq * (rnd() + rnd() + rnd() - 1.5) * 2;
+      vy[i] += -vy[i] * 0.6 * dt + 0.012 * sq * (rnd() + rnd() + rnd() - 1.5) * 2;
+      px[i] += vx[i] * dt; py[i] += vy[i] * dt;
+      if (px[i] < 0.02) { px[i] = 0.02; vx[i] = Math.abs(vx[i]); }
+      if (px[i] > 0.98) { px[i] = 0.98; vx[i] = -Math.abs(vx[i]); }
+      if (py[i] < 0.06) { py[i] = 0.06; vy[i] = Math.abs(vy[i]); }
+      if (py[i] > 0.86) { py[i] = 0.86; vy[i] = -Math.abs(vy[i]); }
+    }
+  }
+
+  var simAcc = 0;
+  function simulate(dt) {
+    simAcc += dt;
+    var guard = 0;
+    while (simAcc >= H && guard++ < 40) { step(H); simAcc -= H; }
+    if (guard >= 40) simAcc = 0;
+  }
+
+  // ── controls ──
+  var sEps = $("s-eps"), sSpread = $("s-spread"), sCount = $("s-count"), sRad = $("s-radius");
+  function readControls() {
+    S.eps = parseInt(sEps.value, 10) / 100;
+    $("v-eps").textContent = S.eps.toFixed(2);
+    S.spread = parseInt(sSpread.value, 10) / 1000;
+    $("v-spread").textContent = "±" + (S.spread * 100).toFixed(1) + "%";
+    setRates();
+    S.radius = parseInt(sRad.value, 10) / 100;
+    $("v-radius").textContent = S.radius.toFixed(2);
+    if (S.local) rebuildNeighbours();
+  }
+  sEps.addEventListener("input", readControls);
+  sSpread.addEventListener("input", readControls);
+  sRad.addEventListener("input", readControls);
+  sCount.addEventListener("input", function () {
+    var n = parseInt(sCount.value, 10) * 11;
+    var old = S.n;
+    if (n > old) for (var i = old; i < n; i++) { ph[i] = rnd(); last[i] = -99; }
+    S.n = n; $("v-count").textContent = String(n);
+    events = []; evHead = 0; links = []; cascade = [];
+    if (S.local) rebuildNeighbours();
+    resetClock();
+  });
+  $("b-scatter").addEventListener("click", scatter);
+  $("b-clock").addEventListener("click", function () {
+    S.clock = !S.clock; this.setAttribute("aria-pressed", S.clock ? "true" : "false");
+    kick();
+  });
+  function setLocal(v) {
+    S.local = v;
+    $("b-global").setAttribute("aria-pressed", v ? "false" : "true");
+    $("b-local").setAttribute("aria-pressed", v ? "true" : "false");
+    sRad.disabled = !v;
+    events = []; evHead = 0; links = []; cascade = [];
+    if (v) rebuildNeighbours();
+  }
+  $("b-global").addEventListener("click", function () { setLocal(false); });
+  $("b-local").addEventListener("click", function () { setLocal(true); });
+
+  // ══════════════════════════════════════════════════════════
+  //  DRAWING THE MEADOW
+  // ══════════════════════════════════════════════════════════
+  var meadowCv = $("meadow"), stripCv = $("strip");
+  var M = null, skyCache = null, sprite = null, ambT = 0;
+  var grassRng = Kit.mulberry32(20260605);
+  function makeLayer(count, hLo, hHi, wLo, wHi) {
+    var a = [];
+    for (var i = 0; i < count; i++) a.push({ x: grassRng(), h: hLo + (hHi - hLo) * Math.pow(grassRng(), 1.4), w: wLo + (wHi - wLo) * grassRng(),
+                                             lean: (grassRng() - 0.5) * 0.5, p: grassRng() * TAU });
+    return a;
+  }
+  var GRASS = [
+    { blades: makeLayer(260, 0.06, 0.15, 1.2, 2.6), per: 150, ground: 0.035, tok: "--grass-far", amp: 0.05 },
+    { blades: makeLayer(200, 0.09, 0.22, 1.6, 3.4), per: 110, ground: 0.022, tok: "--grass-mid", amp: 0.07 },
+    { blades: makeLayer(150, 0.11, 0.31, 2.2, 4.6), per: 75,  ground: 0.012, tok: "--grass-near", amp: 0.09 }
+  ];
+  var starRng = Kit.mulberry32(7);
+  var STARS = []; for (var si = 0; si < 90; si++) STARS.push({ x: starRng(), y: Math.pow(starRng(), 1.6) * 0.62, s: 0.5 + starRng() * 1.1, f: 0.5 + starRng() * 2, p: starRng() * TAU, a: 0.25 + starRng() * 0.75 });
+
+  function sizeMeadow() {
+    var w = meadowCv.clientWidth || 600;
+    var h = Math.round(Math.max(330, Math.min(480, w * 0.58)));
+    meadowCv.dataset.cssHeight = String(h);
+    M = Kit.fit(meadowCv);
+    M.cw = meadowCv.clientWidth; M.dprSeen = window.devicePixelRatio || 1;
+    S.aspect = M.w / M.h;
+    buildSky(); buildSprite();
+    if (S.local) rebuildNeighbours();
+  }
+  function buildSky() {
+    var c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(M.w * M.dpr)); c.height = Math.max(1, Math.round(M.h * M.dpr));
+    var g = c.getContext("2d");
+    var gr = g.createLinearGradient(0, 0, 0, c.height);
+    gr.addColorStop(0, Kit.css("--sky-top")); gr.addColorStop(0.58, Kit.css("--sky-mid")); gr.addColorStop(1, Kit.css("--sky-low"));
+    g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height);
+    // a low haze over the horizon
+    var hz = g.createRadialGradient(c.width * 0.5, c.height * 1.05, 0, c.width * 0.5, c.height * 1.05, c.width * 0.7);
+    hz.addColorStop(0, Kit.alpha(Kit.css("--sky-low"), 0.55)); hz.addColorStop(1, Kit.alpha(Kit.css("--sky-low"), 0));
+    g.fillStyle = hz; g.fillRect(0, 0, c.width, c.height);
+    skyCache = c;
+  }
+  function buildSprite() {
+    var c = document.createElement("canvas"); c.width = c.height = 128;
+    var g = c.getContext("2d"), fly = Kit.css("--fly"), core = Kit.css("--fly-core");
+    var gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    gr.addColorStop(0, Kit.alpha(core, 1)); gr.addColorStop(0.07, Kit.alpha(core, 0.95));
+    gr.addColorStop(0.16, Kit.alpha(fly, 0.7)); gr.addColorStop(0.34, Kit.alpha(fly, 0.26));
+    gr.addColorStop(0.62, Kit.alpha(fly, 0.07)); gr.addColorStop(1, Kit.alpha(fly, 0));
+    g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+    sprite = c;
+  }
+  function glowOf(i) {
+    var e = S.t - last[i];
+    return (e >= 0 && e < 1.2) ? Math.exp(-e / GLOW_TAU) : 0;
+  }
+  function drawGrass(g, w, h, L) {
+    var k = Math.min(L.blades.length, Math.max(30, Math.round(L.per * w / 900)));
+    g.fillStyle = Kit.css(L.tok);
+    g.fillRect(0, h - L.ground * h, w, L.ground * h + 1);
+    g.beginPath();
+    for (var i = 0; i < k; i++) {
+      var b = L.blades[i], bx = b.x * w, bh = b.h * h, bw = b.w;
+      var sway = (Math.sin(ambT * 0.7 + b.x * 9 + b.p) * L.amp + Math.sin(ambT * 0.23 + b.x * 2.3) * 0.05) * bh;
+      var tx = bx + b.lean * bh + sway, ty = h - bh;
+      var cx = bx + b.lean * bh * 0.35 + sway * 0.35, cy = h - bh * 0.55;
+      g.moveTo(bx - bw, h + 1);
+      g.quadraticCurveTo(cx - bw * 0.5, cy, tx, ty);
+      g.quadraticCurveTo(cx + bw * 0.5, cy, bx + bw, h + 1);
+      g.closePath();
+    }
+    g.fill();
+  }
+  function drawFlies(g, w, h, layer, glows) {
+    var n = S.n, fly = Kit.css("--fly");
+    var base = Math.max(10, Math.min(30, w / 34));
+    g.globalCompositeOperation = "lighter";
+    g.fillStyle = Kit.alpha(fly, 0.22);
+    for (var i = 0; i < n; i++) {
+      if (depth[i] !== layer) continue;
+      var x = px[i] * w, y = py[i] * h, gl = glows[i];
+      var sc = layer ? 1 : 0.62;
+      g.globalAlpha = 1;
+      g.fillRect(x - 0.8 * sc, y - 0.8 * sc, 1.6 * sc, 1.6 * sc);
+      if (gl > 0.012) {
+        var r = base * sc * (0.75 + 0.45 * gl);
+        g.globalAlpha = Math.min(1, gl * (layer ? 1 : 0.8));
+        g.drawImage(sprite, x - r, y - r, 2 * r, 2 * r);
+        var R = r * 2.8;
+        g.globalAlpha = gl * 0.18;
+        g.drawImage(sprite, x - R, y - R, 2 * R, 2 * R);
+      }
+    }
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = "source-over";
+  }
+  var glowBuf = new Float64Array(MAXN);
+  function drawMeadow() {
+    if (!M || M.cw !== meadowCv.clientWidth || M.dprSeen !== (window.devicePixelRatio || 1)) sizeMeadow();
+    var g = M.g, w = M.w, h = M.h, n = S.n;
+    g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
+    g.drawImage(skyCache, 0, 0, w, h);
+    // stars
+    var sa = parseFloat(Kit.css("--star-a")) || 0.6, ink = Kit.css("--night-ink");
+    for (var s = 0; s < STARS.length; s++) {
+      var st = STARS[s], tw = reduced ? 1 : 0.65 + 0.35 * Math.sin(ambT * st.f + st.p);
+      g.fillStyle = Kit.alpha(ink, (sa * st.a * tw).toFixed(3));
+      g.fillRect(st.x * w, st.y * h, st.s, st.s);
+    }
+    var amb = 0;
+    for (var i = 0; i < n; i++) { glowBuf[i] = glowOf(i); amb += glowBuf[i]; }
+    amb /= Math.max(1, n);
+    // the whole meadow brightens when they flash together
+    if (amb > 0.01) {
+      g.globalCompositeOperation = "lighter";
+      var fly = Kit.css("--fly");
+      var ag = g.createRadialGradient(w * 0.5, h * 0.62, 0, w * 0.5, h * 0.62, Math.max(w, h) * 0.75);
+      ag.addColorStop(0, Kit.alpha(fly, (0.16 * amb).toFixed(3))); ag.addColorStop(1, Kit.alpha(fly, 0));
+      g.fillStyle = ag; g.fillRect(0, 0, w, h);
+      g.globalCompositeOperation = "source-over";
+    }
+    drawGrass(g, w, h, GRASS[0]);
+    drawFlies(g, w, h, 0, glowBuf);
+    drawGrass(g, w, h, GRASS[1]);
+    // threads: who set off whom, in neighbour mode
+    if (S.local && links.length) {
+      g.globalCompositeOperation = "lighter";
+      g.lineWidth = 1;
+      var flyc = Kit.css("--fly");
+      for (var l = links.length - 1; l >= 0; l--) {
+        var L = links[l], age = S.t - L.t;
+        if (age > 0.6 || age < 0) { if (age > 0.6) { links.splice(0, l + 1); break; } continue; }
+        if (L.a >= n || L.b >= n) continue;
+        g.strokeStyle = Kit.alpha(flyc, (0.5 * Math.exp(-age / 0.18)).toFixed(3));
+        g.beginPath(); g.moveTo(px[L.a] * w, py[L.a] * h); g.lineTo(px[L.b] * w, py[L.b] * h); g.stroke();
+      }
+      g.globalCompositeOperation = "source-over";
+    }
+    drawFlies(g, w, h, 1, glowBuf);
+    drawGrass(g, w, h, GRASS[2]);
+    if (S.clock) drawClock(g, w, h, glowBuf);
+  }
+  function drawClock(g, w, h, glows) {
+    var n = S.n, cx = w / 2, cy = h * 0.46, R = Math.min(w, h) * 0.32;
+    var ink = Kit.css("--night-ink"), dim = Kit.css("--night-dim"), just = Kit.css("--night-just"), fly = Kit.css("--fly");
+    g.fillStyle = Kit.alpha(Kit.css("--sky-top"), 0.72);
+    g.beginPath(); g.arc(cx, cy, R * 1.32, 0, TAU); g.fill();
+    g.strokeStyle = Kit.alpha(dim, 0.6); g.lineWidth = 1;
+    g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke();
+    for (var k = 0; k < 32; k++) {
+      var a = -Math.PI / 2 + TAU * k / 32, r1 = R * (k % 8 === 0 ? 0.9 : 0.95);
+      g.beginPath(); g.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1); g.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); g.stroke();
+    }
+    g.font = "11px " + Kit.css("--mono"); g.textAlign = "center"; g.fillStyle = Kit.alpha(ink, 0.8);
+    g.fillText("flash", cx, cy - R * 1.12);
+    // mean hand
+    var mr = S.r * R * 0.85, ma = S.meanAng - Math.PI / 2;
+    g.strokeStyle = just; g.lineWidth = 2.2;
+    g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(ma) * mr, cy + Math.sin(ma) * mr); g.stroke();
+    g.fillStyle = just; g.beginPath(); g.arc(cx, cy, 2.5, 0, TAU); g.fill();
+    // every firefly on the dial
+    g.globalCompositeOperation = "lighter";
+    for (var i = 0; i < n; i++) {
+      var aa = -Math.PI / 2 + TAU * ph[i], gl = glows[i];
+      var rr = R * (1 + 0.035 * ((i * 7) % 5 - 2));  // a little radial jitter so crowds read as crowds
+      var x = cx + Math.cos(aa) * rr, y = cy + Math.sin(aa) * rr;
+      g.fillStyle = Kit.alpha(fly, (0.45 + 0.55 * gl).toFixed(3));
+      g.beginPath(); g.arc(x, y, 2.2 + 2.6 * gl, 0, TAU); g.fill();
+      if (gl > 0.05) { var q = 10 * gl; g.globalAlpha = gl * 0.7; g.drawImage(sprite, x - q, y - q, 2 * q, 2 * q); g.globalAlpha = 1; }
+    }
+    g.globalCompositeOperation = "source-over";
+    g.fillStyle = Kit.alpha(ink, 0.9); g.font = "12px " + Kit.css("--mono");
+    g.fillText("r " + S.r.toFixed(2) + "   " + S.Hb.toFixed(2) + " bits", cx, cy + R * 0.42);
+  }
+
+  var strip = null, stripW = 0;
+  function drawStrip() {
+    if (!strip || stripW !== stripCv.clientWidth) { strip = Kit.fit(stripCv); stripW = stripCv.clientWidth; }
+    var g = strip.g, w = strip.w, h = strip.h;
+    g.clearRect(0, 0, w, h);
+    var padL = 30, padR = 30, padT = 18, padB = 18, pw = w - padL - padR, phh = h - padT - padB;
+    var dim = Kit.css("--dim"), rule = Kit.css("--rule"), temper = Kit.css("--temper"), just = Kit.css("--just");
+    g.font = "10px " + Kit.css("--mono"); g.textBaseline = "middle";
+    g.strokeStyle = rule; g.lineWidth = 1;
+    for (var b = 0; b <= 5; b++) {
+      var y = padT + phh * (1 - b / 5);
+      g.beginPath(); g.moveTo(padL, y + 0.5); g.lineTo(padL + pw, y + 0.5); g.stroke();
+      g.fillStyle = dim; g.textAlign = "right"; g.fillText(String(b), padL - 6, y);
+    }
+    g.textAlign = "left";
+    g.fillText("1", padL + pw + 6, padT); g.fillText("0", padL + pw + 6, padT + phh);
+    g.fillStyle = temper; g.fillText("bits", 2, padT - 10);
+    g.fillStyle = just; g.textAlign = "right"; g.fillText("r", w - 2, padT - 10);
+    var cap = Math.log2(Math.min(S.n, BINS));
+    g.setLineDash([4, 4]); g.strokeStyle = dim;
+    var yc = padT + phh * (1 - cap / 5);
+    g.beginPath(); g.moveTo(padL, yc); g.lineTo(padL + pw, yc); g.stroke(); g.setLineDash([]);
+    var WIN = 60, t1 = Math.max(WIN, S.t), t0 = t1 - WIN;
+    g.fillStyle = dim; g.textAlign = "center"; g.textBaseline = "alphabetic";
+    for (var tt = Math.ceil(t0 / 10) * 10; tt <= t1; tt += 10) {
+      var xt = padL + pw * (tt - t0) / WIN;
+      g.fillText(tt + " s", xt, h - 4);
+    }
+    if (HIST.length < 2) return;
+    function X(t) { return padL + pw * (t - t0) / WIN; }
+    var start = 0; while (start < HIST.length - 1 && HIST[start].t < t0) start++;
+    // r
+    g.strokeStyle = just; g.lineWidth = 1.5; g.beginPath();
+    for (var i = start; i < HIST.length; i++) { var p = HIST[i]; var yy = padT + phh * (1 - p.r); if (i === start) g.moveTo(X(p.t), yy); else g.lineTo(X(p.t), yy); }
+    g.stroke();
+    // entropy, raw and smoothed
+    g.strokeStyle = Kit.alpha(temper, 0.4); g.lineWidth = 1; g.beginPath();
+    for (var j = start; j < HIST.length; j++) { var q = HIST[j]; var y2 = padT + phh * (1 - q.H / 5); if (j === start) g.moveTo(X(q.t), y2); else g.lineTo(X(q.t), y2); }
+    g.stroke();
+    g.strokeStyle = temper; g.lineWidth = 2.2; g.beginPath();
+    for (var k = start; k < HIST.length; k++) { var y3 = padT + phh * (1 - smoothedH(k, 15) / 5); if (k === start) g.moveTo(X(HIST[k].t), y3); else g.lineTo(X(HIST[k].t), y3); }
+    g.stroke();
+  }
+
+  function fmtT(t) { return t < 100 ? t.toFixed(1) : String(Math.round(t)); }
+  var lastReadout = 0;
+  function readouts(force) {
+    var nowMs = performance.now();
+    if (!force && nowMs - lastReadout < 200) return;
+    lastReadout = nowMs;
+    measure();
+    $("t-r").textContent = S.r.toFixed(2);
+    $("t-h").innerHTML = S.Hb.toFixed(2) + " <small>bits</small>";
+    $("t-time").innerHTML = fmtT(S.t) + " <small>s</small>";
+    $("t-lock").innerHTML = S.lockedAt >= 0 ? fmtT(S.lockedAt) + " <small>s</small>" : "&mdash;";
+    var cap = Math.log2(Math.min(S.n, BINS));
+    $("gauge-fill").style.width = (100 * S.Hb / 5).toFixed(1) + "%";
+    $("gauge-max").style.left = "calc(" + (100 * cap / 5).toFixed(1) + "% - 1px)";
+    var gm = $("gauge"); gm.setAttribute("aria-valuenow", S.Hb.toFixed(2));
+    gm.setAttribute("aria-valuetext", S.Hb.toFixed(2) + " bits of " + cap.toFixed(2) + " possible");
+    $("p-h0").textContent = S.h0 === null ? "—" : S.h0.toFixed(2);
+    $("p-hnow").textContent = S.Hb.toFixed(2);
+    $("p-lock").textContent = S.lockedAt >= 0
+      ? ", and it came into step " + fmtT(S.lockedAt) + " seconds after the scatter (the 2-second average of r first above 0.95)"
+      : (S.eps === 0 ? ", and the pull is zero, so no firefly reacts to the others" : ", not in step yet");
+  }
+
+  // ── the frame loop: runs only while the page is visible and the meadow on screen ──
+  var meadowOn = true, rafId = 0, lastNow = 0;
+  function frame(now) {
+    rafId = 0;
+    if (document.hidden || !meadowOn) { lastNow = 0; return; }
+    var dt = lastNow ? Math.min(0.05, (now - lastNow) / 1000) : 0;
+    lastNow = now;
+    if (!reduced) ambT += dt;
+    simulate(dt);
+    wander(dt);
+    drawMeadow();
+    drawStrip();
+    readouts(false);
+    rafId = requestAnimationFrame(frame);
+  }
+  function kick() { if (!rafId && !document.hidden && meadowOn) rafId = requestAnimationFrame(frame); }
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (es) {
+      meadowOn = es.some(function (e) { return e.isIntersecting; });
+      if (meadowOn) kick();
+    }).observe($("meadow-panel"));
+  }
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) { kick(); kickJoin(); } });
+  Kit.onTheme(function () {
+    M = null; strip = null; stripW = 0; orbFit = null; lanesFit = null;
+    drawMeadow(); drawStrip(); drawOrb(performance.now() / 1000); drawLanes(performance.now() / 1000);
+  });
+
+  // ══════════════════════════════════════════════════════════
+  //  ONE FIREFLY: this device, by microphone or with a pretend partner
+  // ══════════════════════════════════════════════════════════
+  var CHIRP_F = 3000, CHIRP_LEN = 0.04, PARTNER_F = 2200, REF_AFTER = 0.35, REF_BEFORE = 0.03;
+  var LAT = 0.07, MISS = 0.05, HOLD = 0.15, ORB_TAU = 0.14, LANE_WIN = 8;
+  var J = { active: false, mode: null, session: 0, period: 1 + (rnd() * 2 - 1) * 0.06, ph: 0, eps: 0.25,
+            last: -99, start: 0, lastFrame: 0, own: [], heard: [], ptrue: [], ticks: [], pend: [],
+            partner: null, mic: null, deaf: false, used: 0, ignored: 0, gap: null, raf: 0, logItems: [] };
+  $("j-period").textContent = J.period.toFixed(2) + " s";
+  var orbCv = $("orb"), lanesCv = $("lanes"), orbFit = null, lanesFit = null, orbW = 0, lanesW = 0;
+
+  $("j-eps").addEventListener("input", function () {
+    J.eps = parseInt(this.value, 10) / 100; $("j-eps-v").textContent = J.eps.toFixed(2);
+  });
+
+  function chirp(freq, gain) {
+    var c = Kit.sound.audio(), t = c.currentTime + 0.005;
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = "sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(gain, t + 0.004);
+    g.gain.setValueAtTime(gain, t + CHIRP_LEN - 0.006);
+    g.gain.linearRampToValueAtTime(0, t + CHIRP_LEN);
+    o.connect(g); g.connect(Kit.sound.bus());
+    o.start(t); o.stop(t + CHIRP_LEN + 0.02);
+  }
+
+  function logLine(text, cls) {
+    J.logItems.unshift({ text: text, cls: cls });
+    if (J.logItems.length > 8) J.logItems.length = 8;
+    var ol = $("j-log");
+    ol.innerHTML = "";
+    J.logItems.forEach(function (it) { var li = document.createElement("li"); li.className = it.cls; li.textContent = it.text; ol.appendChild(li); });
+  }
+  function stamp(t) { return (t - J.start).toFixed(2).padStart(6, " ") + " s  "; }
+  function showMsg(html) { var m = $("j-msg"); m.innerHTML = html; m.hidden = false; }
+  function hideMsg() { var m = $("j-msg"); m.hidden = true; m.innerHTML = ""; }
+
+  function updateJoinUI() {
+    $("j-join").setAttribute("aria-pressed", J.active && J.mode === "mic" ? "true" : "false");
+    $("j-practice").setAttribute("aria-pressed", J.active && J.mode === "practice" ? "true" : "false");
+    $("j-join").textContent = J.active && J.mode === "mic" ? "Leave (stop listening)" : "Join as a firefly";
+    $("j-practice").textContent = J.active && J.mode === "practice" ? "Stop practising" : "Practice with an imaginary partner";
+    if (!J.mic) {
+      $("vu-level").style.width = "0"; $("vu-band").style.width = "0";
+      $("vu-level-v").textContent = J.active && J.mode === "practice" ? "unused" : "off";
+      $("vu-band-v").textContent = J.active && J.mode === "practice" ? "unused" : "off";
+    }
+    statusText(true);
+  }
+  var lastStatus = 0;
+  function statusText(force) {
+    var nowMs = performance.now();
+    if (!force && nowMs - lastStatus < 250) return;
+    lastStatus = nowMs;
+    var el = $("j-status"), my = "This phone's natural period is <b>" + J.period.toFixed(2) + " s</b>";
+    if (!J.active) { el.innerHTML = "Stopped. " + my + "."; return; }
+    if (J.mode === "practice") {
+      var gp = J.gap === null ? "waiting for both to chirp"
+        : Math.abs(J.gap) < 0.0005 ? "0 ms" : Math.round(Math.abs(J.gap) * 1000) + " ms, " + (J.gap > 0 ? "partner first" : "this phone first");
+      el.innerHTML = "Practice running. " + my + ". The partner's is <b>" + J.partner.period.toFixed(2) + " s</b>. Gap between the last two chirps: <b>" + gp + "</b>.";
+    } else {
+      var state = J.deaf ? "Chirping, not listening (no microphone)" : J.mic ? "Listening" : "Waiting for the microphone";
+      el.innerHTML = state + ". " + my + ". Chirps heard: <b>" + (J.used + J.ignored) + "</b>, used: <b>" + J.used + "</b>.";
+    }
+  }
+
+  function startJoin(mode) {
+    var was = J.active ? J.mode : null;
+    if (was) Kit.sound.stop("ff-join");
+    if (was === mode) return;
+    Kit.sound.audio();
+    var sess = ++J.session;
+    Kit.sound.register("ff-join", null, [], function () { endJoin(sess); });
+    var t = performance.now() / 1000;
+    J.active = true; J.mode = mode; J.ph = rnd(); J.last = -99; J.start = t; J.lastFrame = 0;
+    J.own = []; J.heard = []; J.ptrue = []; J.ticks = []; J.pend = []; J.logItems = [];
+    J.deaf = false; J.used = 0; J.ignored = 0; J.gap = null;
+    J.partner = mode === "practice"
+      ? { period: J.period * (1 + (rnd() < 0.5 ? -1 : 1) * (0.05 + 0.04 * rnd())), ph: rnd(), last: -99 }
+      : null;
+    hideMsg();
+    $("j-log").innerHTML = "";
+    logLine(mode === "practice" ? "practice started: a partner firefly runs inside this page" : "joined: chirping and asking for the microphone", "sys");
+    updateJoinUI();
+    if (mode === "mic") openMic(sess);
+    kickJoin();
+  }
+  function endJoin(sess) {
+    if (sess !== J.session) return;
+    J.active = false; closeMic(); J.mode = null; J.partner = null;
+    if (J.raf) { cancelAnimationFrame(J.raf); J.raf = 0; }
+    updateJoinUI();
+    logLine("stopped", "sys");
+    var t = performance.now() / 1000;
+    drawOrb(t); drawLanes(t);
+  }
+  $("j-join").addEventListener("click", function () { startJoin("mic"); });
+  $("j-practice").addEventListener("click", function () { startJoin("practice"); });
+
+  function micFail(sess, kind) {
+    if (sess !== J.session || !J.active) return;
+    J.deaf = true; closeMic();
+    var why;
+    if (kind === "insecure") why = "This page is not on a secure (https) address, and browsers open the microphone only on secure pages. Desktop Chrome also allows a file opened from disk.";
+    else if (kind === "noapi") why = "This browser does not offer microphone access on this page.";
+    else if (kind === "NotAllowedError" || kind === "SecurityError" || kind === "PermissionDeniedError") why = "Microphone permission was refused, so this phone cannot hear its partner. To try again, allow the microphone for this page in the browser's site settings, then press Join again.";
+    else if (kind === "NotFoundError" || kind === "DevicesNotFoundError" || kind === "OverconstrainedError") why = "No microphone was found on this device.";
+    else if (kind === "NotReadableError" || kind === "TrackStartError" || kind === "AbortError") why = "The microphone is in use by something else, such as a call, a recorder or another tab.";
+    else if (kind === "ended") why = "The microphone stopped. It may have been unplugged, or another app took it.";
+    else why = "The microphone did not open (" + String(kind).replace(/[<>&]/g, "") + ").";
+    showMsg("<b>Microphone not available.</b> " + why + " This phone keeps chirping without listening, so a partner phone can still follow it. To stop it, press the button again, the <b>Stop</b> button in the corner, or Escape. <b>Practice with an imaginary partner</b> works without a microphone.");
+    logLine("microphone unavailable: " + kind, "sys");
+    statusText(true);
+  }
+  function openMic(sess) {
+    if (!window.isSecureContext) { micFail(sess, "insecure"); return; }
+    var md = navigator.mediaDevices;
+    if (!md || !md.getUserMedia) { micFail(sess, "noapi"); return; }
+    var p;
+    try {
+      p = md.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: false });
+    } catch (e) { micFail(sess, (e && e.name) || "error"); return; }
+    p.then(function (stream) {
+      if (sess !== J.session || !J.active) { stream.getTracks().forEach(function (tr) { tr.stop(); }); return; }
+      var c = Kit.sound.audio();
+      var src = c.createMediaStreamSource(stream), an = c.createAnalyser();
+      an.fftSize = 1024; an.smoothingTimeConstant = 0; an.minDecibels = -130; an.maxDecibels = 0;
+      src.connect(an); // never to the speakers
+      J.mic = { stream: stream, src: src, an: an, fbuf: new Float32Array(an.frequencyBinCount), tbuf: new Float32Array(an.fftSize),
+                binHz: c.sampleRate / an.fftSize, floor: null, lastDet: -99, hitRun: 0, snr: 0, level: -120 };
+      stream.getTracks().forEach(function (tr) {
+        tr.addEventListener("ended", function () { if (sess === J.session && J.active) micFail(sess, "ended"); });
+      });
+      logLine("microphone open, listening near " + CHIRP_F / 1000 + " kHz", "sys");
+      statusText(true);
+    }).catch(function (err) { micFail(sess, (err && err.name) || "error"); });
+  }
+  function closeMic() {
+    var m = J.mic; J.mic = null;
+    if (!m) return;
+    try { m.stream.getTracks().forEach(function (tr) { tr.stop(); }); } catch (e) {}
+    try { m.src.disconnect(); } catch (e) {}
+  }
+
+  function bandPow(m, lo, hi) {
+    var a = Math.max(1, Math.floor(lo / m.binHz)), b = Math.min(m.fbuf.length - 1, Math.ceil(hi / m.binHz)), s = 0, c = 0;
+    for (var k = a; k <= b; k++) { s += Math.pow(10, m.fbuf[k] / 10); c++; }
+    return s / Math.max(1, c);
+  }
+  function pollMic(t, dt) {
+    var m = J.mic; if (!m) return;
+    m.an.getFloatFrequencyData(m.fbuf);
+    m.an.getFloatTimeDomainData(m.tbuf);
+    var ss = 0; for (var i = 0; i < m.tbuf.length; i++) ss += m.tbuf[i] * m.tbuf[i];
+    m.level = 10 * Math.log10(ss / m.tbuf.length + 1e-14);
+    var bandDb = 10 * Math.log10(bandPow(m, 2800, 3200) + 1e-20);
+    var flankDb = 10 * Math.log10((bandPow(m, 2000, 2500) + bandPow(m, 3600, 4100)) / 2 + 1e-20);
+    var own = (t - J.last) < REF_AFTER;
+    if (m.floor === null) m.floor = bandDb;
+    m.snr = bandDb - m.floor;
+    var hit = m.snr > 12 && bandDb - flankDb > 6 && bandDb > -100;
+    m.hitRun = hit ? m.hitRun + dt : 0;
+    // the floor follows quiet frames; a steady whine counts as quiet after 0.4 s
+    if ((!hit && !own) || m.hitRun > 0.4) m.floor += (bandDb - m.floor) * Math.min(1, dt / 1.5);
+    if (hit && t - m.lastDet > HOLD) { m.lastDet = t; hear(t, m.snr); }
+  }
+
+  function selfFlash(t) {
+    // gap > 0: the partner chirped first; < 0: this phone did
+    if (J.partner && J.partner.last > -50 && t - J.partner.last < J.period / 2) J.gap = t - J.partner.last;
+    J.ph = 0; J.last = t; J.own.push(t);
+    chirp(CHIRP_F, 0.3);
+    logLine(stamp(t) + "chirp", "own");
+    if (J.partner && rnd() > MISS) J.pend.push({ t: t + LAT + (rnd() - 0.5) * 0.02, to: "partner" });
+  }
+  function partnerFlash(t) {
+    var P = J.partner;
+    if (J.last > -50 && t - J.last < J.period / 2) J.gap = -(t - J.last); // this phone first, negative
+    P.ph = 0; P.last = t; J.ptrue.push(t);
+    chirp(PARTNER_F, 0.1);
+    if (rnd() > MISS) J.pend.push({ t: t + LAT + (rnd() - 0.5) * 0.02, to: "self" });
+  }
+  function partnerHear(t) {
+    var P = J.partner; if (!P) return;
+    if (t - P.last < REF_AFTER || (1 - P.ph) * P.period < REF_BEFORE) return;
+    var x = fUp(P.ph) + J.eps;
+    if (x >= 1) partnerFlash(t); else P.ph = gDown(x);
+  }
+  function hear(t, snr) {
+    var phase = J.ph, tag = snr === undefined ? "" : "  +" + snr.toFixed(0) + " dB";
+    var ign = (t - J.last) < REF_AFTER ? "just chirped" : ((1 - J.ph) * J.period < REF_BEFORE ? "about to chirp" : null);
+    J.heard.push({ t: t, ign: !!ign });
+    J.ticks.push({ t: t, ph: phase, ign: !!ign });
+    if (ign) { J.ignored++; logLine(stamp(t) + "heard, ignored (" + ign + ")" + tag, "ign"); return; }
+    J.used++;
+    var x = fUp(J.ph) + J.eps;
+    if (x >= 1) {
+      logLine(stamp(t) + "heard at φ " + phase.toFixed(2) + ", pushed to flash" + tag, "acc");
+      selfFlash(t);
+    } else {
+      J.ph = gDown(x);
+      logLine(stamp(t) + "heard at φ " + phase.toFixed(2) + " → " + J.ph.toFixed(2) + tag, "acc");
+    }
+  }
+
+  function joinFrame(ts) {
+    J.raf = 0;
+    if (!J.active || document.hidden) { J.lastFrame = 0; return; }
+    var t = ts / 1000;
+    var dt = J.lastFrame ? Math.min(0.05, t - J.lastFrame) : 0;
+    J.lastFrame = t;
+    J.ph += dt / J.period;
+    if (J.ph >= 1) selfFlash(t);
+    var P = J.partner;
+    if (P) { P.ph += dt / P.period; if (P.ph >= 1) partnerFlash(t); }
+    if (J.pend.length) {
+      var keep = [];
+      var due = J.pend.filter(function (e) { if (e.t <= t) return true; keep.push(e); return false; });
+      J.pend = keep;
+      due.sort(function (a, b) { return a.t - b.t; }).forEach(function (e) {
+        if (!J.active) return;
+        if (e.to === "self") hear(t); else partnerHear(t);
+      });
+    }
+    pollMic(t, dt);
+    var cut = t - LANE_WIN - 1;
+    while (J.own.length && J.own[0] < cut) J.own.shift();
+    while (J.ptrue.length && J.ptrue[0] < cut) J.ptrue.shift();
+    while (J.heard.length && J.heard[0].t < cut) J.heard.shift();
+    while (J.ticks.length && J.ticks[0].t < t - 8) J.ticks.shift();
+    drawOrb(t); drawLanes(t); meters(); statusText(false);
+    if (J.active) J.raf = requestAnimationFrame(joinFrame);
+  }
+  function kickJoin() { if (J.active && !J.raf && !document.hidden) J.raf = requestAnimationFrame(joinFrame); }
+
+  var lastMeter = 0;
+  function meters() {
+    var m = J.mic; if (!m) return;
+    var nowMs = performance.now(); if (nowMs - lastMeter < 60) return; lastMeter = nowMs;
+    var lv = Math.max(0, Math.min(1, (m.level + 70) / 70)), bd = Math.max(0, Math.min(1, m.snr / 30));
+    $("vu-level").style.width = (lv * 100).toFixed(0) + "%";
+    $("vu-band").style.width = (bd * 100).toFixed(0) + "%";
+    $("vu-level-v").textContent = Math.round(m.level) + " dB";
+    $("vu-band-v").textContent = (m.snr >= 0 ? "+" : "") + m.snr.toFixed(0) + " dB";
+    $("vu-level-m").setAttribute("aria-valuenow", m.level.toFixed(0));
+    $("vu-band-m").setAttribute("aria-valuenow", m.snr.toFixed(0));
+  }
+
+  function drawOrb(t) {
+    if (!orbFit || orbW !== orbCv.clientWidth) { orbFit = Kit.fit(orbCv); orbW = orbCv.clientWidth; }
+    var g = orbFit.g, w = orbFit.w, h = orbFit.h;
+    var fly = Kit.css("--fly"), core = Kit.css("--fly-core"), ink = Kit.css("--night-ink"), dim = Kit.css("--night-dim"),
+        just = Kit.css("--night-just"), rose = Kit.css("--night-rose"), mono = Kit.css("--mono");
+    g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
+    var bg = g.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, Kit.css("--sky-top")); bg.addColorStop(1, Kit.css("--sky-mid"));
+    g.fillStyle = bg; g.fillRect(0, 0, w, h);
+    var cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.4, orbR = R * 0.6;
+    var gl = J.active ? Math.exp(-Math.max(0, t - J.last) / ORB_TAU) : 0;
+    g.globalCompositeOperation = "lighter";
+    if (gl > 0.01) { // the flash fills the panel
+      var fg = g.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.8);
+      fg.addColorStop(0, Kit.alpha(fly, (0.55 * gl).toFixed(3))); fg.addColorStop(0.5, Kit.alpha(fly, (0.18 * gl).toFixed(3))); fg.addColorStop(1, Kit.alpha(fly, 0));
+      g.fillStyle = fg; g.fillRect(0, 0, w, h);
+    }
+    var idle = J.active ? 0.1 : 0.05;
+    var or = orbR * (1 + 0.18 * gl);
+    var og = g.createRadialGradient(cx, cy, 0, cx, cy, or);
+    og.addColorStop(0, Kit.alpha(core, (idle + 0.9 * gl).toFixed(3)));
+    og.addColorStop(0.25, Kit.alpha(fly, (idle * 0.8 + 0.7 * gl).toFixed(3)));
+    og.addColorStop(0.6, Kit.alpha(fly, (idle * 0.4 + 0.25 * gl).toFixed(3)));
+    og.addColorStop(1, Kit.alpha(fly, 0));
+    g.fillStyle = og; g.beginPath(); g.arc(cx, cy, or, 0, TAU); g.fill();
+    g.globalCompositeOperation = "source-over";
+    // the ring: this phone's clock
+    g.strokeStyle = Kit.alpha(dim, 0.55); g.lineWidth = 1;
+    g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke();
+    var top = -Math.PI / 2;
+    if (J.active) {
+      g.strokeStyle = Kit.alpha(fly, 0.55); g.lineWidth = 3;
+      g.beginPath(); g.arc(cx, cy, R, top, top + TAU * J.ph); g.stroke();
+    }
+    // ticks where chirps were heard
+    for (var i = 0; i < J.ticks.length; i++) {
+      var tk = J.ticks[i], age = t - tk.t, a = top + TAU * tk.ph, al = Math.max(0, 1 - age / 8);
+      g.strokeStyle = Kit.alpha(tk.ign ? dim : just, (al * (tk.ign ? 0.7 : 1)).toFixed(3)); g.lineWidth = tk.ign ? 1.5 : 2.5;
+      g.beginPath(); g.moveTo(cx + Math.cos(a) * (R + 5), cy + Math.sin(a) * (R + 5)); g.lineTo(cx + Math.cos(a) * (R + 16), cy + Math.sin(a) * (R + 16)); g.stroke();
+    }
+    g.strokeStyle = Kit.alpha(ink, 0.7); g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(cx, cy - R + 6); g.lineTo(cx, cy - R - 3); g.stroke();
+    g.font = "11px " + mono; g.textAlign = "center"; g.fillStyle = Kit.alpha(ink, 0.75);
+    g.fillText("flash", cx, cy - R - 22);
+    if (J.active) {
+      var ha = top + TAU * J.ph;
+      g.fillStyle = core; g.beginPath(); g.arc(cx + Math.cos(ha) * R, cy + Math.sin(ha) * R, 5, 0, TAU); g.fill();
+    }
+    var P = J.partner;
+    if (J.active && P) {
+      var pa = top + TAU * P.ph;
+      g.strokeStyle = rose; g.lineWidth = 2;
+      g.beginPath(); g.arc(cx + Math.cos(pa) * R, cy + Math.sin(pa) * R, 6.5, 0, TAU); g.stroke();
+      // the partner's own small orb, top right
+      var pg = Math.exp(-Math.max(0, t - P.last) / ORB_TAU), qx = w - 34, qy = 34, qr = 22 * (1 + 0.2 * pg);
+      g.globalCompositeOperation = "lighter";
+      var pgr = g.createRadialGradient(qx, qy, 0, qx, qy, qr);
+      pgr.addColorStop(0, Kit.alpha(core, (0.08 + 0.85 * pg).toFixed(3))); pgr.addColorStop(0.4, Kit.alpha(fly, (0.06 + 0.5 * pg).toFixed(3))); pgr.addColorStop(1, Kit.alpha(fly, 0));
+      g.fillStyle = pgr; g.beginPath(); g.arc(qx, qy, qr, 0, TAU); g.fill();
+      g.globalCompositeOperation = "source-over";
+      g.strokeStyle = Kit.alpha(rose, 0.8); g.lineWidth = 1.2; g.beginPath(); g.arc(qx, qy, 9, 0, TAU); g.stroke();
+      g.fillStyle = Kit.alpha(ink, 0.75); g.textAlign = "right"; g.fillText("partner", w - 62, 38);
+    }
+    g.textAlign = "center"; g.fillStyle = Kit.alpha(ink, 0.8); g.font = "12px " + mono;
+    var label = !J.active ? "press Join or Practice" : J.mode === "practice" ? "this phone · practice" : J.deaf ? "this phone · not listening" : J.mic ? "this phone · listening" : "this phone";
+    g.fillText(label, cx, h - 14);
+  }
+
+  function drawLanes(t) {
+    if (!lanesFit || lanesW !== lanesCv.clientWidth) { lanesFit = Kit.fit(lanesCv); lanesW = lanesCv.clientWidth; }
+    var g = lanesFit.g, w = lanesFit.w, h = lanesFit.h;
+    g.clearRect(0, 0, w, h);
+    var practice = J.mode === "practice" || (!J.active && J.ptrue.length > 0);
+    var rows = practice ? [["this phone", "--temper"], ["partner chirped", "--rose"], ["heard here", "--just"]] : [["this phone", "--temper"], ["heard here", "--just"]];
+    var padL = Math.min(118, w * 0.3), padR = 8, rh = (h - 18) / rows.length;
+    var dim = Kit.css("--dim"), rule = Kit.css("--rule");
+    g.font = "10px " + Kit.css("--mono"); g.textBaseline = "middle";
+    rows.forEach(function (r, k) {
+      var y = 4 + rh * (k + 0.5);
+      g.fillStyle = dim; g.textAlign = "left"; g.fillText(r[0], 0, y);
+      g.strokeStyle = rule; g.lineWidth = 1; g.beginPath(); g.moveTo(padL, y + 0.5); g.lineTo(w - padR, y + 0.5); g.stroke();
+    });
+    var t1 = J.active ? t : (J.lastFrame || t), t0 = t1 - LANE_WIN, pw = w - padL - padR;
+    function X(tt) { return padL + pw * (tt - t0) / LANE_WIN; }
+    g.textAlign = "center"; g.textBaseline = "alphabetic"; g.fillStyle = dim;
+    for (var s = 0; s <= LANE_WIN; s += 2) g.fillText(s === LANE_WIN ? "now" : "−" + (LANE_WIN - s) + " s", padL + pw * s / LANE_WIN, h - 2);
+    function ticks(arr, row, color, getT, wide) {
+      var y = 4 + rh * (row + 0.5), half = Math.min(12, rh * 0.38);
+      g.strokeStyle = color; g.lineWidth = wide;
+      for (var i = 0; i < arr.length; i++) {
+        var tt = getT(arr[i]); if (tt < t0) continue;
+        var x = X(tt); g.beginPath(); g.moveTo(x, y - half); g.lineTo(x, y + half); g.stroke();
+      }
+    }
+    var id = function (v) { return v; };
+    ticks(J.own, 0, Kit.css("--temper"), id, 3);
+    if (practice) ticks(J.ptrue, 1, Kit.css("--rose"), id, 3);
+    var hr = practice ? 2 : 1;
+    ticks(J.heard.filter(function (e) { return e.ign; }), hr, Kit.alpha(dim, 0.8), function (e) { return e.t; }, 2);
+    ticks(J.heard.filter(function (e) { return !e.ign; }), hr, Kit.css("--just"), function (e) { return e.t; }, 3);
+  }
+
+  // ── test hooks for headless checks (no effect on the page) ──
+  window.FF = {
+    advance: function (sec) { var n = Math.round(sec / H); for (var i = 0; i < n; i++) step(H); measure(); readouts(true); return { r: S.r, H: S.Hb, t: S.t }; },
+    state: function () { measure(); return { r: S.r, H: S.Hb, t: S.t, n: S.n, eps: S.eps, spread: S.spread, local: S.local, lockedAt: S.lockedAt, h0: S.h0 }; },
+    scatter: scatter,
+    join: function () { return { active: J.active, mode: J.mode, deaf: J.deaf, gap: J.gap, used: J.used, ignored: J.ignored, own: J.own.length, period: J.period,
+                                 partner: J.partner && J.partner.period, mic: !!J.mic, msg: $("j-msg").hidden ? "" : $("j-msg").textContent }; }
+  };
+
+  // ── boot ──
+  readControls();
+  resetClock();
+  sizeMeadow();
+  drawMeadow(); drawStrip(); readouts(true);
+  drawOrb(performance.now() / 1000); drawLanes(performance.now() / 1000);
+  kick();
+})();
+</script>
+</body>
+</html>

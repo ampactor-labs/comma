@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Tuning Thinks Best</title>
+<link rel="stylesheet" href="lab.css">
+<style>
+  .detail { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  @media (min-width: 54rem) { .detail { grid-template-columns: 1.1fr 1fr; } }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-family: var(--mono); font-size: 0.7rem; color: var(--dim); margin: 0.4rem 0 0; }
+  .legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 0.35rem; border-radius: 1px; }
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">Lab &middot; 02</span>
+  <h1>Which tuning thinks best?</h1>
+  <p class="lede">The main page builds its oscillator bank from the piano's tuning errors. But equal temperament is only one way to spread the comma around. Over five centuries, musicians used many different tunings, and each one leaves a different set of errors. This page builds the bank from each tuning's errors and measures which one remembers the most.</p>
+  <p>None of these tunings was designed with memory in mind. They were designed to make music sound good in certain keys. The bank simply measures what their errors happen to provide.</p>
+</header>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">01</span>
+    <div><h2>Ten tunings compared</h2></div>
+  </div>
+
+  <p class="wide">Each card shows one tuning's bank: eleven oscillators, one per interval from the main page, each turning at the rate by which that tuning misses its interval. They are shown at one sixth of real speed so you can follow them. An oscillator that stands still marks an interval the tuning plays exactly. An exact interval has no error, so its oscillator adds nothing.</p>
+
+  <div class="panel">
+    <h3>Eleven oscillators per tuning</h3>
+    <canvas id="cards" height="560" aria-label="One card per tuning showing eleven oscillators turning at that tuning's detunings, with its measured capacity"></canvas>
+    <div class="meter" aria-hidden="true"><i id="m1"></i></div>
+    <div class="btn-row">
+      <button id="b-contest" data-tone="temper">Run the comparison</button>
+      <button id="b-sound" data-tone="just" data-needs-sound>Hear the selected bank</button>
+    </div>
+    <div class="readout" id="contest-read">Each tuning gets the same experiment as the main page: the same input, coupling 0.12, the same readout, scored on data it was not trained on. Tap a card for its numbers.</div>
+  </div>
+
+  <div class="panel">
+    <h3 id="detail-title">The selected tuning</h3>
+    <div class="detail">
+      <div class="table-scroll" style="margin:0">
+        <table>
+          <thead><tr><th>Interval</th><th>Misses by</th><th>Beat at A3</th></tr></thead>
+          <tbody id="detail-body"></tbody>
+        </table>
+      </div>
+      <div>
+        <p class="note" id="detail-note" style="margin-top:0"></p>
+        <div class="readout" id="detail-read"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="wide">Equal temperament, the tuning modern pianos use, finishes in the middle. Two well-temperaments from the 1700s, Kirnberger III and Vallotti, give the bank more to work with. They spread their errors unevenly, and none of their oscillators stands still. Quarter-comma meantone, which makes thirds pure by narrowing the fifths further, does worse. Five-limit just intonation plays four of the eleven intervals exactly, so four oscillators stand still, and it scores lower still.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">02</span>
+    <div><h2>More accurate tunings make a weaker bank</h2></div>
+  </div>
+
+  <p class="wide">Next, set history aside and try every equal division of the octave from 5 notes to 60. More notes per octave means every interval can be matched more closely, which is the goal of most microtonal tuning systems. Here is what that does to the bank.</p>
+
+  <div class="panel">
+    <h3>Equal divisions, five to sixty</h3>
+    <canvas id="ladder" height="300" aria-label="Capacity, reach, and average error of the bank built from each equal division of the octave"></canvas>
+    <div class="legend">
+      <span><i style="background:var(--just)"></i>capacity, delays 0 to 300</span>
+      <span><i style="background:var(--temper)"></i>reach, seconds</span>
+      <span><i style="background:var(--dim)"></i>average error, cents</span>
+    </div>
+    <div class="meter" aria-hidden="true"><i id="m2"></i></div>
+    <div class="btn-row">
+      <button id="b-ladder">Measure all 56 divisions</button>
+    </div>
+    <div class="readout" id="ladder-read">Fifty-six experiments, plotted as each one finishes.</div>
+  </div>
+
+  <p class="wide">As the errors shrink, capacity falls. The curve is jagged, because each division happens to land close to some intervals and far from others, but the trend is clear: the best banks come from about 9 to 20 notes, and capacity declines past about 25. At 53 notes, a tuning whose fifths and thirds are within a few cents of pure, the bank holds a little over half of what the piano's bank holds. Reach moves the other way, because slower oscillators hold the past longer, but they hold less of it and hold nearly the same information. A tuning can be so accurate that its errors give the bank almost nothing to work with.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">03</span>
+    <div><h2>Can a search beat the piano?</h2></div>
+  </div>
+
+  <p class="wide">Now drop tuning entirely. Keep the piano's band of speeds, 0.37 to 8.63 Hz, and let a search choose any eleven speeds inside it. The search is deliberately simple: change the speeds a little at random, keep the change if the bank holds more, and repeat.</p>
+
+  <div class="panel">
+    <h3>A blind search over eleven rates</h3>
+    <canvas id="fan" height="150" aria-label="The piano's eleven rates and the best rates found so far, on a log axis from 0.37 to 8.63 hertz"></canvas>
+    <canvas id="trace" height="200" style="margin-top:0.8rem" aria-label="Best capacity found against number of experiments, with the piano and two simple spacings for comparison"></canvas>
+    <div class="meter" aria-hidden="true"><i id="m3"></i></div>
+    <div class="btn-row">
+      <button id="b-search" data-tone="temper">Start the search</button>
+    </div>
+    <div class="readout" id="search-read">It first measures the piano, an even spacing, and an even spacing on a logarithmic scale, then starts from the piano and searches.</div>
+  </div>
+
+  <p class="wide">The search beats the piano by a modest margin, and eleven evenly spaced speeds do almost as well as the search. The piano's set is lopsided: four of its oscillators sit below 0.7 Hz, and oscillators that close together duplicate each other. Even so, a tuning designed for a completely different purpose gets most of the way to the best this bank allows.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-mark">04</span>
+    <div><h2>Larger banks</h2></div>
+  </div>
+
+  <p class="wide">The main page uses eleven intervals, the harmonics up to the 23rd. Continuing up the harmonic series adds more intervals, each with its own error, so each adds an oscillator and three more values for the readout. Does capacity keep pace with the larger ceiling?</p>
+
+  <div class="panel">
+    <h3>Eleven to forty-seven oscillators</h3>
+    <canvas id="big" height="240" aria-label="Capacity against ceiling for banks of 11, 16, 23, 32 and 47 oscillators"></canvas>
+    <div class="meter" aria-hidden="true"><i id="m4"></i></div>
+    <div class="btn-row"><button id="b-big">Measure larger banks</button></div>
+    <div class="readout" id="big-read">Each bank uses the odd harmonics 3, 5, 7, and on up, folded into one octave above A3 and measured against the piano.</div>
+  </div>
+
+  <p class="wide">Larger banks hold more, but each added oscillator is worth a little less, because the new ones must fit into the same narrow band of speeds as the old ones. The ceiling grows by three with every oscillator; capacity grows more slowly.</p>
+
+  <div class="foot">
+    <p class="note"><strong>Method.</strong> Every bar on this page is the main page's experiment, run by <code>lab/kit.js</code>, which carries the same equations and constants and reproduces the main page's numbers exactly when given the piano's fan (<code>node tools/verify.mjs</code> checks this, and checks the orderings this page's prose claims). Coupling K = 0.12, seeded random input, 3,500 steps to fit and 3,500 to score. Capacity here is summed over delays 0 to 300, the main page's "longer window", because the 0-to-30 window hides most of what slow banks remember; the cards also report the 0-to-30 figure. Reach is the last delay probed in tens from 40 to 260 steps whose held-out score is at least 0.01. A tuning's detuning for each interval is the frequency gap at A3 = 220 Hz between the just interval and the nearest note that tuning has, with the temperaments rooted on A. Historical temperaments are defined by how much each fifth around the circle is narrowed: Werckmeister III and Vallotti in fractions of the Pythagorean comma, quarter-comma meantone and Kirnberger III in fractions of the syntonic comma and the schisma, with the leftover in meantone and Pythagorean going to the wolf between G&sharp; and E&flat;. The search is a (1+1) evolution strategy over log-rates with a step that grows on success and shrinks on failure, signs kept from the piano, capped at 160 experiments; another run with another seed would find a slightly different fan. The bank only ever receives random input here, so "thinks best" means "retains the most of a random signal", which is one narrow measure.</p>
+  </div>
+</section>
+
+</div>
+
+<script src="kit.js"></script>
+<script>
+(function () {
+  "use strict";
+  Kit.nav("bakeoff.html");
+  Kit.soundBar();
+  var fit = Kit.fit, css = Kit.css, alpha = Kit.alpha, S = Kit.sound;
+  var TAU = Math.PI * 2, Q = Kit.queue();
+  var KC = 0.12;
+
+  // ── contestants ──
+  var C = [
+    { id: "equal", t: Kit.edo(12), name: "Equal temperament", year: "1917*" },
+    { id: "pythagorean", t: Kit.temperament("pythagorean"), name: "Pythagorean", year: "c. 500 BC" },
+    { id: "meantone", t: Kit.temperament("meantone"), name: "¼-comma meantone", year: "1523" },
+    { id: "werckmeister", t: Kit.temperament("werckmeister"), name: "Werckmeister III", year: "1691" },
+    { id: "kirnberger", t: Kit.temperament("kirnberger"), name: "Kirnberger III", year: "1779" },
+    { id: "vallotti", t: Kit.temperament("vallotti"), name: "Vallotti", year: "1754" },
+    { id: "just", t: Kit.justIntonation(), name: "Five-limit just", year: "ancient" },
+    { id: "edo19", t: Kit.edo(19), name: "19 equal", year: "1558" },
+    { id: "edo31", t: Kit.edo(31), name: "31 equal", year: "1661" },
+    { id: "edo53", t: Kit.edo(53), name: "53 equal", year: "c. 40 BC" }
+  ];
+  var NOTES = {
+    equal: "Every fifth narrowed by a twelfth of the Pythagorean comma: the modern piano. (*Standard in piano tuning by about the time of the first World War; proposed centuries earlier.)",
+    edo19: "Nineteen equal steps, proposed by Francisco de Salinas in 1558. Better thirds than the piano, worse fifths.",
+    edo31: "Thirty-one equal steps, championed by Christiaan Huygens in 1661. Nearly quarter-comma meantone, without the wolf.",
+    edo53: "Fifty-three equal steps, Jing Fang's and Mercator's. Fifths and thirds within a few cents of pure. Too good for this bank's own good."
+  };
+  C.forEach(function (c, i) {
+    c.IV = Kit.intervals(c.t);
+    c.OM = Kit.omegas(c.IV);
+    c.res = null;
+    c.note = NOTES[c.id] || c.t.note || "";
+    c.slot = i; c.x = 0; c.y = 0; c.tx = 0; c.ty = 0; c.placed = false;
+    c.phase = new Float64Array(11);
+    for (var j = 0; j < 11; j++) c.phase[j] = j * 0.57;
+  });
+  var selC = C[0];
+
+  // ── card layout: a grid that reorders by rank once measured ──
+  var cardsCv = document.getElementById("cards");
+  function layout(w) {
+    var cols = w >= 900 ? 5 : w >= 560 ? 3 : 2;
+    var gap = 10, cw = (w - gap * (cols - 1)) / cols, ch = Math.min(cw * 1.08, 230);
+    var rows = Math.ceil(C.length / cols);
+    return { cols: cols, gap: gap, cw: cw, ch: ch, h: rows * (ch + gap) - gap };
+  }
+  function rankOrder() {
+    var measured = C.filter(function (c) { return c.res; });
+    if (measured.length < C.length) return C.slice();
+    return C.slice().sort(function (a, b) { return b.res.total - a.res.total; });
+  }
+  function placeCards(w, snap) {
+    var L = layout(w);
+    var want = String(L.h);
+    if (cardsCv.getAttribute("height") !== want && cardsCv.dataset.cssHeight !== want) {
+      cardsCv.dataset.cssHeight = want;
+    }
+    rankOrder().forEach(function (c, i) {
+      c.tx = (i % L.cols) * (L.cw + L.gap);
+      c.ty = Math.floor(i / L.cols) * (L.ch + L.gap);
+      if (snap || !c.placed) { c.x = c.tx; c.y = c.ty; c.placed = true; }
+    });
+    return L;
+  }
+
+  var maxBeat = 0;
+  C.forEach(function (c) { c.IV.forEach(function (v) { maxBeat = Math.max(maxBeat, v.beat); }); });
+
+  function drawCards(dt) {
+    var w = cardsCv.clientWidth;
+    var L = placeCards(w, false);
+    var f = fit(cardsCv), g = f.g;
+    g.clearRect(0, 0, f.w, f.h);
+    var bestTotal = 0;
+    C.forEach(function (c) { if (c.res) bestTotal = Math.max(bestTotal, c.res.total); });
+    var justC = css("--just"), tempC = css("--temper"), dimC = css("--dim"), inkC = css("--ink"), ruleC = css("--rule");
+    C.forEach(function (c) {
+      // glide toward the ranked slot
+      var k = Kit.reduced ? 1 : Math.min(1, dt * 5);
+      c.x += (c.tx - c.x) * k; c.y += (c.ty - c.y) * k;
+      var x0 = c.x, y0 = c.y, cw = L.cw, ch = L.ch;
+      g.fillStyle = css("--panel-2");
+      g.fillRect(x0, y0, cw, ch);
+      g.strokeStyle = c === selC ? tempC : ruleC; g.lineWidth = c === selC ? 1.5 : 1;
+      g.strokeRect(x0 + 0.5, y0 + 0.5, cw - 1, ch - 1);
+      // clocks
+      var cx = x0 + cw / 2, cy = y0 + ch * 0.44, R = Math.min(cw * 0.36, ch * 0.3);
+      for (var j = 0; j < 11; j++) {
+        var r = R * (0.28 + 0.72 * j / 10);
+        var v = c.IV[j];
+        var frozen = v.beat < 0.01;
+        if (!Kit.reduced) c.phase[j] += c.OM[j] / 6 * dt;
+        g.strokeStyle = alpha(frozen ? tempC : ruleC, frozen ? 0.5 : 0.7); g.lineWidth = 1;
+        g.beginPath(); g.arc(cx, cy, r, 0, TAU); g.stroke();
+        var a = c.phase[j] - Math.PI / 2;
+        var px = cx + Math.cos(a) * r, py = cy + Math.sin(a) * r;
+        var speed = v.beat / maxBeat;
+        if (!frozen && !Kit.reduced) {
+          // a short comet tail, length by speed
+          g.strokeStyle = alpha(justC, 0.35); g.lineWidth = 2;
+          g.beginPath();
+          var dir = c.OM[j] >= 0 ? -1 : 1;
+          g.arc(cx, cy, r, a, a + dir * Math.min(1.4, 0.15 + speed * 1.2), dir > 0);
+          g.stroke();
+        }
+        g.fillStyle = frozen ? tempC : justC;
+        g.beginPath(); g.arc(px, py, frozen ? 2.6 : 2.2, 0, TAU); g.fill();
+      }
+      // labels
+      g.fillStyle = inkC; g.font = "500 11px " + css("--mono"); g.textAlign = "left";
+      g.fillText(c.name, x0 + 8, y0 + ch - 30);
+      g.fillStyle = dimC; g.font = "10px " + css("--mono");
+      var zeros = c.IV.filter(function (v) { return v.beat < 0.01; }).length;
+      g.fillText(c.year + (zeros ? " · " + zeros + " frozen" : ""), x0 + 8, y0 + 14);
+      if (c.res) {
+        var bw = (cw - 16) * c.res.total / Math.max(bestTotal, 1);
+        g.fillStyle = alpha(justC, 0.25); g.fillRect(x0 + 8, y0 + ch - 20, cw - 16, 8);
+        g.fillStyle = justC; g.fillRect(x0 + 8, y0 + ch - 20, bw, 8);
+        g.fillStyle = inkC; g.textAlign = "right"; g.font = "500 11px " + css("--mono");
+        g.fillText(c.res.total.toFixed(1), x0 + cw - 8, y0 + 14);
+      } else if (c.busy) {
+        g.fillStyle = tempC; g.textAlign = "right";
+        g.fillText("measuring…", x0 + cw - 8, y0 + 14);
+      }
+    });
+  }
+
+  cardsCv.addEventListener("click", function (e) {
+    var rect = cardsCv.getBoundingClientRect(), mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    var L = layout(cardsCv.clientWidth);
+    C.forEach(function (c) {
+      if (mx >= c.x && mx <= c.x + L.cw && my >= c.y && my <= c.y + L.ch) { selC = c; showDetail(); }
+    });
+  });
+
+  function showDetail() {
+    var c = selC;
+    document.getElementById("detail-title").textContent = c.name;
+    var body = document.getElementById("detail-body");
+    body.innerHTML = "";
+    c.IV.forEach(function (v) {
+      var tr = document.createElement("tr");
+      var frozen = v.beat < 0.01;
+      tr.innerHTML = "<td>" + v.name + "</td><td class='num' style='color:var(" + (frozen ? "--temper" : "--ink") + ")'>" +
+        (v.err >= 0 ? "+" : "−") + Math.abs(v.err).toFixed(2) + "¢</td><td class='num'>" +
+        (frozen ? "frozen" : v.beat.toFixed(2) + "/s") + "</td>";
+      body.appendChild(tr);
+    });
+    document.getElementById("detail-note").textContent = c.note;
+    var r = c.res;
+    document.getElementById("detail-read").innerHTML = r
+      ? "Capacity <b class='just-t'>" + r.total.toFixed(2) + "</b> of " + r.ceiling + " over delays 0 to 300 (<b>" + r.c31.toFixed(2) +
+        "</b> over 0 to 30) · reach <b>" + r.reachSec.toFixed(1) + " s</b> · mixing <b class='temp-t'>" + (100 * r.nl).toFixed(1) + "%</b>"
+      : "Not measured yet. Press Run the comparison.";
+  }
+
+  // ── the contest ──
+  var bContest = document.getElementById("b-contest");
+  function busy(on) {
+    ["b-contest", "b-ladder", "b-big"].forEach(function (id) { document.getElementById(id).disabled = on; });
+    if (!searching) document.getElementById("b-search").disabled = on;
+  }
+  function measure(OM, done, progress, o) {
+    var b = Kit.bench(OM);
+    Q.push(b.experimentGen(KC, 1, Object.assign({ window: 300 }, o || {})), function (r) {
+      r.c31 = 0; for (var i = 0; i <= 30 && i < r.mc.length; i++) r.c31 += r.mc[i];
+      done(r);
+    }, progress);
+  }
+  function setMeter(id, v) { document.getElementById(id).style.width = (100 * v).toFixed(1) + "%"; }
+
+  bContest.addEventListener("click", function () {
+    if (Q.busy()) return;
+    busy(true);
+    var n = 0;
+    C.forEach(function (c, i) {
+      c.busy = true;
+      measure(c.OM, function (r) {
+        c.res = r; c.busy = false; n++;
+        setMeter("m1", n / C.length);
+        if (c === selC) showDetail();
+        if (n === C.length) finishContest();
+      }, function (p) { setMeter("m1", (n + (p || 0)) / C.length); });
+    });
+  });
+  function finishContest() {
+    busy(false);
+    placeCards(cardsCv.clientWidth, !visible);
+    var ranked = rankOrder();
+    var eq = C[0];
+    var place = ranked.indexOf(eq) + 1;
+    var top = ranked[0], bottom = ranked[ranked.length - 1];
+    document.getElementById("contest-read").innerHTML =
+      "<b class='just-t'>" + top.name + "</b> holds the most, <b>" + top.res.total.toFixed(2) + "</b> of " + top.res.ceiling +
+      ". Equal temperament comes in <b>" + ordinal(place) + "</b> of " + C.length + " at " + eq.res.total.toFixed(2) +
+      ". Last is <b class='temp-t'>" + bottom.name + "</b> at " + bottom.res.total.toFixed(2) +
+      ". The cards are now sorted, best first. Tap one for its numbers.";
+    showDetail();
+  }
+  function ordinal(n) { return n + (n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th"); }
+
+  // ── hear the selected bank: eleven sines two octaves up, as on the main page ──
+  document.getElementById("b-sound").addEventListener("click", function () {
+    if (S.playing("bank")) { S.stop("bank"); return; }
+    var c = S.audio(), t = c.currentTime + 0.05;
+    var out = c.createGain(); out.gain.value = 0; out.connect(S.bus());
+    out.gain.linearRampToValueAtTime(0.85, t + 0.4);
+    var nodes = [];
+    selC.IV.forEach(function (v) {
+      [v.fJust, v.fTemp].forEach(function (fq) {
+        var o = c.createOscillator(); o.type = "sine"; o.frequency.value = fq * 4;
+        var g = c.createGain(); g.gain.value = 0.03; o.connect(g); g.connect(out); o.start(t); nodes.push(o);
+      });
+    });
+    S.register("bank", out, nodes);
+  });
+  S.onChange(function () {
+    var b = document.getElementById("b-sound");
+    b.textContent = S.playing("bank") ? "Stop" : "Hear the selected bank";
+    b.setAttribute("aria-pressed", S.playing("bank") ? "true" : "false");
+  });
+
+  // ── the EDO ladder ──
+  var ladderPts = [];
+  var ladderCv = document.getElementById("ladder");
+  document.getElementById("b-ladder").addEventListener("click", function () {
+    if (Q.busy()) return;
+    busy(true);
+    ladderPts = [];
+    var Ns = []; for (var n = 5; n <= 60; n++) Ns.push(n);
+    var done = 0;
+    Ns.forEach(function (n) {
+      var IV = Kit.intervals(Kit.edo(n));
+      var meanErr = IV.reduce(function (a, v) { return a + Math.abs(v.err); }, 0) / IV.length;
+      measure(Kit.omegas(IV), function (r) {
+        ladderPts.push({ n: n, total: r.total, reach: r.reachSec, err: meanErr });
+        done++; setMeter("m2", done / Ns.length);
+        drawLadder();
+        if (done === Ns.length) {
+          busy(false);
+          var at = function (k) { return ladderPts.filter(function (p) { return p.n === k; })[0]; };
+          var best = ladderPts.slice().sort(function (a, b) { return b.total - a.total; })[0];
+          document.getElementById("ladder-read").innerHTML =
+            "Most capacity at <b class='just-t'>" + best.n + " notes</b> (" + best.total.toFixed(1) + "). The piano's 12 holds " +
+            at(12).total.toFixed(1) + "; 53 holds <b class='temp-t'>" + at(53).total.toFixed(1) + "</b> while reaching " +
+            at(53).reach.toFixed(1) + " s back to the piano's " + at(12).reach.toFixed(1) + " s. Average error falls from " +
+            at(5).err.toFixed(0) + " cents at 5 notes to " + at(60).err.toFixed(1) + " at 60.";
+        }
+      }, function (p) { setMeter("m2", (done + (p || 0)) / Ns.length); }, { window: 300 });
+    });
+  });
+
+  function drawLadder() {
+    var f = fit(ladderCv), g = f.g, w = f.w, h = f.h;
+    g.clearRect(0, 0, w, h);
+    var pad = { l: 36, r: 36, t: 18, b: 28 };
+    var pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+    function X(n) { return pad.l + (n - 5) / 55 * pw; }
+    g.strokeStyle = css("--rule"); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(pad.l, pad.t); g.lineTo(pad.l, pad.t + ph); g.lineTo(pad.l + pw, pad.t + ph); g.lineTo(pad.l + pw, pad.t); g.stroke();
+    g.font = "9px " + css("--mono"); g.textAlign = "center"; g.fillStyle = css("--dim");
+    [5, 12, 19, 24, 31, 41, 53, 60].forEach(function (n) {
+      g.fillText(String(n), X(n), h - 12);
+      if ([12, 19, 31, 41, 53].indexOf(n) >= 0) {
+        g.strokeStyle = css("--rule"); g.setLineDash([2, 4]);
+        g.beginPath(); g.moveTo(X(n), pad.t); g.lineTo(X(n), pad.t + ph); g.stroke(); g.setLineDash([]);
+      }
+    });
+    g.fillText("notes per octave", pad.l + pw / 2, h - 1);
+    var CAPMAX = 24, REACHMAX = 6, ERRMAX = 70;
+    g.textAlign = "right"; g.fillStyle = css("--just");
+    [0, 10, 20].forEach(function (v) { g.fillText(String(v), pad.l - 5, pad.t + ph * (1 - v / CAPMAX) + 3); });
+    g.textAlign = "left"; g.fillStyle = css("--temper");
+    [0, 2, 4, 6].forEach(function (v) { g.fillText(v + "s", pad.l + pw + 5, pad.t + ph * (1 - v / REACHMAX) + 3); });
+    if (!ladderPts.length) {
+      g.fillStyle = css("--dim"); g.textAlign = "center"; g.font = "10px " + css("--mono");
+      g.fillText("press Measure all 56 divisions", pad.l + pw / 2, pad.t + ph / 2);
+      return;
+    }
+    var pts = ladderPts.slice().sort(function (a, b) { return a.n - b.n; });
+    function line(get, max, color, wid, dash) {
+      g.strokeStyle = color; g.lineWidth = wid; if (dash) g.setLineDash(dash);
+      g.beginPath();
+      pts.forEach(function (p, i) { var y = pad.t + ph * (1 - Math.min(max, get(p)) / max); if (i) g.lineTo(X(p.n), y); else g.moveTo(X(p.n), y); });
+      g.stroke(); g.setLineDash([]);
+    }
+    line(function (p) { return p.err; }, ERRMAX, alpha(css("--dim"), 0.8), 1.2, [3, 3]);
+    line(function (p) { return p.reach; }, REACHMAX, css("--temper"), 1.6);
+    line(function (p) { return p.total; }, CAPMAX, css("--just"), 2.2);
+    pts.forEach(function (p) {
+      g.fillStyle = css("--just");
+      g.beginPath(); g.arc(X(p.n), pad.t + ph * (1 - p.total / CAPMAX), p.n === 12 ? 4 : 2.2, 0, TAU); g.fill();
+    });
+    var p12 = pts.filter(function (p) { return p.n === 12; })[0];
+    if (p12) {
+      g.fillStyle = css("--ink"); g.textAlign = "center"; g.font = "10px " + css("--mono");
+      g.fillText("the piano", X(12), pad.t + ph * (1 - p12.total / CAPMAX) - 9);
+    }
+  }
+
+  // ── the search ──
+  var LO = 0.37, HI = 8.63;
+  var pianoSigned = C[0].IV.map(function (v) { return v.fJust - v.fTemp; });
+  var signs = pianoSigned.map(Math.sign);
+  var piano = pianoSigned.map(Math.abs);
+  var bestRates = piano.slice(), bestScore = null, tried = [], baselines = {}, searching = false, cancelSearch = false;
+  var MAXEV = 160;
+  function omegaFromRates(rates) { return rates.map(function (r, i) { return TAU * r * signs[i]; }); }
+  var bSearch = document.getElementById("b-search");
+  bSearch.addEventListener("click", function () {
+    if (searching) { cancelSearch = true; bSearch.textContent = "Stopping…"; return; }
+    if (Q.busy()) return;
+    searching = true; cancelSearch = false; busy(true); bSearch.disabled = false;
+    bSearch.textContent = "Stop the search";
+    tried = []; bestRates = piano.slice(); bestScore = null;
+    var lin = [], lg = [];
+    for (var i = 0; i < 11; i++) { lin.push(LO + (HI - LO) * i / 10); lg.push(LO * Math.pow(HI / LO, i / 10)); }
+    var steps = [["piano", piano], ["even", lin], ["log", lg]];
+    (function base(k) {
+      if (k >= steps.length) { bestScore = baselines.piano; drawFan(); drawTrace(); evolve(); return; }
+      measure(omegaFromRates(steps[k][1]), function (r) { baselines[steps[k][0]] = r.total; drawTrace(); base(k + 1); }, null, { skipReach: true });
+    })(0);
+  });
+
+  function evolve() {
+    var rng = Kit.mulberry32(7), sig = 0.3;
+    function gauss() { return (rng() + rng() + rng() - 1.5) * 1.4; }
+    (function next() {
+      if (cancelSearch || tried.length >= MAXEV) { endSearch(); return; }
+      var cand = bestRates.map(function (r) {
+        var l = Math.log(r) + sig * gauss();
+        return Math.exp(Math.min(Math.log(HI), Math.max(Math.log(LO), l)));
+      });
+      measure(omegaFromRates(cand), function (r) {
+        var better = r.total > bestScore;
+        tried.push({ s: r.total, best: better ? r.total : bestScore });
+        if (better) { bestScore = r.total; bestRates = cand; sig *= 1.2; } else sig *= 0.97;
+        setMeter("m3", tried.length / MAXEV);
+        drawFan(cand); drawTrace();
+        document.getElementById("search-read").innerHTML = "Experiment <b>" + tried.length + "</b> of " + MAXEV +
+          " · best so far <b class='just-t'>" + bestScore.toFixed(2) + "</b> · the piano " + baselines.piano.toFixed(2) +
+          " · even spacing " + baselines.even.toFixed(2) + " · log spacing " + baselines.log.toFixed(2);
+        next();
+      }, null, { skipReach: true });
+    })();
+  }
+  function endSearch() {
+    searching = false; busy(false);
+    bSearch.textContent = "Start the search";
+    var gain = 100 * (bestScore / baselines.piano - 1);
+    document.getElementById("search-read").innerHTML = "After <b>" + tried.length + "</b> experiments the best fan holds <b class='just-t'>" +
+      bestScore.toFixed(2) + "</b>, " + gain.toFixed(0) + "% more than the piano's " + baselines.piano.toFixed(2) +
+      ". A ruler-straight even spacing gets " + baselines.even.toFixed(2) + ". The piano reaches <b>" +
+      (100 * baselines.piano / bestScore).toFixed(0) + "%</b> of the best the search found.";
+    drawFan();
+  }
+
+  var fanCv = document.getElementById("fan");
+  function drawFan(trial) {
+    var f = fit(fanCv), g = f.g, w = f.w, h = f.h;
+    g.clearRect(0, 0, w, h);
+    var pad = { l: 12, r: 12 };
+    function X(r) { return pad.l + (Math.log(r / LO) / Math.log(HI / LO)) * (w - pad.l - pad.r); }
+    var rows = [["the piano", piano, css("--temper"), 36], ["best found", bestRates, css("--just"), 92]];
+    g.strokeStyle = css("--rule"); g.lineWidth = 1;
+    rows.forEach(function (row) {
+      g.beginPath(); g.moveTo(pad.l, row[3]); g.lineTo(w - pad.r, row[3]); g.stroke();
+      g.fillStyle = css("--dim"); g.font = "10px " + css("--mono"); g.textAlign = "left";
+      g.fillText(row[0], pad.l, row[3] - 16);
+      row[1].forEach(function (r) {
+        var x = X(r);
+        var grad = g.createRadialGradient(x, row[3], 0, x, row[3], 10);
+        grad.addColorStop(0, alpha(row[2], 0.55)); grad.addColorStop(1, alpha(row[2], 0));
+        g.fillStyle = grad; g.beginPath(); g.arc(x, row[3], 10, 0, TAU); g.fill();
+        g.fillStyle = row[2]; g.fillRect(x - 1, row[3] - 9, 2, 18);
+      });
+    });
+    if (trial) {
+      g.globalAlpha = 0.35; g.fillStyle = css("--ink");
+      trial.forEach(function (r) { g.fillRect(X(r) - 0.5, 92 - 14, 1, 28); });
+      g.globalAlpha = 1;
+    }
+    g.fillStyle = css("--dim"); g.textAlign = "center"; g.font = "9px " + css("--mono");
+    [0.37, 0.5, 1, 2, 4, 8.63].forEach(function (r, i, arr) {
+      g.textAlign = i === 0 ? "left" : i === arr.length - 1 ? "right" : "center";
+      g.fillText(r + " Hz", i === 0 ? pad.l : i === arr.length - 1 ? w - pad.r : X(r), h - 6);
+    });
+  }
+
+  var traceCv = document.getElementById("trace");
+  function drawTrace() {
+    var f = fit(traceCv), g = f.g, w = f.w, h = f.h;
+    g.clearRect(0, 0, w, h);
+    var pad = { l: 36, r: 12, t: 12, b: 24 };
+    var pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+    var vals = tried.map(function (t) { return t.s; });
+    ["piano", "even", "log"].forEach(function (k) { if (baselines[k] !== undefined) vals.push(baselines[k]); });
+    if (!vals.length) {
+      g.fillStyle = css("--dim"); g.font = "10px " + css("--mono"); g.textAlign = "center";
+      g.fillText("start the search", pad.l + pw / 2, pad.t + ph / 2); return;
+    }
+    var lo = Math.floor(Math.min.apply(null, vals) - 0.5), hi = Math.ceil(Math.max.apply(null, vals) + 0.5);
+    function Y(v) { return pad.t + ph * (1 - (v - lo) / (hi - lo)); }
+    function X(i) { return pad.l + (i / MAXEV) * pw; }
+    g.strokeStyle = css("--rule"); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(pad.l, pad.t); g.lineTo(pad.l, pad.t + ph); g.lineTo(pad.l + pw, pad.t + ph); g.stroke();
+    g.fillStyle = css("--dim"); g.font = "9px " + css("--mono"); g.textAlign = "right";
+    [lo, (lo + hi) / 2, hi].forEach(function (v) { g.fillText(v.toFixed(0), pad.l - 5, Y(v) + 3); });
+    var refs = [["piano", css("--temper")], ["even", css("--sage")], ["log", css("--dim")]];
+    refs.forEach(function (r) {
+      if (baselines[r[0]] === undefined) return;
+      var y = Y(baselines[r[0]]);
+      g.strokeStyle = r[1]; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(pad.l, y); g.lineTo(pad.l + pw, y); g.stroke(); g.setLineDash([]);
+      g.fillStyle = r[1]; g.textAlign = r[0] === "log" ? "right" : "left";
+      g.fillText(r[0] === "even" ? "even spacing" : r[0] === "log" ? "log spacing" : "the piano", r[0] === "log" ? pad.l + pw - 4 : pad.l + 4, y - 4);
+    });
+    tried.forEach(function (t, i) {
+      g.fillStyle = alpha(css("--ink"), 0.35);
+      g.fillRect(X(i + 1) - 1, Y(t.s) - 1, 2, 2);
+    });
+    g.strokeStyle = css("--just"); g.lineWidth = 2; g.beginPath();
+    tried.forEach(function (t, i) { if (i) g.lineTo(X(i + 1), Y(t.best)); else g.moveTo(X(1), Y(t.best)); });
+    g.stroke();
+    g.fillStyle = css("--dim"); g.textAlign = "center";
+    g.fillText("experiments", pad.l + pw / 2, h - 4);
+  }
+
+  // ── bigger banks ──
+  var bigPts = [];
+  var bigCv = document.getElementById("big");
+  document.getElementById("b-big").addEventListener("click", function () {
+    if (Q.busy()) return;
+    busy(true); bigPts = [];
+    var sizes = [11, 16, 23, 32, 47], done = 0;
+    sizes.forEach(function (n) {
+      var IV = Kit.intervals(Kit.edo(12), Kit.harmonics(n));
+      measure(Kit.omegas(IV), function (r) {
+        bigPts.push({ n: n, total: r.total, ceiling: r.ceiling, reach: r.reachSec });
+        done++; setMeter("m4", done / sizes.length); drawBig();
+        if (done === sizes.length) {
+          busy(false);
+          var a = bigPts[0], z = bigPts[bigPts.length - 1];
+          document.getElementById("big-read").innerHTML = "From 11 oscillators to 47, capacity grows <b class='just-t'>" + a.total.toFixed(1) +
+            " → " + z.total.toFixed(1) + "</b>, but the share of the ceiling it uses falls from <b>" + (100 * a.total / a.ceiling).toFixed(0) +
+            "%</b> to <b class='temp-t'>" + (100 * z.total / z.ceiling).toFixed(0) + "%</b>.";
+        }
+      }, function (p) { setMeter("m4", (done + (p || 0)) / sizes.length); });
+    });
+  });
+  function drawBig() {
+    var f = fit(bigCv), g = f.g, w = f.w, h = f.h;
+    g.clearRect(0, 0, w, h);
+    var pad = { l: 36, r: 12, t: 14, b: 26 };
+    var pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+    var MAX = 145;
+    g.strokeStyle = css("--rule"); g.beginPath(); g.moveTo(pad.l, pad.t); g.lineTo(pad.l, pad.t + ph); g.lineTo(pad.l + pw, pad.t + ph); g.stroke();
+    g.fillStyle = css("--dim"); g.font = "9px " + css("--mono"); g.textAlign = "right";
+    [0, 50, 100].forEach(function (v) { g.fillText(String(v), pad.l - 5, pad.t + ph * (1 - v / MAX) + 3); });
+    if (!bigPts.length) { g.textAlign = "center"; g.font = "10px " + css("--mono"); g.fillText("press Measure larger banks", pad.l + pw / 2, pad.t + ph / 2); return; }
+    var bw = pw / 5;
+    bigPts.forEach(function (p, i) {
+      var x = pad.l + i * bw + bw * 0.2, bwi = bw * 0.6;
+      var yc = pad.t + ph * (1 - p.ceiling / MAX), yt = pad.t + ph * (1 - p.total / MAX);
+      g.strokeStyle = css("--dim"); g.setLineDash([3, 3]); g.strokeRect(x, yc, bwi, pad.t + ph - yc); g.setLineDash([]);
+      g.fillStyle = css("--just"); g.fillRect(x, yt, bwi, pad.t + ph - yt);
+      g.fillStyle = css("--ink"); g.textAlign = "center";
+      g.fillText(p.total.toFixed(1) + " / " + p.ceiling, x + bwi / 2, yc - 5);
+      g.fillStyle = css("--dim"); g.fillText(p.n + " oscillators", x + bwi / 2, h - 10);
+    });
+  }
+
+  // ── the clock loop for the cards ──
+  var visible = true, last = 0;
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }).observe(cardsCv);
+  }
+  function loop(t) {
+    var dt = last ? Math.min(0.05, (t - last) / 1000) : 0.016; last = t;
+    if (visible && !document.hidden) drawCards(dt);
+    else C.forEach(function (c) { c.x = c.tx; c.y = c.ty; });
+    requestAnimationFrame(loop);
+  }
+  Kit.onTheme(function () { placeCards(cardsCv.clientWidth, true); drawCards(0); drawLadder(); drawFan(); drawTrace(); drawBig(); });
+  placeCards(cardsCv.clientWidth, true);
+  showDetail(); drawLadder(); drawFan(); drawTrace(); drawBig();
+  requestAnimationFrame(loop);
+  // the contest is quiet and quick, so it starts on its own
+  bContest.click();
+})();
+</script>

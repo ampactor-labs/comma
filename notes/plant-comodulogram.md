@@ -94,3 +94,16 @@ only a file reader in front of it. The two genuine unknowns are electrode
 stability across six-hour sessions and the actual shape of the chosen plant's
 spectrum, which decides the bands. Both are answered by the first afternoon
 of recording, which is the correct way to answer them.
+
+## Since then
+
+The analysis now lives in [lab/comodulogram.html](../lab/comodulogram.html),
+with a file reader in front of it, block-shuffle surrogates (circular shifts
+of a short record lit false cells too often), Benjamini–Hochberg correction,
+spike removal, and test signals. Rerun there, over 600 seconds at K = 8, the
+additive bank's largest z-score is about 1.1 and no cell survives the
+correction, while the multiplicative variant, where the mean field scales
+each oscillator's gain, lights eight cells with z near 14. The 2.9 above came
+from the earlier script and is not reproduced exactly. `node tools/verify.mjs`
+checks both results.
+

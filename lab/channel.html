@@ -1,0 +1,1615 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>A Letter in a Piano</title>
+<link rel="stylesheet" href="lab.css">
+<style>
+  .msg-input-row { display: flex; flex-wrap: wrap; gap: 0.6rem 0.9rem; align-items: center; margin: 0 0 0.6rem; }
+  .msg-input-row label { font-family: var(--mono); font-size: 0.74rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dim); }
+  .msg-input-row input { flex: 1 1 16rem; max-width: 26rem; min-height: 42px; }
+  .msg-input-row .readout { min-width: 5rem; }
+  .canvas-wrap { position: relative; margin: 0.4rem 0 0.2rem; }
+  .msgs { margin: 1rem 0 0.4rem; display: grid; gap: 0.35rem; }
+  .msg-row { display: grid; grid-template-columns: 6.6rem 1fr; gap: 0.6rem; align-items: center; }
+  .msg-row .lab { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+  .chars { display: flex; flex-wrap: wrap; gap: 2px; font-family: var(--mono); }
+  .chars span {
+    display: inline-flex; align-items: center; justify-content: center; width: 1.14rem; height: 1.5rem;
+    font-size: 0.82rem; border-bottom: 2px solid var(--rule); color: var(--ink); background: var(--panel-2);
+    transition: background 0.4s, color 0.4s;
+  }
+  .chars span.cwA { border-bottom-color: var(--just-soft); }
+  .chars span.cwB { border-bottom-color: var(--rule); }
+  .chars span.bad { color: var(--temper); background: var(--temper-soft); }
+  .chars span.good { color: var(--just); }
+  .chars span.fixed { color: var(--ground); background: var(--just); }
+  .chars span.lost { color: var(--temper); background: var(--temper-soft); text-decoration: line-through; }
+  .chars span.blank { color: var(--dim); }
+  @media (max-width: 40rem) {
+    .msg-row { grid-template-columns: 1fr; gap: 0.15rem; }
+    .chars span { width: calc((100vw - 4.6rem) / 15 - 2px); max-width: 1.14rem; }
+  }
+  .status { margin-top: 0.6rem; min-height: 3.4em; }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; font-family: var(--mono); font-size: 0.7rem; color: var(--dim); margin: 0.5rem 0 0; }
+  .legend i { display: inline-block; width: 0.8rem; height: 0.18rem; vertical-align: middle; margin-right: 0.35rem; border-radius: 1px; }
+  .ab-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  @media (min-width: 46rem) { .ab-grid { grid-template-columns: 1fr 1fr; } }
+  .ab-result { min-height: 2.6em; }
+  .budget td.note-est { color: var(--dim); }
+  .budget tr.total td { color: var(--ink); font-weight: 500; border-top: 1px solid var(--dim); }
+  .budget tr.pay td { color: var(--just); }
+  .key-detail { min-height: 1.7em; }
+</style>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">Lab &middot; 05</span>
+  <h1>A Letter in a Piano</h1>
+  <p class="lede">Every real piano is slightly out of tune, and small differences go unnoticed. This page uses that slack to store a 30-character message in a piano's tuning. Each character becomes a few small pitch shifts, measured in cents. A cent is a hundredth of a piano semitone.</p>
+  <p>The <a href="../notes/tuning-channel.md">tuning-channel note</a> worked out the numbers on paper. This page runs them. Type a message and the page shifts the tuning away from the reference curve by a cent or two per key. Then you can disturb it with a humid summer or a visit from a piano tuner, and read back what is left.</p>
+</header>
+
+<section>
+  <div class="sec-head"><span class="sec-mark">01</span><div><h2>Write a message into the tuning</h2></div></div>
+
+  <p>Start from the reference tuning, the standard tuning any piano tuner can look up. It has two parts. Equal temperament splits the octave into twelve equal semitones. Stretch adjusts for real strings: they are stiff, so their overtones run slightly sharp, and tuners compensate by setting the treble a little sharp and the bass a little flat. Any difference between this piano and the reference can carry information.</p>
+  <p>The page uses three places to store bits. First, each of the twelve pitch classes (all the A's, all the A&sharp;'s, and so on) can shift a few cents as a group. Historical well temperaments shifted pitch classes this way on purpose, so it sounds normal. Second, each of the 88 keys can sit 2 cents sharp or flat of the curve. Third, on the 60 notes that use three strings, the third string can sit about a cent away from the other two. A listener who notices at all hears that as a slightly warmer tone.</p>
+  <p>The page also adds an error-correcting code. It appends extra check symbols, computed from the message, to the end of the message. If a few characters are read back wrong, the reader uses the check symbols to find which ones are wrong and fix them. Here the message is split into two blocks, called codewords. Each holds 15 characters plus 8 check symbols, and each can fix up to 4 wrong symbols. The code is a Reed&ndash;Solomon code, the same family used on CDs and QR codes. Full details are in the notes at the bottom.</p>
+  <p>Type up to 30 characters and press Write. Then press Add summer humidity or Send in a tuner to disturb the tuning. Press Read back to decode what is left.</p>
+
+  <div class="panel" id="bench">
+    <h3>The piano</h3>
+    <div class="msg-input-row">
+      <label for="msg">Message</label>
+      <input type="text" id="msg" maxlength="30" spellcheck="false" autocomplete="off" value="THE ERROR IS THE MACHINE.">
+      <span class="readout num" id="msg-count">25 / 30</span>
+    </div>
+    <canvas id="dials" height="132" aria-label="Twelve strobe dials, one per pitch class, showing each pitch class's temperament offset in cents and whether it reads back the written level"></canvas>
+    <div class="canvas-wrap">
+      <canvas id="piano" height="352" aria-label="An 88-key piano. Above each key a needle shows its pitch offset in cents from the reference tuning, cyan where it reads back the written level and amber where it does not. Thin lines show the three strings of each three-string note. Two lanes under the keys show the two interleaved codewords"></canvas>
+    </div>
+    <div class="legend" aria-hidden="true">
+      <span><i style="background:var(--just)"></i>reads back correctly</span>
+      <span><i style="background:var(--temper)"></i>reads back wrong</span>
+      <span><i style="background:var(--dim)"></i>where the message set it</span>
+      <span><i style="background:var(--sage)"></i>reader's estimate of the drift</span>
+    </div>
+    <div class="readout key-detail" id="key-detail">Tap a key to see its strings. If sound is on, you also hear them.</div>
+
+    <div class="btn-row">
+      <button id="b-write" data-tone="just">Write</button>
+      <button id="b-summer">Add summer humidity</button>
+      <button id="b-tuner">Send in a tuner</button>
+      <button id="b-read" data-tone="just">Read back</button>
+      <button id="b-reset">Reset piano</button>
+    </div>
+    <div class="slider-row">
+      <label for="sev">Summer severity</label>
+      <input type="range" id="sev" min="0" max="100" value="45">
+      <span class="readout num" id="sev-val">45%</span>
+    </div>
+    <div class="slider-row">
+      <label for="visit">How much of the visit</label>
+      <input type="range" id="visit" min="0" max="1000" value="1000">
+      <span class="readout num" id="visit-val">100%</span>
+    </div>
+
+    <div class="msgs" aria-live="polite">
+      <div class="msg-row"><span class="lab">Written</span><span class="chars" id="row-written"></span></div>
+      <div class="msg-row"><span class="lab">Read, raw</span><span class="chars" id="row-raw"></span></div>
+      <div class="msg-row"><span class="lab">Decoded</span><span class="chars" id="row-dec"></span></div>
+    </div>
+    <div class="readout status" id="status" aria-live="polite">The piano is tuned to the reference. No message is written yet.</div>
+    <p class="note" style="margin-top:0.8rem">How to read the display. Each needle shows one key's pitch in cents from the reference tuning. The faint dashes show where the message set each key. Under the needles, thin lines show the strings of each note. On a three-string note the lines overlap when the strings agree, and the message fans the third one out. The twelve dials at the top are the pitch classes, each averaged across all its octaves. They work like a strobe tuner, a precise tuning instrument whose striped ring stands still when the pitch is exactly on target. Here a ring stands still when the dial reads exactly what was written. The two lanes under the keys are the two codewords, alternating symbol by symbol. Each lane shows the message character stored there, or a dot for a check symbol. In the rows below the piano, Read, raw is what the strobe reads before correction, and Decoded is the result after correction. Characters the code repaired are highlighted in cyan. Struck-through characters belong to a codeword the code could not repair.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="sec-mark">02</span><div><h2>The reference curve and the bit budget</h2></div></div>
+  <p>The chart below shows the reference tuning across the keyboard. It is twelve equal semitones bent into a gentle S-shape by the stretch: flat in the bass, sharp in the treble. The message sits a few cents off this curve, close enough that it does not stand out.</p>
+
+  <div class="panel">
+    <h3>The reference tuning</h3>
+    <canvas id="stretch" height="230" aria-label="The stretch curve in cents across the 88 keys, flat in the bass and sharp in the treble, with the current piano's keys plotted as dots around it"></canvas>
+    <div class="readout" style="margin-top:0.5rem">The cyan curve is the stretch this page assumes. It follows the shape of the Railsback curve, the classic measurement of how far tuned pianos depart from equal temperament. It runs from about &minus;25 cents at the lowest A to +25 at the top C. It is drawn to look like the published curves, not measured from a piano. The dots are the keys as the piano stands now, the same values as the needles above, at true scale.</div>
+  </div>
+
+  <p>The note estimated about 290 raw bits, using six levels per pitch class and three per key. A level is one of the allowed offsets a setting can take; four levels store 2 bits. Six and three are not powers of two, so storing them efficiently needs a more complex packing method (arithmetic coding). This page rounds down to level counts that pack into whole bits: four per pitch class, two per key and four per third string. The table is computed from the page's own layout.</p>
+
+  <div class="panel">
+    <h3>The budget</h3>
+    <div class="table-scroll">
+      <table class="budget" id="budget"><thead><tr><th>Where</th><th>Cells</th><th>Levels</th><th>Spacing</th><th>Bits</th><th>Note's estimate</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="readout" id="budget-read"></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="sec-mark">03</span><div><h2>What a humid summer does</h2></div></div>
+  <p>Humidity makes the soundboard swell, which raises the pitch. It does not raise every note equally. It moves one region of the keyboard at a time, so neighbouring keys drift together. In coding terms this is burst noise: errors that arrive in clusters rather than one at a time. Reed&ndash;Solomon codes handle bursts well. Each symbol is a 5-bit chunk, so a cluster of bad bits often lands inside one or two symbols and counts as only one or two errors.</p>
+  <p>The page stores each symbol in neighbouring strings, and sends alternate symbols to different codewords. This is called interleaving. A drift over one octave therefore splits its damage between the two codewords instead of overloading one.</p>
+  <p>The reader also corrects for drift before decoding. It knows summer moves whole regions, so it estimates the drift, subtracts it and reads again. After a read, the thin green line across the needles shows that estimate. To try it, set the severity slider, press Add summer humidity, then press Read back.</p>
+
+  <div class="panel">
+    <h3>How often the message survives a summer</h3>
+    <canvas id="surv-season" height="230" aria-label="Fraction of simulated summers the message survives, against summer severity, with and without the code"></canvas>
+    <div class="readout" id="surv-season-read" style="margin-top:0.5rem">Measuring&hellip;</div>
+    <div class="meter" aria-hidden="true"><i id="surv-meter"></i></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="sec-mark">04</span><div><h2>What a piano tuner does</h2></div></div>
+  <p>Weather is random, and error-correcting codes are built for random noise. A piano tuner is a different kind of problem. The tuner's job is to pull every string back to the reference, which erases exactly the offsets that carry the message. This is coupling: a pull that makes the parts of a system agree. Offsets the message set close to the reference go first, because a string that is barely off needs only one small adjustment.</p>
+  <p>The simulated tuner works across the keyboard in sixteen passes, alternating direction. On each pass, every string moves at most half a cent toward its target. That is a bounded pull, the same shape as the coupling on the main page. To try it, set how much of the visit to run, press Send in a tuner, and watch the counts in the status line.</p>
+
+  <div class="panel">
+    <h3>How much of a visit the message survives</h3>
+    <canvas id="surv-tuner" height="230" aria-label="Fraction of simulated tuner visits the message survives, against how far through the visit the tuner got"></canvas>
+    <div class="readout" id="surv-tuner-read" style="margin-top:0.5rem">Measuring&hellip;</div>
+  </div>
+
+  <p>A message stored in a tuning lasts only until someone tunes the piano. <span id="tuner-verdict">The tuner does not need to finish the visit.</span></p>
+</section>
+
+<section>
+  <div class="sec-head"><span class="sec-mark">05</span><div><h2>Listen for the message</h2></div></div>
+  <p>The page plays five chords two ways. The first uses the reference tuning. The second uses the piano as it stands now, including the message and any summer or tuner changes. Then try the blind round: you hear two versions, A and B, without knowing which holds the message, and you guess. The test is blind because knowing the answer changes what people think they hear.</p>
+
+  <div class="panel">
+    <h3>Listen</h3>
+    <div class="btn-row" role="group" aria-label="Playback register">
+      <button id="oct-hi" aria-pressed="true">Phone speaker</button>
+      <button id="oct-lo" aria-pressed="false">Headphones</button>
+    </div>
+    <p class="note" style="margin:0 0 0.6rem" id="oct-note">Phone speaker plays everything two octaves up, where a small speaker can reproduce it. The offsets in cents stay the same, but beats (the slow pulse two close tones make) run four times as fast.</p>
+    <div class="btn-row">
+      <button id="b-play-ref" data-tone="just" data-needs-sound>Play the reference piano</button>
+      <button id="b-play-let" data-tone="temper" data-needs-sound>Play the piano with the message</button>
+    </div>
+    <div class="ab-grid">
+      <div>
+        <h3 style="margin-top:0.6rem">Blind round</h3>
+        <div class="btn-row">
+          <button id="b-ab-a" data-needs-sound>Play A</button>
+          <button id="b-ab-b" data-needs-sound>Play B</button>
+        </div>
+        <div class="btn-row">
+          <button id="b-guess-a">A has the message</button>
+          <button id="b-guess-b">B has the message</button>
+          <button id="b-ab-new">New round</button>
+        </div>
+      </div>
+      <div>
+        <div class="readout ab-result" id="ab-result" aria-live="polite">Play both, then guess which one has the message.</div>
+        <div class="readout" id="ab-tally">No guesses yet.</div>
+      </div>
+    </div>
+  </div>
+  <p>Nobody knows yet whether people can hear the message. It has not been measured, and it is the weakest point in the note's argument. The <a href="listen.html">listening test</a> is there to measure it.</p>
+</section>
+
+<div class="foot">
+  <p class="note"><strong>The code.</strong> An error-correcting code adds check symbols computed from the message, so the reader can locate and repair a limited number of wrong symbols. This page uses Reed&ndash;Solomon over GF(32), a finite field of 32 elements, with primitive polynomial x<sup>5</sup>+x<sup>2</sup>+1. One symbol is one character of the page's 32-character alphabet (A&ndash;Z, space and . , ! ? '). Generator roots are &alpha;<sup>0</sup>&hellip;&alpha;<sup>7</sup>. There are two shortened codewords of 23 symbols, 15 data and 8 parity each, RS(23,15). Each corrects up to four wrong symbols. Decoding uses syndromes, Berlekamp&ndash;Massey, Chien search and Forney's algorithm. The decoder supports erasures (positions marked as doubtful in advance), but the reader does not use them. In this model most wrong readings are confidently wrong, because whole regions drift together. In offline tests, marking doubtful symbols as erasures raised miscorrections without raising successes. <span id="rs-selftest">A self-test runs when the page loads.</span></p>
+  <p class="note"><strong>The layout.</strong> Temperament: each pitch class is offset by &minus;4.5, &minus;1.5, +1.5 or +4.5 cents (2 bits, Gray-coded, so neighbouring levels differ by one bit). Lean: each key sits &plusmn;2 cents from its pitch class plus the stretch (1 bit). Unisons: on keys 29&ndash;88 (C&sharp;3 to C8, treated as the three-string notes, called trichords; makers differ) the third string sits &minus;1.5, &minus;0.5, +0.5 or +1.5 cents from its pair (2 bits). The bit stream runs temperament first, then key by key from the bass. It is cut into 5-bit symbols in that order, and symbol <i>i</i> goes to codeword <i>i</i> mod 2. Message character <i>i</i> is symbol <i>i</i>, so the message reads left to right up the keyboard and the parity sits in the treble. The last two bits, on the top C's third string, are unused.</p>
+  <p class="note"><strong>The reader.</strong> It reads each key's pitch as the mean of its pair of strings, and each third string against that pair. It decides each pitch class's temperament jointly over that class's seven or eight keys, then each key's lean, then each unison to the nearest level. Before deciding, it tracks drift in four rounds: read, smooth the leftover error across the keyboard with a Gaussian five keys wide, and subtract.</p>
+  <p class="note"><strong>The weather and the tuner.</strong> A summer at severity <i>s</i> adds <i>s</i> &times; 6 cents times a seeded smooth random field (six Gaussian bumps, a swell in the middle of the keyboard and a tilt, scaled so its largest value is 1). It also adds independent jitter of <i>s</i> &times; 0.45 cents standard deviation on every string. Each press is a new summer. The tuner makes 16 passes, moving each string at most 0.5 cent toward its target per pass and landing within 0.2 cent once there. Neither model is fitted to a real piano. Because the tuner's pull is bounded, cells written close to the reference are bound to go first. The page shows the note's claim working under that assumption, and does not test the assumption.</p>
+  <p class="note"><strong>What is assumed and not measured.</strong> The whole budget rests on two unmeasured numbers. The first is how far a tuning can wander before a listener notices, taken here as &plusmn;4.5 cents on temperament, plus &plusmn;2 per key and &plusmn;1.5 on a unison. The second is how finely a strobe tuner can read a string that has been drifting, taken as a 1-cent level spacing on unisons. Tighten or loosen them and the budget moves with them. The sound is synthetic: six harmonics per string with a little inharmonicity, from <code>Kit.sound.pluck</code>, not a recorded piano. The reference piano here has perfect unisons, which no real piano does. A real piano's own spread would hide the message better. The <a href="listen.html">listening test</a> is where the first of those thresholds gets measured.</p>
+</div>
+
+</div>
+
+<script src="kit.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // [verify:rs] begin
+  // Reed–Solomon over GF(32), primitive polynomial x^5 + x^2 + 1 (0b100101).
+  // One symbol is one character of the register's alphabet. Codewords are
+  // arrays, data first, parity last; index j is the coefficient of
+  // x^(n-1-j). Generator roots are alpha^0 .. alpha^(nParity-1). Shortened
+  // codes (n < 31) work unchanged. Nothing here touches the page.
+  function gfTables() {
+    var exp = new Array(62), log = new Array(32), x = 1;
+    for (var i = 0; i < 31; i++) {
+      exp[i] = x; log[x] = i;
+      x <<= 1; if (x & 32) x ^= 37;
+    }
+    for (var j = 31; j < 62; j++) exp[j] = exp[j - 31];
+    log[0] = -1;
+    return { exp: exp, log: log, order: 31, size: 32, prim: 37 };
+  }
+  var RS_GF = gfTables();
+  function gfMul(a, b) {
+    if (a === 0 || b === 0) return 0;
+    return RS_GF.exp[RS_GF.log[a] + RS_GF.log[b]];
+  }
+  function gfDiv(a, b) {
+    if (b === 0) throw new Error("GF(32) division by zero");
+    if (a === 0) return 0;
+    return RS_GF.exp[(RS_GF.log[a] - RS_GF.log[b] + 31) % 31];
+  }
+  function gfPow2(e) { return RS_GF.exp[((e % 31) + 31) % 31]; }   // alpha^e
+  // low-degree-first polynomial helpers
+  function polyEvalLow(p, x) {
+    var y = 0;
+    for (var i = p.length - 1; i >= 0; i--) y = gfMul(y, x) ^ p[i];
+    return y;
+  }
+  function polyMulLow(a, b) {
+    var out = new Array(a.length + b.length - 1).fill(0);
+    for (var i = 0; i < a.length; i++)
+      for (var j = 0; j < b.length; j++) out[i + j] ^= gfMul(a[i], b[j]);
+    return out;
+  }
+  function rsGenerator(nParity) {           // low-degree first
+    var g = [1];
+    for (var i = 0; i < nParity; i++) g = polyMulLow(g, [gfPow2(i), 1]);
+    return g;
+  }
+  function rsEncode(data, nParity) {
+    var k = data.length;
+    if (k + nParity > 31) throw new Error("codeword longer than 31 symbols");
+    var g = rsGenerator(nParity);           // g[nParity] = 1
+    var rem = new Array(nParity).fill(0);   // rem[0] is the highest degree
+    for (var i = 0; i < k; i++) {
+      var fb = (data[i] & 31) ^ rem[0];
+      for (var j = 0; j < nParity - 1; j++) rem[j] = rem[j + 1] ^ gfMul(fb, g[nParity - 1 - j]);
+      rem[nParity - 1] = gfMul(fb, g[0]);
+    }
+    return data.map(function (d) { return d & 31; }).concat(rem);
+  }
+  function rsSyndromes(r, nParity) {
+    var S = new Array(nParity);
+    for (var i = 0; i < nParity; i++) {
+      var a = gfPow2(i), y = 0;
+      for (var j = 0; j < r.length; j++) y = gfMul(y, a) ^ r[j];
+      S[i] = y;
+    }
+    return S;
+  }
+  // received: array of symbols; erasures: array of indices known to be
+  // unreliable. Corrects e errors and f erasures whenever 2e + f <= nParity.
+  function rsDecode(received, nParity, erasures) {
+    var n = received.length, k = n - nParity;
+    var r = received.map(function (v) { return v & 31; });
+    var fail = { ok: false, data: r.slice(0, k), corrected: [] };
+    var S = rsSyndromes(r, nParity);
+    if (S.every(function (s) { return s === 0; })) return { ok: true, data: r.slice(0, k), corrected: [] };
+    var er = [];
+    (erasures || []).forEach(function (p) { if (p >= 0 && p < n && er.indexOf(p) < 0) er.push(p); });
+    var f = er.length;
+    if (f > nParity) return fail;
+    // erasure locator Gamma(x) = prod (1 + X x), X = alpha^(n-1-j)
+    var gamma = [1];
+    er.forEach(function (p) { gamma = polyMulLow(gamma, [1, gfPow2(n - 1 - p)]); });
+    // Berlekamp–Massey, started from the erasure locator
+    var L = f, lam = gamma.slice(), B = gamma.slice();
+    for (var rr = f + 1; rr <= nParity; rr++) {
+      var delta = 0;
+      for (var j = 0; j < lam.length; j++) {
+        var si = rr - 1 - j;
+        if (si >= 0) delta ^= gfMul(lam[j], S[si]);
+      }
+      var xB = [0].concat(B);
+      if (delta !== 0) {
+        var T = new Array(Math.max(lam.length, xB.length)).fill(0);
+        for (var a = 0; a < T.length; a++) T[a] = (lam[a] || 0) ^ gfMul(delta, xB[a] || 0);
+        if (2 * L <= rr + f - 1) {
+          B = lam.map(function (c) { return gfDiv(c, delta); });
+          L = rr + f - L;
+        } else B = xB;
+        lam = T;
+      } else B = xB;
+    }
+    while (lam.length > 1 && lam[lam.length - 1] === 0) lam.pop();
+    var deg = lam.length - 1;
+    if (deg !== L || 2 * (L - f) + f > nParity) return fail;
+    // Chien search over the positions this (possibly shortened) code has
+    var pos = [];
+    for (var p2 = 0; p2 < n; p2++) {
+      if (polyEvalLow(lam, gfPow2(-(n - 1 - p2))) === 0) pos.push(p2);
+    }
+    if (pos.length !== deg) return fail;
+    // Forney: Omega = S * Lambda mod x^nParity; e = X Omega(1/X) / Lambda'(1/X)
+    var om = polyMulLow(S, lam).slice(0, nParity);
+    var dl = [];
+    for (var q = 1; q < lam.length; q++) dl.push(q % 2 ? lam[q] : 0);
+    var out = r.slice(), fixed = [];
+    for (var t = 0; t < pos.length; t++) {
+      var X = gfPow2(n - 1 - pos[t]), Xi = gfPow2(-(n - 1 - pos[t]));
+      var den = polyEvalLow(dl, Xi);
+      if (den === 0) return fail;
+      var mag = gfMul(X, gfDiv(polyEvalLow(om, Xi), den));
+      if (mag !== 0) { out[pos[t]] ^= mag; fixed.push(pos[t]); }
+    }
+    if (!rsSyndromes(out, nParity).every(function (s) { return s === 0; })) return fail;
+    return { ok: true, data: out.slice(0, k), corrected: fixed };
+  }
+  // [verify:rs] end
+
+  // [channel] begin
+  // The tuning channel, DOM-free. Keys are numbered 1..88 (A0..C8); key 49
+  // is A4. Offsets are in cents from the public reference: equal
+  // temperament plus the stretch curve below.
+  var ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ .,!?'";
+  var NKEYS = 88;
+  var T_LV = [-4.5, -1.5, 1.5, 4.5];   // temperament: 4 levels, 3-cent spacing
+  var W_LV = [-2, 2];                   // per-key lean off the stretch
+  var U_LV = [-1.5, -0.5, 0.5, 1.5];    // third string of a trichord vs its pair
+  var GRAY = [0, 1, 3, 2], UNGRAY = [0, 1, 3, 2];  // level index <-> 2 bits
+  var CW = 2, CW_N = 23, CW_P = 8, CW_K = CW_N - CW_P, MSG_LEN = CW * CW_K;
+  function nStrings(k) { return k <= 8 ? 1 : (k <= 28 ? 2 : 3); }
+  function pcOf(k) { return (k - 1) % 12; }            // 0 = A
+  var PC_NAMES = ["A", "A♯", "B", "C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯"];
+  function keyName(k) { var m = k + 8; return PC_NAMES[pcOf(k)] + Math.floor(m / 12); }
+  // Railsback-like stretch: flat through the middle, about -25 cents at A0
+  // and +25 at C8. An illustration of the shape, not a measured piano.
+  function stretch(k) {
+    if (k >= 49) { var x = (k - 49) / 39; return 25 * (0.08 * x + 0.92 * Math.pow(x, 2.6)); }
+    var y = (49 - k) / 48; return -25 * (0.08 * y + 0.92 * Math.pow(y, 3.0));
+  }
+  function keyHz(k, cents) { return 440 * Math.pow(2, (k - 49) / 12 + (cents || 0) / 1200); }
+
+  // The layout: which bit of the stream lives in which cell. Temperament
+  // first (pitch classes A..G#), then key by key from the bass: each key's
+  // lean bit, then, on trichords, the two bits of its third string. The
+  // stream is cut into 5-bit symbols in that order, so a symbol's bits sit
+  // in neighbouring cells. 232 bits make 46 symbols and two spare bits.
+  function buildLayout() {
+    var cells = [], slots = [];
+    function cell(c, nb) { c.bits = []; c.id = cells.length; cells.push(c); for (var b = 0; b < nb; b++) { c.bits.push(slots.length); slots.push({ cell: c.id, b: b }); } return c; }
+    for (var p = 0; p < 12; p++) cell({ kind: "T", pc: p }, 2);
+    var keyCells = [];
+    for (var k = 1; k <= NKEYS; k++) {
+      var kc = { W: cell({ kind: "W", key: k }, 1) };
+      if (nStrings(k) === 3) kc.U = cell({ kind: "U", key: k }, 2);
+      keyCells[k] = kc;
+    }
+    var nSym = Math.floor(slots.length / 5);
+    var symCells = [];
+    for (var s = 0; s < nSym; s++) {
+      var set = [];
+      for (var i = 5 * s; i < 5 * s + 5; i++) if (slots[i].cell >= 0 && set.indexOf(slots[i].cell) < 0) set.push(slots[i].cell);
+      symCells.push(set);
+    }
+    cells.forEach(function (c) {
+      c.syms = []; c.bits.forEach(function (bi) { var s2 = Math.floor(bi / 5); if (s2 < nSym && c.syms.indexOf(s2) < 0) c.syms.push(s2); });
+      c.spare = c.syms.length === 0;
+    });
+    return { cells: cells, slots: slots, keyCells: keyCells, nSym: nSym, symCells: symCells,
+             rawBits: slots.length, usedBits: nSym * 5 };
+  }
+  var LAY = buildLayout();
+  function symCw(s) { return s % CW; }
+  function symPos(s) { return Math.floor(s / CW); }
+
+  function textToSyms(msg) {
+    var out = [];
+    for (var i = 0; i < MSG_LEN; i++) {
+      var ch = (msg[i] || " ").toUpperCase(), v = ALPHA.indexOf(ch);
+      out.push(v < 0 ? 26 : v);
+    }
+    return out;
+  }
+  function symsToText(sy) { return sy.map(function (v) { return ALPHA[v & 31]; }).join(""); }
+
+  // message -> 46 channel symbols -> cell levels (index into the level lists)
+  function encodeMessage(msg) {
+    var data = textToSyms(msg), syms = new Array(LAY.nSym);
+    for (var c = 0; c < CW; c++) {
+      var d = [];
+      for (var p = 0; p < CW_K; p++) d.push(data[p * CW + c]);
+      var word = rsEncode(d, CW_P);
+      for (var q = 0; q < CW_N; q++) syms[q * CW + c] = word[q];
+    }
+    var bits = new Array(LAY.slots.length).fill(0);
+    for (var s = 0; s < LAY.nSym; s++) for (var b = 0; b < 5; b++) bits[5 * s + b] = (syms[s] >> (4 - b)) & 1;
+    // spare cells beyond the last symbol: fixed filler so they look like the rest
+    for (var z = LAY.nSym * 5; z < bits.length; z++) bits[z] = (z * 7) & 1;
+    var lv = LAY.cells.map(function (cl) {
+      if (cl.kind === "W") return bits[cl.bits[0]];
+      var v = (bits[cl.bits[0]] << 1) | bits[cl.bits[1]];
+      return UNGRAY[v];
+    });
+    return { syms: syms, levels: lv, data: data };
+  }
+  // the strings each key should carry, from cell levels. s[k] = [string offsets]
+  // trichord: [third, pair, pair]; bichord: [pair, pair]; single: [one]
+  function targetStrings(levels) {
+    var out = [];
+    for (var k = 1; k <= NKEYS; k++) {
+      var kc = LAY.keyCells[k];
+      var P = T_LV[levels[pcOf(k)]] + W_LV[levels[kc.W.id]];
+      var n = nStrings(k);
+      if (n === 3) out[k] = [P + U_LV[levels[kc.U.id]], P, P];
+      else if (n === 2) out[k] = [P, P];
+      else out[k] = [P];
+    }
+    return out;
+  }
+  function pairPitch(st, k) {
+    var s = st[k], n = s.length;
+    return n === 3 ? (s[1] + s[2]) / 2 : (n === 2 ? (s[0] + s[1]) / 2 : s[0]);
+  }
+  // A strobe read: every cell to its nearest level, plus how close each
+  // reading sat to a decision boundary (0 dead on, 1 on the line).
+  function readCells(st) {
+    var lv = new Array(LAY.cells.length), amb = new Array(LAY.cells.length), est = new Array(LAY.cells.length);
+    var P = []; for (var k = 1; k <= NKEYS; k++) P[k] = pairPitch(st, k);
+    for (var pc = 0; pc < 12; pc++) {
+      var costs = T_LV.map(function (t) {
+        var c = 0;
+        for (var k2 = pc + 1; k2 <= NKEYS; k2 += 12) {
+          var a = P[k2] - t - W_LV[0], b = P[k2] - t - W_LV[1];
+          c += Math.min(a * a, b * b);
+        }
+        return c;
+      });
+      var best = 0; for (var i = 1; i < 4; i++) if (costs[i] < costs[best]) best = i;
+      var second = Infinity; for (var j = 0; j < 4; j++) if (j !== best) second = Math.min(second, costs[j]);
+      lv[pc] = best;
+      amb[pc] = Math.max(0, 1 - (second - costs[best]) / 6);
+      // continuous temperament estimate for the dial: mean of P - lean
+      var sum = 0, cnt = 0;
+      for (var k3 = pc + 1; k3 <= NKEYS; k3 += 12) {
+        var r = P[k3] - T_LV[best];
+        sum += P[k3] - (r < 0 ? W_LV[0] : W_LV[1]); cnt++;
+      }
+      est[pc] = sum / cnt;
+    }
+    for (var k4 = 1; k4 <= NKEYS; k4++) {
+      var kc = LAY.keyCells[k4];
+      var rel = P[k4] - T_LV[lv[pcOf(k4)]];
+      lv[kc.W.id] = rel < 0 ? 0 : 1;
+      est[kc.W.id] = rel;
+      amb[kc.W.id] = Math.max(0, 1 - Math.abs(rel) / 2);
+      if (kc.U) {
+        var u = st[k4][0] - P[k4];
+        var bi = 0; for (var q = 1; q < 4; q++) if (Math.abs(u - U_LV[q]) < Math.abs(u - U_LV[bi])) bi = q;
+        lv[kc.U.id] = bi;
+        est[kc.U.id] = u;
+        var d = u - U_LV[bi];
+        var inward = (bi === 0 && d < 0) || (bi === 3 && d > 0) ? 0 : Math.abs(d);
+        amb[kc.U.id] = Math.min(1, inward / 0.5);
+      }
+    }
+    return { levels: lv, amb: amb, est: est, P: P };
+  }
+  function levelsToSyms(lv) {
+    var bits = new Array(LAY.slots.length).fill(0);
+    LAY.cells.forEach(function (cl) {
+      if (cl.kind === "W") bits[cl.bits[0]] = lv[cl.id];
+      else { var v = GRAY[lv[cl.id]]; bits[cl.bits[0]] = v >> 1; bits[cl.bits[1]] = v & 1; }
+    });
+    var syms = [];
+    for (var s = 0; s < LAY.nSym; s++) { var x = 0; for (var b = 0; b < 5; b++) x = (x << 1) | bits[5 * s + b]; syms.push(x); }
+    return syms;
+  }
+  // The reader knows summers move whole regions, so it tracks the drift:
+  // read, take what's left over after the decisions, smooth it across the
+  // keyboard (Gaussian, TRACK_SIG keys), subtract, read again.
+  var TRACK_IT = 4, TRACK_SIG = 5, KERN = null;
+  function kernel() {
+    if (KERN) return KERN;
+    KERN = [];
+    for (var k = 1; k <= NKEYS; k++) {
+      var row = [], sw = 0;
+      for (var j = 1; j <= NKEYS; j++) { var w = Math.exp(-0.5 * Math.pow((j - k) / TRACK_SIG, 2)); row.push(w); sw += w; }
+      KERN[k] = row.map(function (w) { return w / sw; });
+    }
+    return KERN;
+  }
+  function shifted(st, d) {
+    var o = [];
+    for (var k = 1; k <= NKEYS; k++) o[k] = st[k].map(function (x) { return x - d[k]; });
+    return o;
+  }
+  function trackedRead(st) {
+    var K = kernel(), d = new Array(NKEYS + 1).fill(0), rd = null;
+    for (var it = 0; it <= TRACK_IT; it++) {
+      rd = readCells(shifted(st, d));
+      if (it === TRACK_IT) break;
+      var r = [];
+      for (var k = 1; k <= NKEYS; k++) {
+        var kc = LAY.keyCells[k];
+        r[k - 1] = rd.P[k] + d[k] - (T_LV[rd.levels[pcOf(k)]] + W_LV[rd.levels[kc.W.id]]);
+      }
+      var nd = new Array(NKEYS + 1).fill(0);
+      for (var k2 = 1; k2 <= NKEYS; k2++) { var v = 0, row = K[k2]; for (var j = 0; j < NKEYS; j++) v += row[j] * r[j]; nd[k2] = v; }
+      d = nd;
+    }
+    rd.drift = d;
+    return rd;
+  }
+  // Decode both codewords, errors only (up to CW_P / 2 wrong symbols each).
+  function decodeRead(rd) {
+    var syms = levelsToSyms(rd.levels);
+    var data = new Array(MSG_LEN), ok = true, fixed = [], failedCw = [];
+    for (var c = 0; c < CW; c++) {
+      var word = [];
+      for (var q = 0; q < CW_N; q++) word.push(syms[q * CW + c]);
+      var res = rsDecode(word, CW_P, []);
+      if (!res.ok) { ok = false; failedCw.push(c); }
+      else res.corrected.forEach(function (q2) { fixed.push(q2 * CW + c); });
+      for (var p = 0; p < CW_K; p++) data[p * CW + c] = res.data[p];
+    }
+    var raw = []; for (var i = 0; i < MSG_LEN; i++) raw.push(syms[i]);
+    return { ok: ok, syms: syms, raw: raw, data: data, fixed: fixed, failedCw: failedCw };
+  }
+
+  // A season: a slow random field across the compass (regional drift,
+  // the burst noise) plus independent jitter on every string.
+  var DRIFT_MAX = 6, JITTER = 0.45;
+  function gauss(rng) { var u = 1 - rng(), v = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function seasonField(seed) {
+    var rng = mulberry(seed), F = new Array(NKEYS + 1).fill(0);
+    var bumps = [];
+    for (var b = 0; b < 6; b++) bumps.push({ c: -6 + rng() * 100, w: 5 + rng() * 12, a: (rng() < 0.5 ? -1 : 1) * (0.4 + rng() * 0.6) });
+    var tilt = (rng() - 0.5) * 0.6;
+    for (var k = 1; k <= NKEYS; k++) {
+      var v = 0.45 * Math.exp(-Math.pow((k - 46) / 24, 2)) + tilt * (k - 44) / 44;
+      bumps.forEach(function (bp) { v += bp.a * Math.exp(-Math.pow((k - bp.c) / bp.w, 2)); });
+      F[k] = v;
+    }
+    var m = 0; for (var k2 = 1; k2 <= NKEYS; k2++) m = Math.max(m, Math.abs(F[k2]));
+    for (var k3 = 1; k3 <= NKEYS; k3++) F[k3] /= m;
+    var J = [];
+    for (var k4 = 1; k4 <= NKEYS; k4++) { J[k4] = []; for (var s = 0; s < nStrings(k4); s++) J[k4].push(gauss(rng)); }
+    return { F: F, J: J };
+  }
+  // per-string change a season of this severity (0..1) makes
+  function seasonDelta(seed, sev) {
+    var f = seasonField(seed), d = [];
+    for (var k = 1; k <= NKEYS; k++) d[k] = f.J[k].map(function (j) { return sev * (DRIFT_MAX * f.F[k] + JITTER * j); });
+    return d;
+  }
+  // The tuner: passes over the keyboard, each moving every string at most
+  // NUDGE cents toward where the reference wants it (the pair toward the
+  // reference, the third string toward its pair). A bounded pull, like the
+  // register's sin coupling. Anything within a nudge lands on its target
+  // with a small fixed error.
+  var PASSES = 16, NUDGE = 0.5, LAND = 0.12;
+  function landing(seed, k, s) { var r = mulberry(seed * 977 + k * 31 + s)(); return LAND * (2 * r - 1) * 1.7; }
+  function nudgeToward(x, target, land) {
+    var d = x - target;
+    if (Math.abs(d) <= NUDGE) return target + land;
+    return x - (d > 0 ? NUDGE : -NUDGE);
+  }
+  function tuneKey(st, k, seed) {
+    var s = st[k], n = s.length;
+    if (n === 3) {
+      s[1] = nudgeToward(s[1], 0, landing(seed, k, 1));
+      s[2] = nudgeToward(s[2], 0, landing(seed, k, 2));
+      var pair = (s[1] + s[2]) / 2;
+      s[0] = nudgeToward(s[0], pair, landing(seed, k, 0));
+    } else for (var i = 0; i < n; i++) s[i] = nudgeToward(s[i], 0, landing(seed, k, i));
+  }
+  // order of keys the tuner visits on pass p (back and forth)
+  function passKey(p, i) { return p % 2 === 0 ? i + 1 : NKEYS - i; }
+  function tunerApply(st, fromStep, toStep, seed) {
+    for (var t = fromStep; t < toStep; t++) tuneKey(st, passKey(Math.floor(t / NKEYS), t % NKEYS), seed);
+  }
+  function cloneStrings(st) { var o = []; for (var k = 1; k <= NKEYS; k++) o[k] = st[k].slice(); return o; }
+  function mulberry(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  // [channel] end
+
+  // ══════════════════════════════════════════════════════════
+  //  STATE
+  // ══════════════════════════════════════════════════════════
+
+  function blankStrings() { var o = []; for (var k = 1; k <= NKEYS; k++) { o[k] = []; for (var i = 0; i < nStrings(k); i++) o[k].push(0); } return o; }
+  var S = {
+    cur: blankStrings(),          // what the strings actually are, cents from reference
+    disp: blankStrings(),         // what the needles show (eases toward cur)
+    written: null,                // { msg, syms, levels, data, target }
+    drift: new Array(NKEYS + 1).fill(0),   // reader's last estimate of the weather
+    driftAlpha: 0,
+    anim: null,                   // the running operation
+    readRes: null,                // last decode
+    flash: new Array(46).fill(0), // per-symbol correction flash, seconds left
+    keyFlash: new Array(NKEYS + 1).fill(0),
+    touch: new Array(NKEYS + 1).fill(-1),
+    strobePh: new Array(12).fill(0),
+    summerNo: 0, tunerNo: 0, t: 0,
+    live: null                    // per-frame reading of disp
+  };
+  var reduced = Kit.reduced;
+  function spd(sec) { return reduced ? sec * 0.25 : sec; }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var msgIn = $("msg");
+
+  // ══════════════════════════════════════════════════════════
+  //  GEOMETRY
+  // ══════════════════════════════════════════════════════════
+
+  function isBlack(k) { var p = pcOf(k); return p === 1 || p === 4 || p === 6 || p === 9 || p === 11; }
+  function rowsFor(w) { return w >= 640 ? [[1, 88]] : [[1, 44], [45, 88]]; }
+  function keyGeom(k0, k1, x0, w) {
+    var nW = 0; for (var k = k0; k <= k1; k++) if (!isBlack(k)) nW++;
+    var W = w / nW, g = {}, wi = 0;
+    for (var k2 = k0; k2 <= k1; k2++) {
+      if (!isBlack(k2)) { var l = x0 + wi * W; g[k2] = { cx: l + W / 2, l: l, w: W, black: false }; wi++; }
+      else { var b = x0 + wi * W, bw = W * 0.62; g[k2] = { cx: b, l: b - bw / 2, w: bw, black: true }; }
+    }
+    g.W = W;
+    return g;
+  }
+  function pianoDims(w) {
+    var narrow = w < 640;
+    var d = narrow
+      ? { top: 20, strip: 118, fan: 34, keys: 58, lane: 9, gap: 20 }
+      : { top: 24, strip: 160, fan: 44, keys: 84, lane: 12, gap: 0 };
+    d.row = d.top + d.strip + d.fan + d.keys + 4 + 2 * d.lane;
+    d.rows = rowsFor(w);
+    d.h = d.rows.length * d.row + (d.rows.length - 1) * d.gap + 6;
+    d.range = 9;   // cents shown each side of the reference
+    return d;
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  COLORS
+  // ══════════════════════════════════════════════════════════
+
+  function C() {
+    return { ground: Kit.css("--ground"), panel: Kit.css("--panel"), panel2: Kit.css("--panel-2"), rule: Kit.css("--rule"),
+             ink: Kit.css("--ink"), dim: Kit.css("--dim"), just: Kit.css("--just"), temper: Kit.css("--temper"),
+             sage: Kit.css("--sage"), rose: Kit.css("--rose") };
+  }
+  function isDark(hex) {
+    var h = hex.replace("#", ""); if (h.length === 3) h = h.split("").map(function (c) { return c + c; }).join("");
+    var n = parseInt(h, 16); return ((n >> 16 & 255) * 0.3 + (n >> 8 & 255) * 0.59 + (n & 255) * 0.11) < 128;
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  READING (per frame, cheap) AND THE MESSAGE ROWS
+  // ══════════════════════════════════════════════════════════
+
+  function liveRead() {
+    var rd = readCells(shifted(S.disp, S.drift.map(function (v) { return v * S.driftAlpha; })));
+    var ok = new Array(LAY.cells.length);
+    for (var i = 0; i < LAY.cells.length; i++) ok[i] = S.written ? rd.levels[i] === S.written.levels[i] : true;
+    rd.ok = ok;
+    return rd;
+  }
+  function keyOk(rd, k) {
+    var kc = LAY.keyCells[k];
+    return rd.ok[kc.W.id] && rd.ok[pcOf(k)];
+  }
+
+  function fillRow(el, text, cls) {
+    el.innerHTML = "";
+    for (var i = 0; i < MSG_LEN; i++) {
+      var sp = document.createElement("span");
+      sp.textContent = text ? (text[i] === " " ? " " : text[i]) : " ";
+      sp.className = (i % 2 ? "cwB" : "cwA") + (cls && cls[i] ? " " + cls[i] : "") + (text ? "" : " blank");
+      el.appendChild(sp);
+    }
+  }
+  function showWritten() {
+    if (!S.written) { fillRow($("row-written"), null); return; }
+    fillRow($("row-written"), symsToText(S.written.data));
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  OPERATIONS
+  // ══════════════════════════════════════════════════════════
+
+  function clearRead() {
+    S.readRes = null; fillRow($("row-raw"), null); fillRow($("row-dec"), null);
+  }
+  function startWrite(instant) {
+    var msg = (msgIn.value || "").toUpperCase();
+    var en = encodeMessage(msg);
+    S.written = { msg: msg, syms: en.syms, levels: en.levels, data: en.data, target: targetStrings(en.levels) };
+    S.cur = blankStrings();
+    S.drift.fill(0); S.driftAlpha = 0;
+    clearRead(); showWritten();
+    if (instant) {
+      S.cur = cloneStrings(S.written.target); S.disp = cloneStrings(S.cur); S.anim = null;
+      setStatus("Written. " + MSG_LEN + " characters became " + LAY.nSym + " symbols (" + LAY.usedBits + " bits), stored in " + LAY.cells.length + " cells of the tuning. Press Add summer humidity or Send in a tuner to disturb it, then Read back.");
+      drawStretch(); kick(); return;
+    }
+    S.anim = { kind: "write", t: 0, dur: spd(2.6), done: 0 };
+    setStatus("Writing. The needles move away from the reference one key at a time.");
+    kick();
+  }
+  function stepWrite(a, dt) {
+    a.t += dt;
+    var f = Math.min(1, a.t / a.dur);
+    var upto = Math.floor(f * (NKEYS + 6));
+    for (var k = a.done + 1; k <= Math.min(NKEYS, upto); k++) { S.cur[k] = S.written.target[k].slice(); S.touch[k] = S.t; }
+    a.done = Math.max(a.done, Math.min(NKEYS, upto));
+    a.cursor = f * (NKEYS + 6);
+    if (f >= 1) {
+      S.anim = null; drawStretch();
+      setStatus("Written. " + MSG_LEN + " characters became " + LAY.nSym + " symbols (" + LAY.usedBits + " bits), stored in " + LAY.cells.length + " cells of the tuning. Press Add summer humidity or Send in a tuner to disturb it, then Read back.");
+    }
+  }
+
+  function startSummer() {
+    if (!S.written) startWrite(true);
+    var sev = +$("sev").value / 100;
+    S.summerNo++;
+    S.drift.fill(0); S.driftAlpha = 0; clearRead();
+    var seed = 7000 + S.summerNo;
+    S.anim = { kind: "summer", t: 0, dur: spd(3.4), base: cloneStrings(S.cur), delta: seasonDelta(seed, sev), sev: sev, field: seasonField(seed).F };
+    setStatus("Summer " + S.summerNo + ", severity " + Math.round(sev * 100) + "%. Regional drift up to " + (sev * DRIFT_MAX).toFixed(1) + " cents, plus random jitter of " + (sev * JITTER).toFixed(2) + " cents on each string.");
+    kick();
+  }
+  function summerFrac(a, k) {
+    var xf = -24 + (a.t / a.dur) * (NKEYS + 50);
+    var u = Math.max(0, Math.min(1, (xf - k) / 24));
+    return u * u * (3 - 2 * u);
+  }
+  function stepSummer(a, dt) {
+    a.t = Math.min(a.dur, a.t + dt);
+    for (var k = 1; k <= NKEYS; k++) {
+      var fr = summerFrac(a, k);
+      for (var i = 0; i < S.cur[k].length; i++) S.cur[k][i] = a.base[k][i] + a.delta[k][i] * fr;
+    }
+    if (a.t >= a.dur) {
+      S.anim = null; drawStretch();
+      setStatus("Summer " + S.summerNo + " is over. Regional drift up to " + (a.sev * DRIFT_MAX).toFixed(1) + " cents, string jitter " + (a.sev * JITTER).toFixed(2) + " cents. Amber needles are keys the strobe now reads wrong, before the reader corrects for drift. Press Read back to decode.");
+    }
+  }
+
+  function startTuner() {
+    if (!S.written) startWrite(true);
+    var p = +$("visit").value / 1000;
+    S.tunerNo++;
+    S.drift.fill(0); S.driftAlpha = 0; clearRead();
+    var steps = Math.round(p * PASSES * NKEYS);
+    var dur = spd(Math.max(1.4, Math.min(9, steps / 160)));
+    S.anim = { kind: "tuner", t: 0, dur: dur, steps: steps, done: 0, seed: 300 + S.tunerNo, p: p };
+    tunerCounts.start = countsByBucket();
+    kick();
+  }
+  function stepTuner(a, dt) {
+    a.t = Math.min(a.dur, a.t + dt);
+    var target = a.steps === 0 ? 0 : Math.round(a.steps * (a.t / a.dur));
+    for (var s = a.done; s < target; s++) {
+      var k = passKey(Math.floor(s / NKEYS), s % NKEYS);
+      tuneKey(S.cur, k, a.seed); S.touch[k] = S.t;
+    }
+    a.done = Math.max(a.done, target);
+    a.pos = a.done;
+    var st = tunerStatus(a);
+    setStatus(st);
+    if (a.t >= a.dur) { S.anim = null; drawStretch(); setStatus(tunerStatus(a, true)); }
+  }
+
+  // which written cells now misread, by how far from the reference the letter put them
+  function bucketOf(cell) {
+    var lv = S.written.levels;
+    var dev;
+    if (cell.kind === "W") { var k = cell.key; dev = Math.abs(T_LV[lv[pcOf(k)]] + W_LV[lv[cell.id]]); }
+    else if (cell.kind === "U") dev = Math.abs(U_LV[lv[cell.id]]);
+    else dev = Math.abs(T_LV[lv[cell.id]]);
+    return dev <= 1 ? 0 : (dev <= 3 ? 1 : 2);
+  }
+  var tunerCounts = { start: null };
+  function countsByBucket() {
+    var rd = S.live || liveRead();
+    var tot = [0, 0, 0], bad = [0, 0, 0];
+    if (!S.written) return { tot: tot, bad: bad };
+    LAY.cells.forEach(function (c) {
+      if (c.kind === "T" || c.spare) return;
+      var b = bucketOf(c); tot[b]++; if (!rd.ok[c.id]) bad[b]++;
+    });
+    return { tot: tot, bad: bad };
+  }
+  function tunerStatus(a, done) {
+    var c = countsByBucket();
+    var pass = Math.min(PASSES, Math.floor(a.done / NKEYS) + (a.done % NKEYS ? 1 : 0));
+    var head = done
+      ? "The tuner stopped after " + (a.p * 100).toFixed(1) + "% of the visit (pass " + Math.max(pass, 0) + " of " + PASSES + ")."
+      : "Tuner at work, pass " + Math.max(pass, 1) + " of " + PASSES + ".";
+    return head + " Now misread: " + c.bad[0] + " of " + c.tot[0] + " cells written within 1 cent of the reference, " +
+      c.bad[1] + " of " + c.tot[1] + " written 1 to 3 cents off, " + c.bad[2] + " of " + c.tot[2] + " written more than 3 cents off.";
+  }
+
+  function startRead() {
+    if (!S.written) { setStatus("Nothing is written yet. Press Write first."); return; }
+    S.anim = { kind: "read", t: 0, dur: spd(1.2) };
+    clearRead();
+    setStatus("Reading every string with the strobe tuner…");
+    kick();
+  }
+  function stepRead(a, dt) {
+    a.t = Math.min(a.dur, a.t + dt);
+    a.cursor = (a.t / a.dur) * (NKEYS + 2);
+    if (a.t >= a.dur) { S.anim = null; finishRead(); }
+  }
+  function finishRead() {
+    S.disp = cloneStrings(S.cur);
+    var rd = trackedRead(S.cur);
+    var res = decodeRead(rd);
+    S.readRes = res;
+    S.drift = rd.drift; S.driftAlpha = 1;
+    var w = S.written;
+    var rawCls = [], decCls = [];
+    var nWrongSym = 0; for (var s = 0; s < LAY.nSym; s++) if (res.syms[s] !== w.syms[s]) nWrongSym++;
+    var nRawChar = 0, nDecWrong = 0;
+    for (var i = 0; i < MSG_LEN; i++) {
+      var rawBad = res.raw[i] !== w.data[i]; if (rawBad) nRawChar++;
+      rawCls.push(rawBad ? "bad" : "");
+      var cwFailed = res.failedCw.indexOf(i % CW) >= 0;
+      var decBad = res.data[i] !== w.data[i]; if (decBad) nDecWrong++;
+      decCls.push(cwFailed ? "lost" : (decBad ? "bad" : (res.fixed.indexOf(i) >= 0 ? "fixed" : "good")));
+    }
+    fillRow($("row-raw"), symsToText(res.raw), rawCls);
+    fillRow($("row-dec"), symsToText(res.data), decCls);
+    res.fixed.forEach(function (s2) { S.flash[s2] = 2.6; symKeys(s2).forEach(function (k) { S.keyFlash[k] = 2.6; }); });
+    var cwName = function (c) { return c === 0 ? "A" : "B"; };
+    var msg;
+    if (res.ok && nDecWrong === 0) {
+      msg = nWrongSym === 0
+        ? "Read all " + LAY.nSym + " symbols and every one was correct. The message came back exactly, with no correction needed."
+        : "Read all " + LAY.nSym + " symbols. " + nWrongSym + (nWrongSym === 1 ? " was" : " were") + " wrong before decoding (" + (nRawChar === nWrongSym ? (nWrongSym === 1 ? "in" : "all in") + " the message itself" : nRawChar === 0 ? "all in the check symbols" : nRawChar + " in the message itself, the rest in the check symbols") + "). The code found and fixed " + (res.fixed.length === 1 ? "it" : res.fixed.length === 2 ? "both" : "all " + res.fixed.length) + ". The message came back exactly.";
+    } else if (res.ok) {
+      msg = "The decoder reported success, but the result is wrong. With " + nWrongSym + " wrong symbols, it matched a different valid codeword. This failure is rare and gives no warning.";
+    } else {
+      msg = (res.failedCw.length > 1 ? "Codewords A and B each" : "Codeword " + cwName(res.failedCw[0])) + " had more than four wrong symbols (" + nWrongSym + " wrong in total), so the decoder refused to decode " +
+        (res.failedCw.length > 1 ? "both" : "it") + ". Struck-through characters are raw readings, not decoded ones. " +
+        (res.fixed.length ? "The other codeword was repaired (" + res.fixed.length + " fixed). " : "") + "This reader cannot recover the message.";
+    }
+    setStatus(msg);
+    drawStretch();
+  }
+  function symKeys(s) {
+    var ks = [];
+    LAY.symCells[s].forEach(function (cid) { var c = LAY.cells[cid]; if (c.key && ks.indexOf(c.key) < 0) ks.push(c.key); });
+    return ks;
+  }
+
+  function resetPiano() {
+    S.anim = null; S.written = null; S.cur = blankStrings(); S.drift.fill(0); S.driftAlpha = 0;
+    clearRead(); showWritten();
+    setStatus("The piano is tuned to the reference. No message is written yet.");
+    drawStretch(); kick();
+  }
+
+  function setStatus(t) { $("status").textContent = t; }
+
+  // ══════════════════════════════════════════════════════════
+  //  DRAWING: THE PIANO
+  // ══════════════════════════════════════════════════════════
+
+  var cvP = $("piano"), cvD = $("dials");
+  var geomCache = null;
+
+  function drawPiano() {
+    var w = cvP.clientWidth || 600;
+    var d = pianoDims(w);
+    cvP.dataset.cssHeight = String(d.h);
+    var f = Kit.fit(cvP), g = f.g, col = C(), dark = isDark(col.ground);
+    g.clearRect(0, 0, f.w, f.h);
+    var rd = S.live;
+    var rows = [];
+    d.rows.forEach(function (r, ri) {
+      var y0 = ri * (d.row + d.gap);
+      var geo = keyGeom(r[0], r[1], 2, f.w - 4);
+      rows.push({ k0: r[0], k1: r[1], y0: y0, geo: geo });
+      drawRow(g, f, d, geo, r[0], r[1], y0, rd, col, dark);
+    });
+    geomCache = { d: d, rows: rows };
+  }
+
+  function yCents(d, y0, c) {
+    var mid = y0 + d.top + d.strip / 2;
+    var cc = Math.max(-d.range, Math.min(d.range, c));
+    return mid - cc * (d.strip / 2 - 6) / d.range;
+  }
+  function xAtKey(geo, k0, k1, kf) {
+    var a = Math.max(k0, Math.min(k1, Math.floor(kf))), b = Math.min(k1, a + 1);
+    var t = Math.max(0, Math.min(1, kf - a));
+    if (kf < k0) return geo[k0].cx - (k0 - kf) * geo.W * 0.58;
+    if (kf > k1) return geo[k1].cx + (kf - k1) * geo.W * 0.58;
+    return geo[a].cx + (geo[b].cx - geo[a].cx) * t;
+  }
+
+  function drawRow(g, f, d, geo, k0, k1, y0, rd, col, dark) {
+    var sTop = y0 + d.top, sBot = sTop + d.strip, mid = (sTop + sBot) / 2;
+    var xL = geo[k0].l, xR = geo[k1].l + geo[k1].w;
+    // strip background + grid
+    g.fillStyle = Kit.alpha(col.ink, dark ? 0.025 : 0.03);
+    g.fillRect(xL, sTop, xR - xL, d.strip);
+    g.lineWidth = 1;
+    [-6, -3, 3, 6].forEach(function (c) {
+      var y = Math.round(yCents(d, y0, c)) + 0.5;
+      g.strokeStyle = Kit.alpha(col.dim, 0.18); g.beginPath(); g.moveTo(xL, y); g.lineTo(xR, y); g.stroke();
+    });
+    g.strokeStyle = Kit.alpha(col.dim, 0.55);
+    g.beginPath(); g.moveTo(xL, Math.round(mid) + 0.5); g.lineTo(xR, Math.round(mid) + 0.5); g.stroke();
+    g.font = "10px " + Kit.css("--mono"); g.fillStyle = col.dim; g.textBaseline = "middle";
+    [-6, -3, 0, 3, 6].forEach(function (c) {
+      g.fillText((c > 0 ? "+" : c < 0 ? "−" : "") + Math.abs(c) + (c === 0 ? " ref" : "¢"), xL + 3, yCents(d, y0, c) - 6);
+    });
+
+    var a = S.anim;
+    // summer wave
+    if (a && a.kind === "summer") {
+      var xfK = -24 + (a.t / a.dur) * (NKEYS + 50) - 10;
+      var xf = xAtKey(geo, k0, k1, xfK);
+      var bw = geo.W * 9;
+      var grd = g.createLinearGradient(xf - bw, 0, xf + bw * 0.4, 0);
+      grd.addColorStop(0, Kit.alpha(col.sage, 0));
+      grd.addColorStop(0.75, Kit.alpha(col.sage, 0.20));
+      grd.addColorStop(1, Kit.alpha(col.sage, 0));
+      g.fillStyle = grd; g.fillRect(Math.max(xL, xf - bw), sTop, Math.min(xR, xf + bw * 0.4) - Math.max(xL, xf - bw), d.strip + d.fan);
+      // ripples: the field itself, drawn behind the front
+      g.save(); g.globalCompositeOperation = dark ? "lighter" : "source-over";
+      for (var rr = 0; rr < 3; rr++) {
+        g.strokeStyle = Kit.alpha(col.sage, 0.35 - rr * 0.1); g.lineWidth = 1.2;
+        g.beginPath();
+        var started = false;
+        for (var kk = k0; kk <= k1; kk++) {
+          var fr = summerFrac(a, kk); if (fr <= 0.001) continue;
+          var yy = yCents(d, y0, a.field[kk] * a.sev * DRIFT_MAX * fr + Math.sin(S.t * 3 + kk * 0.35 + rr * 2) * 0.35 * fr);
+          var x = geo[kk].cx;
+          if (!started) { g.moveTo(x, yy); started = true; } else g.lineTo(x, yy);
+        }
+        g.stroke();
+      }
+      g.restore();
+    }
+    // reader's drift estimate
+    if (S.driftAlpha > 0.01) {
+      g.strokeStyle = Kit.alpha(col.sage, 0.85 * S.driftAlpha); g.lineWidth = 1.6;
+      g.beginPath();
+      for (var k3 = k0; k3 <= k1; k3++) { var y3 = yCents(d, y0, S.drift[k3]); if (k3 === k0) g.moveTo(geo[k3].cx, y3); else g.lineTo(geo[k3].cx, y3); }
+      g.stroke();
+    }
+
+    // written marks
+    if (S.written) {
+      g.strokeStyle = Kit.alpha(col.dim, 0.75); g.lineWidth = 1.2;
+      for (var k4 = k0; k4 <= k1; k4++) {
+        var pw = pairPitch(S.written.target, k4) + S.drift[k4] * S.driftAlpha;
+        var yw = yCents(d, y0, pw), hw = Math.max(2.2, geo.W * 0.22);
+        g.beginPath(); g.moveTo(geo[k4].cx - hw, yw); g.lineTo(geo[k4].cx + hw, yw); g.stroke();
+      }
+    }
+    // needles
+    var headR = Math.max(1.8, Math.min(3, geo.W * 0.16));
+    for (var pass = 0; pass < 2; pass++) {
+      if (pass === 1) { g.save(); g.globalCompositeOperation = dark ? "lighter" : "source-over"; }
+      for (var k = k0; k <= k1; k++) {
+        var P = pairPitch(S.disp, k);
+        var good = rd ? keyOk(rd, k) : true;
+        var hue = S.written ? (good ? col.just : col.temper) : col.dim;
+        var x2 = geo[k].cx, y2 = yCents(d, y0, P);
+        if (pass === 0) {
+          g.strokeStyle = Kit.alpha(hue, 0.55); g.lineWidth = geo.W > 14 ? 1.4 : 1;
+          g.beginPath(); g.moveTo(x2, mid); g.lineTo(x2, y2); g.stroke();
+        } else {
+          var recent = S.touch[k] >= 0 ? Math.max(0, 1 - (S.t - S.touch[k]) / 0.5) : 0;
+          g.fillStyle = Kit.alpha(hue, 0.22 + 0.3 * recent);
+          g.beginPath(); g.arc(x2, y2, headR * (2.3 + recent * 1.5), 0, Math.PI * 2); g.fill();
+          g.fillStyle = hue;
+          g.beginPath(); g.arc(x2, y2, headR, 0, Math.PI * 2); g.fill();
+          if (Math.abs(P) > d.range) {   // off the scale: a chevron
+            var dir = P > 0 ? -1 : 1;
+            g.strokeStyle = hue; g.lineWidth = 1.2; g.beginPath();
+            g.moveTo(x2 - 3, y2 + dir * -1); g.lineTo(x2, y2 + dir * -5); g.lineTo(x2 + 3, y2 + dir * -1); g.stroke();
+          }
+        }
+      }
+      if (pass === 1) g.restore();
+    }
+
+    // unison fans
+    var fTop = sBot + 4, fBot = sBot + d.fan;
+    var gain = Math.max(2.6, Math.min(4.6, geo.W * 0.26));
+    for (var k5 = k0; k5 <= k1; k5++) {
+      var st = S.disp[k5], n = st.length, P5 = pairPitch(S.disp, k5), x5 = geo[k5].cx;
+      var uGood = true, uc = LAY.keyCells[k5].U;
+      if (uc && rd && S.written) uGood = rd.ok[uc.id];
+      for (var i = 0; i < n; i++) {
+        var off = st[i] - P5;
+        var isThird = n === 3 && i === 0;
+        var hue5 = isThird && S.written ? (uGood ? col.just : col.temper) : col.dim;
+        g.strokeStyle = Kit.alpha(hue5, isThird ? 0.95 : 0.55); g.lineWidth = isThird ? 1.1 : 0.8;
+        g.beginPath(); g.moveTo(x5, fBot); g.lineTo(x5 + off * gain, fTop); g.stroke();
+      }
+      if (uc && S.written) {
+        var uw = U_LV[S.written.levels[uc.id]];
+        g.fillStyle = Kit.alpha(col.dim, 0.8);
+        g.fillRect(x5 + uw * gain - 1, fTop - 3, 2, 2);
+      }
+    }
+
+    // keys
+    var kTop = fBot + 2, kH = d.keys;
+    var whiteFill = dark ? Kit.alpha(col.ink, 0.13) : col.panel;
+    var blackFill = dark ? col.ground : Kit.alpha(col.ink, 0.86);
+    for (var pass2 = 0; pass2 < 2; pass2++) {
+      for (var k6 = k0; k6 <= k1; k6++) {
+        var kg = geo[k6]; if (kg.black !== (pass2 === 1)) continue;
+        var h6 = kg.black ? kH * 0.62 : kH;
+        g.fillStyle = kg.black ? blackFill : whiteFill;
+        g.fillRect(kg.l + 0.5, kTop, kg.w - 1, h6);
+        g.strokeStyle = col.rule; g.lineWidth = 1;
+        g.strokeRect(kg.l + 0.5, kTop + 0.5, kg.w - 1, h6 - 1);
+        var fl = S.keyFlash[k6];
+        if (fl > 0) {
+          g.fillStyle = Kit.alpha(col.just, Math.min(0.75, fl / 2.6 * 0.9) * (0.7 + 0.3 * Math.sin(S.t * 14)));
+          g.fillRect(kg.l + 1, kTop + 1, kg.w - 2, h6 - 2);
+        }
+        if (rd && S.written && !keyOkFull(rd, k6)) {
+          g.fillStyle = Kit.alpha(col.temper, 0.85);
+          g.fillRect(kg.l + 1.5, kTop + h6 - 5, kg.w - 3, 3);
+        }
+        if (S.written && S.touch[k6] >= 0 && S.t - S.touch[k6] < 0.3 && a && (a.kind === "write" || a.kind === "tuner")) {
+          g.fillStyle = Kit.alpha(a.kind === "write" ? col.just : col.rose, 0.35 * (1 - (S.t - S.touch[k6]) / 0.3));
+          g.fillRect(kg.l + 1, kTop + 1, kg.w - 2, h6 - 2);
+        }
+      }
+    }
+    // octave labels on the Cs
+    g.font = (geo.W > 14 ? 10 : 8) + "px " + Kit.css("--mono"); g.textBaseline = "alphabetic"; g.textAlign = "center";
+    for (var k7 = k0; k7 <= k1; k7++) if (pcOf(k7) === 3) { g.fillStyle = dark ? col.dim : col.dim; g.fillText(keyName(k7), geo[k7].cx, kTop + kH - 8); }
+    g.textAlign = "left";
+
+    // codeword lanes
+    var lTop = kTop + kH + 3;
+    for (var s = 0; s < LAY.nSym; s++) {
+      var ks = symKeys(s).filter(function (kk2) { return kk2 >= k0 && kk2 <= k1; });
+      if (!ks.length) continue;
+      var lx0 = Infinity, lx1 = -Infinity;
+      ks.forEach(function (kk3) { lx0 = Math.min(lx0, geo[kk3].cx - geo.W * 0.29); lx1 = Math.max(lx1, geo[kk3].cx + geo.W * 0.29); });
+      var cw = s % CW, ly = lTop + cw * d.lane;
+      var isData = Math.floor(s / CW) < CW_K;
+      var base = cw === 0 ? col.just : col.sage;
+      var flash = S.flash[s];
+      var failed = S.readRes && S.readRes.failedCw.indexOf(cw) >= 0;
+      g.fillStyle = flash > 0 ? Kit.alpha(col.just, 0.35 + 0.6 * flash / 2.6) : Kit.alpha(base, isData ? 0.22 : 0.10);
+      g.fillRect(lx0 + 0.5, ly, Math.max(1, lx1 - lx0 - 1), d.lane - 2);
+      if (failed) { g.strokeStyle = Kit.alpha(col.temper, 0.9); g.lineWidth = 1; g.strokeRect(lx0 + 1, ly + 0.5, Math.max(1, lx1 - lx0 - 2), d.lane - 3); }
+      if (lx1 - lx0 >= 8 && d.lane >= 10) {
+        g.fillStyle = flash > 0 ? col.ground : col.ink; g.textAlign = "center"; g.textBaseline = "middle";
+        g.font = "9px " + Kit.css("--mono");
+        var chv = isData ? (S.written ? ALPHA[S.written.data[s]] : "") : "·";
+        if (chv === " ") chv = "␣";
+        g.fillText(chv, (lx0 + lx1) / 2, ly + (d.lane - 2) / 2 + 0.5);
+        g.textAlign = "left";
+      }
+    }
+
+    // cursors: writer, reader, tuner
+    if (a && (a.kind === "write" || a.kind === "read")) {
+      var cx = xAtKey(geo, k0, k1, a.cursor);
+      if (cx >= xL - 2 && cx <= xR + 2) {
+        g.save(); g.globalCompositeOperation = dark ? "lighter" : "source-over";
+        var gr2 = g.createLinearGradient(cx - 18, 0, cx + 2, 0);
+        gr2.addColorStop(0, Kit.alpha(col.just, 0)); gr2.addColorStop(1, Kit.alpha(col.just, 0.28));
+        g.fillStyle = gr2; g.fillRect(cx - 18, sTop, 20, kTop + kH - sTop);
+        g.strokeStyle = Kit.alpha(col.just, 0.9); g.lineWidth = 1.5;
+        g.beginPath(); g.moveTo(cx, sTop); g.lineTo(cx, kTop + kH); g.stroke();
+        g.restore();
+      }
+    }
+    if (a && a.kind === "tuner" && a.steps > 0) {
+      var sIdx = Math.max(0, Math.min(a.steps - 1, a.done - 1));
+      var pk = passKey(Math.floor(sIdx / NKEYS), sIdx % NKEYS);
+      if (pk >= k0 && pk <= k1) drawTuner(g, geo[pk].cx, y0 + 2, d, col, Math.floor(sIdx / NKEYS) % 2 === 0 ? 1 : -1);
+    }
+  }
+  function keyOkFull(rd, k) {
+    var kc = LAY.keyCells[k];
+    return keyOk(rd, k) && (!kc.U || rd.ok[kc.U.id]);
+  }
+  // the tuner: a little figure with a hammer, walking the keys
+  function drawTuner(g, x, y, d, col, dir) {
+    var h = d.top - 4;
+    g.save();
+    g.strokeStyle = col.rose; g.fillStyle = col.rose; g.lineWidth = 1.6; g.lineCap = "round";
+    var bob = reduced ? 0 : Math.sin(S.t * 18) * 1.2;
+    g.beginPath(); g.arc(x, y + 3 + bob * 0.3, 3, 0, Math.PI * 2); g.fill();          // head
+    g.beginPath(); g.moveTo(x, y + 6); g.lineTo(x, y + h); g.stroke();                // body
+    // arm and hammer reaching down into the strip
+    var hx = x + dir * 7, hy = y + h + 6 + bob;
+    g.beginPath(); g.moveTo(x, y + 9); g.lineTo(hx, hy); g.stroke();
+    g.beginPath(); g.moveTo(hx - 4, hy + 0.5 * dir); g.lineTo(hx + 4, hy - 0.5 * dir); g.lineWidth = 2.6; g.stroke();
+    // glow line down to the keys
+    g.globalAlpha = 0.25; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(x, y + h); g.lineTo(x, y + d.top + d.strip + d.fan); g.stroke();
+    g.restore();
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  DRAWING: THE TWELVE DIALS
+  // ══════════════════════════════════════════════════════════
+
+  var dialEst = new Array(12).fill(0);
+  function drawDials() {
+    var w = cvD.clientWidth || 600;
+    var cols = w >= 560 ? 12 : 6, nrow = 12 / cols;
+    var cellW = w / cols, r = Math.min(cellW * 0.36, 32);
+    var rowH = r * 2 + 30;
+    var lanes = cols === 12 ? 22 : 0;
+    cvD.dataset.cssHeight = String(Math.round(nrow * rowH + lanes + 4));
+    var f = Kit.fit(cvD), g = f.g, col = C(), dark = isDark(col.ground);
+    g.clearRect(0, 0, f.w, f.h);
+    var rd = S.live;
+    var span = 6, maxAng = Math.PI * 0.42;
+    function ang(c) { return -Math.PI / 2 + Math.max(-1.25, Math.min(1.25, c / span)) * maxAng; }
+    for (var p = 0; p < 12; p++) {
+      var cx = (p % cols + 0.5) * cellW, cy = Math.floor(p / cols) * rowH + r + 6;
+      var est = rd ? rd.est[p] : 0;
+      dialEst[p] = est;
+      var wr = S.written ? T_LV[S.written.levels[p]] : 0;
+      var good = rd && S.written ? rd.ok[p] : true;
+      var hue = S.written ? (good ? col.just : col.temper) : col.dim;
+      // face
+      g.fillStyle = Kit.alpha(col.ink, dark ? 0.04 : 0.035);
+      g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill();
+      // strobe ring: stands still when the reading sits on the written level
+      var segs = 16, ph = S.strobePh[p];
+      for (var s = 0; s < segs; s += 2) {
+        var a0 = ph + s * Math.PI * 2 / segs, a1 = a0 + Math.PI * 2 / segs;
+        g.fillStyle = Kit.alpha(hue, 0.30);
+        g.beginPath(); g.arc(cx, cy, r, a0, a1); g.arc(cx, cy, r * 0.8, a1, a0, true); g.closePath(); g.fill();
+      }
+      // level ticks
+      T_LV.forEach(function (lv, li) {
+        var an = ang(lv), isW = S.written && S.written.levels[p] === li;
+        g.strokeStyle = isW ? col.ink : Kit.alpha(col.dim, 0.7); g.lineWidth = isW ? 2 : 1;
+        g.beginPath(); g.moveTo(cx + Math.cos(an) * r * 0.56, cy + Math.sin(an) * r * 0.56); g.lineTo(cx + Math.cos(an) * r * 0.74, cy + Math.sin(an) * r * 0.74); g.stroke();
+      });
+      // zero tick
+      g.strokeStyle = Kit.alpha(col.dim, 0.4); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(cx, cy - r * 0.5); g.lineTo(cx, cy - r * 0.62); g.stroke();
+      // needle
+      var an2 = ang(est);
+      g.save(); g.globalCompositeOperation = dark ? "lighter" : "source-over";
+      g.strokeStyle = Kit.alpha(hue, 0.3); g.lineWidth = 5; g.lineCap = "round";
+      g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(an2) * r * 0.7, cy + Math.sin(an2) * r * 0.7); g.stroke();
+      g.restore();
+      g.strokeStyle = hue; g.lineWidth = 1.6; g.lineCap = "round";
+      g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(an2) * r * 0.7, cy + Math.sin(an2) * r * 0.7); g.stroke();
+      g.fillStyle = hue; g.beginPath(); g.arc(cx, cy, 2.4, 0, Math.PI * 2); g.fill();
+      // labels
+      g.textAlign = "center"; g.textBaseline = "alphabetic";
+      g.font = "11px " + Kit.css("--mono"); g.fillStyle = col.ink;
+      g.fillText(PC_NAMES[p], cx, cy + r * 0.62);
+      g.font = "10px " + Kit.css("--mono"); g.fillStyle = col.dim;
+      g.fillText((est >= 0 ? "+" : "−") + Math.abs(est).toFixed(1) + "¢", cx, cy + r + 15);
+      g.textAlign = "left";
+    }
+    // lanes: the first five symbols live in the temperament
+    if (lanes) {
+      var ly0 = rowH + 2;
+      for (var s2 = 0; s2 < 5; s2++) {
+        var b0 = 5 * s2, b1 = 5 * s2 + 4;
+        var p0 = Math.floor(b0 / 2), p1 = Math.min(11, Math.floor(b1 / 2));
+        var x0 = p0 * cellW + (b0 % 2 ? cellW * 0.5 : 4), x1 = (p1 + 1) * cellW - (b1 % 2 ? 4 : cellW * 0.5);
+        if (b1 >= 24) x1 = f.w - 2;
+        var cw = s2 % CW, ly = ly0 + cw * 10;
+        var flash = S.flash[s2];
+        var failed = S.readRes && S.readRes.failedCw.indexOf(cw) >= 0;
+        g.fillStyle = flash > 0 ? Kit.alpha(col.just, 0.35 + 0.6 * flash / 2.6) : Kit.alpha(cw === 0 ? col.just : col.sage, 0.22);
+        g.fillRect(x0, ly, x1 - x0, 8);
+        if (failed) { g.strokeStyle = Kit.alpha(col.temper, 0.9); g.lineWidth = 1; g.strokeRect(x0 + 0.5, ly + 0.5, x1 - x0 - 1, 7); }
+        g.fillStyle = flash > 0 ? col.ground : col.ink; g.font = "9px " + Kit.css("--mono"); g.textAlign = "center"; g.textBaseline = "middle";
+        var ch = S.written ? ALPHA[S.written.data[s2]] : ""; if (ch === " ") ch = "␣";
+        g.fillText(ch, (x0 + x1) / 2, ly + 4.5); g.textAlign = "left";
+      }
+      g.fillStyle = col.dim; g.font = "9px " + Kit.css("--mono"); g.textBaseline = "middle"; g.textAlign = "right";
+      g.fillText("→ A0", f.w - 4, ly0 + 15); g.textAlign = "left";
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  THE LOOP
+  // ══════════════════════════════════════════════════════════
+
+  var visible = { piano: true, dials: true }, rafOn = false, lastT = 0;
+  function settled() {
+    for (var k = 1; k <= NKEYS; k++) for (var i = 0; i < S.cur[k].length; i++) if (Math.abs(S.cur[k][i] - S.disp[k][i]) > 0.005) return false;
+    return true;
+  }
+  function anyFlash() { for (var i = 0; i < S.flash.length; i++) if (S.flash[i] > 0) return true; return false; }
+  function strobeMoving() {
+    if (reduced || !S.written || !S.live) return false;
+    for (var p = 0; p < 12; p++) if (Math.abs(S.live.est[p] - T_LV[S.written.levels[p]]) > 0.03) return true;
+    return false;
+  }
+  function kick() { if (!rafOn) { rafOn = true; lastT = 0; requestAnimationFrame(frame); } }
+  function frame(now) {
+    if (document.hidden) { rafOn = false; return; }
+    var onScreen = visible.piano || visible.dials;
+    var dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0.016; lastT = now;
+    S.t += dt;
+    var a = S.anim;
+    if (a) {
+      if (a.kind === "write") stepWrite(a, dt);
+      else if (a.kind === "summer") stepSummer(a, dt);
+      else if (a.kind === "tuner") stepTuner(a, dt);
+      else if (a.kind === "read") stepRead(a, dt);
+    }
+    var ease = 1 - Math.exp(-dt / (reduced ? 0.03 : 0.09));
+    for (var k = 1; k <= NKEYS; k++) for (var i = 0; i < S.cur[k].length; i++) S.disp[k][i] += (S.cur[k][i] - S.disp[k][i]) * ease;
+    for (var s = 0; s < S.flash.length; s++) S.flash[s] = Math.max(0, S.flash[s] - dt);
+    for (var k2 = 1; k2 <= NKEYS; k2++) S.keyFlash[k2] = Math.max(0, S.keyFlash[k2] - dt);
+    S.live = liveRead();
+    if (S.written && !reduced) for (var p = 0; p < 12; p++) {
+      var err = S.live.est[p] - T_LV[S.written.levels[p]];
+      S.strobePh[p] += dt * Math.max(-6, Math.min(6, err * 1.6));
+    }
+    if (visible.piano) drawPiano();
+    if (visible.dials) drawDials();
+    // operations keep running offscreen (undrawn); ambient motion only on screen
+    var keep = S.anim || (onScreen && (!settled() || anyFlash() || strobeMoving() || S.keyFlash.some(function (v) { return v > 0; })));
+    if (keep) requestAnimationFrame(frame); else rafOn = false;
+  }
+  function redrawAll() { S.live = liveRead(); drawPiano(); drawDials(); drawStretch(); drawSurv(); }
+
+  // ══════════════════════════════════════════════════════════
+  //  STRETCH CANVAS
+  // ══════════════════════════════════════════════════════════
+
+  var cvS = $("stretch");
+  function drawStretch() {
+    var f = Kit.fit(cvS), g = f.g, col = C();
+    g.clearRect(0, 0, f.w, f.h);
+    var L = 34, R = 8, T = 20, B = 26, W = f.w - L - R, H = f.h - T - B, lim = 32;
+    function X(k) { return L + (k - 1) / 87 * W; }
+    function Y(c) { return T + H / 2 - c / lim * H / 2; }
+    g.font = "10px " + Kit.css("--mono"); g.textBaseline = "middle";
+    [-30, -20, -10, 0, 10, 20, 30].forEach(function (c) {
+      g.strokeStyle = Kit.alpha(col.dim, c === 0 ? 0.55 : 0.15); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(L, Math.round(Y(c)) + 0.5); g.lineTo(L + W, Math.round(Y(c)) + 0.5); g.stroke();
+      g.fillStyle = col.dim; g.textAlign = "right"; g.fillText((c > 0 ? "+" : c < 0 ? "−" : "") + Math.abs(c), L - 5, Y(c));
+    });
+    g.textAlign = "center"; g.textBaseline = "top";
+    for (var k = 1; k <= 88; k++) if (pcOf(k) === 3 || k === 1) { g.fillStyle = col.dim; g.fillText(keyName(k), X(k), T + H + 7); }
+    g.textAlign = "left"; g.textBaseline = "alphabetic"; g.fillStyle = col.dim;
+    g.fillText("equal temperament", L + 6, Y(0) - 5);
+    // the curve
+    g.strokeStyle = col.just; g.lineWidth = 2;
+    g.beginPath(); for (var k2 = 1; k2 <= 88; k2++) { if (k2 === 1) g.moveTo(X(k2), Y(stretch(k2))); else g.lineTo(X(k2), Y(stretch(k2))); } g.stroke();
+    g.fillStyle = col.just; g.fillText("stretch", X(52), Y(stretch(80)) - 4);
+    // the keys as they stand
+    for (var k3 = 1; k3 <= 88; k3++) {
+      var P = pairPitch(S.cur, k3);
+      if (Math.abs(P) < 0.01) continue;
+      g.fillStyle = Kit.alpha(col.temper, 0.9);
+      g.beginPath(); g.arc(X(k3), Y(stretch(k3) + P), 2.1, 0, Math.PI * 2); g.fill();
+    }
+    g.fillStyle = col.dim; g.textAlign = "left";
+    g.textBaseline = "top"; g.fillText("cents", 2, 2);
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  BUDGET TABLE
+  // ══════════════════════════════════════════════════════════
+
+  function buildBudget() {
+    var nT = 0, nW = 0, nU = 0;
+    LAY.cells.forEach(function (c) { if (c.kind === "T") nT++; else if (c.kind === "W") nW++; else nU++; });
+    var bT = nT * Math.log2(T_LV.length), bW = nW * Math.log2(W_LV.length), bU = nU * Math.log2(U_LV.length);
+    var raw = bT + bW + bU;
+    var rows = [
+      ["Temperament", nT + " pitch classes", T_LV.length, "3¢, ±4.5", bT, "≈30 (6 levels)"],
+      ["Per-key lean", nW + " keys", W_LV.length, "±2¢", bW, "≈140 (3 levels)"],
+      ["Third string", nU + " three-string notes", U_LV.length, "1¢, ±1.5", bU, "≈120 (after halving)"]
+    ];
+    var tb = $("budget").querySelector("tbody"), html = "";
+    rows.forEach(function (r) { html += "<tr><td>" + r[0] + "</td><td>" + r[1] + "</td><td>" + r[2] + "</td><td>" + r[3] + "</td><td>" + r[4] + "</td><td class=\"note-est\">" + r[5] + "</td></tr>"; });
+    html += "<tr class=\"total\"><td>Raw total</td><td>" + LAY.cells.length + " cells</td><td></td><td></td><td>" + raw + "</td><td class=\"note-est\">≈290</td></tr>";
+    html += "<tr><td>5-bit symbols</td><td colspan=\"3\">" + LAY.nSym + " symbols, " + (raw - LAY.usedBits) + " bits spare</td><td>" + LAY.usedBits + "</td><td class=\"note-est\"></td></tr>";
+    html += "<tr><td>Check symbols (parity)</td><td colspan=\"3\">" + CW + " × RS(" + CW_N + "," + CW_K + "), " + (CW * CW_P) + " symbols</td><td>" + (CW * CW_P * 5) + "</td><td class=\"note-est\">a third</td></tr>";
+    html += "<tr class=\"pay\"><td>Message</td><td colspan=\"3\">" + MSG_LEN + " characters</td><td>" + (MSG_LEN * 5) + "</td><td class=\"note-est\">≈190 (38 characters)</td></tr>";
+    tb.innerHTML = html;
+    $("budget-read").innerHTML = "That is <b>" + raw + "</b> raw bits, against the note's 290, and <b>" + MSG_LEN + "</b> characters of message, against its 38. Check symbols take " +
+      Math.round(100 * CW * CW_P / LAY.nSym) + "% of the symbols, close to the note's estimate of a third. In return, each codeword can have up to " + (CW_P / 2) + " wrong symbols and still decode. The gap from the note comes from packing into whole bits, plus using only one adjustable string per three-string note, as the note proposed.";
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  SURVIVAL MEASUREMENTS (run once, in slices)
+  // ══════════════════════════════════════════════════════════
+
+  var SURV = { season: [], tuner: [], done: false };
+  var SEV_PTS = [], VIS_PTS = [];
+  for (var sp = 0; sp <= 100; sp += 10) SEV_PTS.push(sp / 100);
+  for (var vp = 0; vp <= 100; vp += 5) VIS_PTS.push(vp / 1000);
+  var TRIALS = 120;
+  function randMsg(rng) { var s = ""; for (var i = 0; i < MSG_LEN; i++) s += ALPHA[Math.floor(rng() * 32)]; return s; }
+  function trialOutcome(en, st) {
+    var res = decodeRead(trackedRead(st));
+    var exact = res.ok && res.data.every(function (v, j) { return v === en.data[j]; });
+    var rawOk = res.raw.every(function (v, j) { return v === en.data[j]; });
+    return { exact: exact, refused: !res.ok, mis: res.ok && !exact, raw: rawOk };
+  }
+  function* survivalGen() {
+    var total = (SEV_PTS.length + VIS_PTS.length) * TRIALS, n = 0;
+    SEV_PTS.forEach(function (sv) { SURV.season.push({ x: sv, exact: 0, refused: 0, mis: 0, raw: 0, n: 0 }); });
+    VIS_PTS.forEach(function (p) { SURV.tuner.push({ x: p, exact: 0, refused: 0, mis: 0, raw: 0, n: 0 }); });
+    for (var a = 0; a < SEV_PTS.length; a++) {
+      var rng = mulberry(4242), pt = SURV.season[a];
+      for (var i = 0; i < TRIALS; i++) {
+        var en = encodeMessage(randMsg(rng)), st = targetStrings(en.levels);
+        var dl = seasonDelta(90000 + i, SEV_PTS[a]);
+        for (var k = 1; k <= NKEYS; k++) for (var j = 0; j < st[k].length; j++) st[k][j] += dl[k][j];
+        var o = trialOutcome(en, st);
+        pt.n++; if (o.exact) pt.exact++; if (o.refused) pt.refused++; if (o.mis) pt.mis++; if (o.raw) pt.raw++;
+        n++; if (i % 6 === 5) yield n / total;
+      }
+    }
+    for (var b = 0; b < VIS_PTS.length; b++) {
+      var rng2 = mulberry(777), pt2 = SURV.tuner[b];
+      for (var i2 = 0; i2 < TRIALS; i2++) {
+        var en2 = encodeMessage(randMsg(rng2)), st2 = targetStrings(en2.levels);
+        tunerApply(st2, 0, Math.round(VIS_PTS[b] * PASSES * NKEYS), 5000 + i2);
+        var o2 = trialOutcome(en2, st2);
+        pt2.n++; if (o2.exact) pt2.exact++; if (o2.refused) pt2.refused++; if (o2.mis) pt2.mis++; if (o2.raw) pt2.raw++;
+        n++; if (i2 % 6 === 5) yield n / total;
+      }
+    }
+  }
+  function pct(a, b) { return b ? Math.round(100 * a / b) : 0; }
+  function survSummary() {
+    var se = SURV.season, tu = SURV.tuner;
+    var at30 = se[3], half = null, lastFull = null;
+    for (var i = 0; i < se.length; i++) { if (se[i].exact === se[i].n) lastFull = se[i]; if (half === null && se[i].exact * 2 < se[i].n) half = se[i]; }
+    var mis = 0, nn = 0; se.concat(tu).forEach(function (p) { mis += p.mis; nn += p.n; });
+    $("surv-season-read").innerHTML = "Each point is " + TRIALS + " simulated summers, each on a random 30-character message, run in your browser when the page loaded. " +
+      "At 30% severity (drift up to " + (0.3 * DRIFT_MAX).toFixed(1) + " cents) the message came back exactly in <b>" + at30.exact + " of " + at30.n + "</b>. Without the code, the raw message was intact in " + at30.raw + ". " +
+      (lastFull ? "Every summer up to " + Math.round(lastFull.x * 100) + "% severity decoded exactly. " : "") +
+      (half ? "At " + Math.round(half.x * 100) + "% (drift up to " + (half.x * DRIFT_MAX).toFixed(1) + " cents) fewer than half did. " : "") +
+      "Across all " + nn + " trials on this page, the decoder reported success with a wrong answer " + mis + " times. Every other time it failed, it reported the failure.";
+    var tHalf = null, tLastFull = null;
+    for (var j = 0; j < tu.length; j++) { if (tu[j].exact === tu[j].n) tLastFull = tu[j]; if (tHalf === null && tu[j].exact * 2 < tu[j].n) tHalf = tu[j]; }
+    var passFrac = 1 / PASSES;
+    $("surv-tuner-read").innerHTML = "Each point is " + TRIALS + " simulated visits to a freshly written piano, with no summer. One pass over the keyboard is " + (100 * passFrac).toFixed(2) + "% of the visit. " +
+      (tLastFull ? "The message decoded exactly every time up to " + (tLastFull.x * 100).toFixed(1) + "% of the visit, while the tuner was still working in the bass. " : "") +
+      (tHalf ? "By " + (tHalf.x * 100).toFixed(1) + "%, fewer than half survived." : "");
+    if (tHalf) $("tuner-verdict").textContent = "In this model the tuner does not even need to finish the first pass. By " + (tHalf.x * 100).toFixed(1) + "% of the visit, " + Math.round(tHalf.x * PASSES * NKEYS) + " keys into the first of sixteen passes, most messages are gone.";
+  }
+
+  var cvSS = $("surv-season"), cvST = $("surv-tuner");
+  function drawSurvOne(cv, pts, xLabel, xFmt, xMax, marker) {
+    var f = Kit.fit(cv), g = f.g, col = C();
+    g.clearRect(0, 0, f.w, f.h);
+    var L = 40, R = 10, T = 14, B = 34, W = f.w - L - R, H = f.h - T - B;
+    function X(x) { return L + x / xMax * W; }
+    function Y(v) { return T + H - v * H; }
+    g.font = "10px " + Kit.css("--mono"); g.textBaseline = "middle"; g.textAlign = "right";
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (v) {
+      g.strokeStyle = Kit.alpha(col.dim, v === 0 ? 0.5 : 0.15); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(L, Math.round(Y(v)) + 0.5); g.lineTo(L + W, Math.round(Y(v)) + 0.5); g.stroke();
+      g.fillStyle = col.dim; g.fillText(Math.round(v * 100) + "%", L - 5, Y(v));
+    });
+    g.textAlign = "center"; g.textBaseline = "top";
+    for (var t = 0; t <= 4; t++) { var xv = xMax * t / 4; g.fillStyle = col.dim; g.textAlign = t === 0 ? "left" : (t === 4 ? "right" : "center"); g.fillText(xFmt(xv), X(xv), T + H + 6); }
+    g.textAlign = "center";
+    g.fillText(xLabel, L + W / 2, T + H + 20);
+    if (marker !== null && marker <= xMax) {
+      g.strokeStyle = Kit.alpha(col.temper, 0.6); g.setLineDash([3, 3]);
+      g.beginPath(); g.moveTo(X(marker), T); g.lineTo(X(marker), T + H); g.stroke(); g.setLineDash([]);
+    }
+    if (!pts.length) { g.fillStyle = col.dim; g.fillText("measuring…", L + W / 2, T + H / 2); return; }
+    function line(key, hue, dash) {
+      g.strokeStyle = hue; g.lineWidth = 2; g.setLineDash(dash || []);
+      g.beginPath(); var first = true;
+      pts.forEach(function (p) { if (!p.n) return; var y = Y(p[key] / p.n); if (first) { g.moveTo(X(p.x), y); first = false; } else g.lineTo(X(p.x), y); });
+      g.stroke(); g.setLineDash([]);
+      pts.forEach(function (p) { if (!p.n) return; g.fillStyle = hue; g.beginPath(); g.arc(X(p.x), Y(p[key] / p.n), 2.4, 0, Math.PI * 2); g.fill(); });
+    }
+    line("raw", col.dim, [4, 3]);
+    line("exact", col.just);
+    g.textAlign = "left"; g.textBaseline = "alphabetic";
+    g.fillStyle = col.just; g.fillText("decoded exactly", L + 10, Y(0.42));
+    g.fillStyle = col.dim; g.fillText("raw message intact, no code", L + 10, Y(0.42) + 14);
+  }
+  function drawSurv() {
+    drawSurvOne(cvSS, SURV.season, "summer severity (largest drift in cents)", function (x) { return Math.round(x * 100) + "% · " + (x * DRIFT_MAX).toFixed(1); }, 1, +$("sev").value / 100);
+    drawSurvOne(cvST, SURV.tuner, "how far through the visit", function (x) { return (x * 100).toFixed(1) + "%"; }, 0.1, +$("visit").value / 1000);
+  }
+
+  // RS self-test: random codewords with 0..6 errors
+  function* rsSelfTestGen(out) {
+    var rng = mulberry(31337), N = 300;
+    for (var e = 0; e <= 6; e++) {
+      var row = { e: e, ok: 0, fail: 0, mis: 0 };
+      for (var i = 0; i < N; i++) {
+        var d = []; for (var q = 0; q < CW_K; q++) d.push(Math.floor(rng() * 32));
+        var c = rsEncode(d, CW_P), r = c.slice(), pos = [];
+        while (pos.length < e) { var p = Math.floor(rng() * CW_N); if (pos.indexOf(p) < 0) pos.push(p); }
+        pos.forEach(function (p2) { r[p2] ^= 1 + Math.floor(rng() * 31); });
+        var res = rsDecode(r, CW_P, []);
+        var ex = res.ok && res.data.every(function (v, j) { return v === d[j]; });
+        if (ex) row.ok++; else if (!res.ok) row.fail++; else row.mis++;
+      }
+      out.push(row); yield e / 6;
+    }
+    return N;
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  SOUND
+  // ══════════════════════════════════════════════════════════
+
+  var OCT = 4;
+  var CHORDS = [[28, 40, 44, 47, 52], [25, 37, 40, 44, 49], [21, 33, 37, 40, 45], [23, 35, 39, 42, 47], [28, 40, 44, 47, 52]];
+  function letteredStrings() {
+    if (S.written) return S.cur;
+    return targetStrings(encodeMessage((msgIn.value || "").toUpperCase()).levels);
+  }
+  function playPassage(strings, id, onEnd) {
+    var snd = Kit.sound;
+    if (snd.isMuted()) return;
+    snd.stopAll();
+    var c = snd.audio(), t0 = c.currentTime + 0.06;
+    var out = c.createGain(); out.gain.value = 1; out.connect(snd.bus());
+    var nodes = [], step = 1.05;
+    CHORDS.forEach(function (ch, ci) {
+      var tt = t0 + ci * step, dur = ci === CHORDS.length - 1 ? 3.2 : 1.9;
+      ch.forEach(function (k, ni) {
+        var st = strings ? strings[k] : null, n = nStrings(k);
+        for (var i = 0; i < n; i++) {
+          var cents = stretch(k) + (st ? st[i] : 0);
+          var v = snd.pluck(keyHz(k, cents) * OCT, tt + ni * 0.012, dur, 0.055 * (ni === 0 ? 1.2 : 1), out);
+          nodes = nodes.concat(v.nodes);
+        }
+      });
+    });
+    snd.register(id, out, nodes);
+    var total = (CHORDS.length - 1) * step + 3.3;
+    snd.later(function () { snd.stop(id); if (onEnd) onEnd(); }, total * 1000);
+  }
+  function playKey(k) {
+    var snd = Kit.sound;
+    if (snd.isMuted()) return;
+    var c = snd.audio(), t0 = c.currentTime + 0.03;
+    var out = c.createGain(); out.connect(snd.bus());
+    var nodes = [], fac = OCT;
+    // six harmonics must stay under the Nyquist limit: drop an octave if needed
+    while (fac > 0.25 && keyHz(k, stretch(k)) * fac > 3300) fac /= 2;
+    S.cur[k].forEach(function (off) { nodes = nodes.concat(snd.pluck(keyHz(k, stretch(k) + off) * fac, t0, 2.6, 0.09, out).nodes); });
+    return fac;
+    snd.register("key", out, nodes);
+    snd.later(function () { snd.stop("key"); }, 2700);
+  }
+
+  // blind A/B
+  var AB = { letterIs: Math.random() < 0.5 ? "A" : "B", guessed: false, n: 0, right: 0, played: {} };
+  function abPlay(which) {
+    AB.played[which] = true;
+    playPassage(which === AB.letterIs ? letteredStrings() : null, "ab");
+  }
+  function binomTail(k, n) { var s = 0; for (var i = k; i <= n; i++) s += choose(n, i); return s / Math.pow(2, n); }
+  function choose(n, k) { var r = 1; for (var i = 1; i <= k; i++) r = r * (n - k + i) / i; return r; }
+  function abGuess(which) {
+    if (AB.guessed) return;
+    AB.guessed = true; AB.n++;
+    var right = which === AB.letterIs; if (right) AB.right++;
+    $("ab-result").textContent = (right ? "Right. " : "Wrong. ") + "The message was in " + AB.letterIs + "." +
+      (AB.played.A && AB.played.B ? "" : " (You guessed before hearing both, so this guess tells you little.)");
+    var p = binomTail(AB.right, AB.n);
+    $("ab-tally").textContent = "You have picked the piano with the message " + AB.right + " of " + AB.n + " times. Random guessing would do at least that well " + (100 * p).toFixed(p < 0.1 ? 1 : 0) + "% of the time.";
+  }
+  function abNew() {
+    AB.letterIs = Math.random() < 0.5 ? "A" : "B"; AB.guessed = false; AB.played = {};
+    Kit.sound.stop("ab");
+    $("ab-result").textContent = "New round. Play both, then guess.";
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  WIRING
+  // ══════════════════════════════════════════════════════════
+
+  Kit.nav("channel.html");
+  Kit.soundBar();
+
+  function updMsgCount() { $("msg-count").textContent = (msgIn.value || "").length + " / " + MSG_LEN; }
+  msgIn.addEventListener("input", function () {
+    var v = msgIn.value.toUpperCase().split("").map(function (ch) { return ALPHA.indexOf(ch) >= 0 ? ch : " "; }).join("");
+    if (v !== msgIn.value) { var pos = msgIn.selectionStart; msgIn.value = v; try { msgIn.setSelectionRange(pos, pos); } catch (e) {} }
+    updMsgCount();
+  });
+  msgIn.addEventListener("keydown", function (e) { if (e.key === "Enter") startWrite(false); });
+  $("b-write").addEventListener("click", function () { startWrite(false); });
+  $("b-summer").addEventListener("click", startSummer);
+  $("b-tuner").addEventListener("click", startTuner);
+  $("b-read").addEventListener("click", startRead);
+  $("b-reset").addEventListener("click", resetPiano);
+  $("sev").addEventListener("input", function () {
+    var v = +$("sev").value; $("sev-val").textContent = v + "% · " + (v / 100 * DRIFT_MAX).toFixed(1) + "¢"; drawSurv();
+  });
+  $("visit").addEventListener("input", function () {
+    var v = +$("visit").value / 10; $("visit-val").textContent = (v < 10 ? v.toFixed(1) : v.toFixed(0)) + "%"; drawSurv();
+  });
+  $("b-play-ref").addEventListener("click", function () { playPassage(null, "passage"); });
+  $("b-play-let").addEventListener("click", function () { playPassage(letteredStrings(), "passage"); });
+  $("b-ab-a").addEventListener("click", function () { abPlay("A"); });
+  $("b-ab-b").addEventListener("click", function () { abPlay("B"); });
+  $("b-guess-a").addEventListener("click", function () { abGuess("A"); });
+  $("b-guess-b").addEventListener("click", function () { abGuess("B"); });
+  $("b-ab-new").addEventListener("click", abNew);
+  function setOct(v) {
+    OCT = v;
+    $("oct-hi").setAttribute("aria-pressed", v === 4 ? "true" : "false");
+    $("oct-lo").setAttribute("aria-pressed", v === 1 ? "true" : "false");
+    $("oct-note").textContent = v === 4
+      ? "Phone speaker plays everything two octaves up, where a small speaker can reproduce it. The offsets in cents stay the same, but beats (the slow pulse two close tones make) run four times as fast."
+      : "Headphones plays at concert pitch. The sound is fuller, but the unison beats are slower and easier to miss.";
+  }
+  $("oct-hi").addEventListener("click", function () { setOct(4); });
+  $("oct-lo").addEventListener("click", function () { setOct(1); });
+
+  // tap a key
+  cvP.addEventListener("pointerdown", function (e) {
+    if (!geomCache) return;
+    var rect = cvP.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
+    var d = geomCache.d, best = null, bd = Infinity;
+    geomCache.rows.forEach(function (r) {
+      if (y < r.y0 || y > r.y0 + d.row) return;
+      for (var k = r.k0; k <= r.k1; k++) { var dd = Math.abs(r.geo[k].cx - x); if (dd < bd) { bd = dd; best = k; } }
+    });
+    if (!best) return;
+    var st = S.cur[best], P = pairPitch(S.cur, best);
+    var txt = keyName(best) + " (key " + best + ", " + nStrings(best) + (nStrings(best) > 1 ? " strings" : " string") + "): pitch " + (P >= 0 ? "+" : "−") + Math.abs(P).toFixed(2) + "¢ from the reference";
+    if (st.length === 3) txt += ", third string " + ((st[0] - P) >= 0 ? "+" : "−") + Math.abs(st[0] - P).toFixed(2) + "¢ from the other two";
+    if (S.written) {
+      var lv = S.written.levels, kc = LAY.keyCells[best];
+      txt += ". Written: " + PC_NAMES[pcOf(best)] + " temperament " + (T_LV[lv[pcOf(best)]] > 0 ? "+" : "−") + Math.abs(T_LV[lv[pcOf(best)]]) + ", lean " + (W_LV[lv[kc.W.id]] > 0 ? "+2" : "−2") +
+        (kc.U ? (kc.U.spare ? ", third string unused" : ", third string " + (U_LV[lv[kc.U.id]] > 0 ? "+" : "−") + Math.abs(U_LV[lv[kc.U.id]])) : "") + ".";
+    } else txt += ".";
+    var fac = playKey(best);
+    if (fac !== undefined && fac < OCT) txt += " (Played " + (fac >= 1 ? "lower than the playback setting" : "an octave or two down") + ", so its overtones stay within what the audio can reproduce.)";
+    $("key-detail").textContent = txt;
+  });
+
+  // visibility
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.target === cvP) visible.piano = en.isIntersecting; else visible.dials = en.isIntersecting; });
+      if (visible.piano || visible.dials) kick();
+    });
+    io.observe(cvP); io.observe(cvD);
+  }
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) kick(); });
+  Kit.onTheme(function () { redrawAll(); });
+
+  // boot
+  updMsgCount();
+  $("sev").dispatchEvent(new Event("input"));
+  $("visit").dispatchEvent(new Event("input"));
+  showWritten(); clearRead();
+  buildBudget();
+  redrawAll();
+  // write the default letter once the piano first comes into view (no sound)
+  var wrote = false;
+  function autoWrite() { if (wrote) return; wrote = true; startWrite(reduced); }
+  if ("IntersectionObserver" in window) {
+    var io2 = new IntersectionObserver(function (es) { if (es.some(function (x) { return x.isIntersecting; })) { autoWrite(); io2.disconnect(); } }, { threshold: 0.25 });
+    io2.observe(cvP);
+  } else autoWrite();
+  // measurements, in frame-sized slices
+  var selfTest = [];
+  setTimeout(function () {
+    var q = Kit.queue();
+    q.push(rsSelfTestGen(selfTest), function () {
+      var lo = selfTest.filter(function (r) { return r.e <= CW_P / 2; }), hi = selfTest.filter(function (r) { return r.e > CW_P / 2; });
+      var okLo = 0, nLo = 0; lo.forEach(function (r) { okLo += r.ok; nLo += r.ok + r.fail + r.mis; });
+      $("rs-selftest").textContent = "When this page loaded, it tested 300 random RS(23,15) codewords at each error count from 0 to 6. With 0 to 4 wrong symbols, " + okLo + " of " + nLo + " decoded exactly. " +
+        hi.map(function (r) { return "With " + r.e + ", " + r.fail + " were refused and " + r.mis + " miscorrected (decoded to the wrong message)."; }).join(" ");
+    });
+    q.push(survivalGen(), function () { SURV.done = true; $("surv-meter").parentNode.style.visibility = "hidden"; survSummary(); drawSurv(); },
+      function (p) { $("surv-meter").style.width = (100 * p).toFixed(0) + "%"; if (Math.random() < 0.08) drawSurv(); });
+  }, 300);
+})();
+</script>
+</body>
+</html>

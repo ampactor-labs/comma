@@ -1,0 +1,1280 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Listening Test</title>
+<link rel="stylesheet" href="lab.css">
+<style>
+  .answer-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin: 1rem 0 0.6rem; }
+  .lamp {
+    min-height: 4.6rem; font-size: 1rem; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 0.2rem; transition: box-shadow 0.25s, border-color 0.25s, background 0.25s;
+  }
+  .lamp small { font-size: 0.66rem; color: var(--dim); letter-spacing: 0.12em; text-transform: uppercase; }
+  .lamp.on { border-color: var(--just); background: var(--just-soft); box-shadow: 0 0 0 1px var(--just), 0 0 26px var(--just-soft); }
+  .lamp.on small { color: var(--just); }
+  .lamp.right { border-color: var(--sage); box-shadow: 0 0 0 1px var(--sage); }
+  .lamp.wrong { border-color: var(--rose); box-shadow: 0 0 0 1px var(--rose); }
+  .fb { min-height: 1.8em; font-family: var(--mono); font-size: 0.86rem; margin: 0.3rem 0; }
+  .fb.ok { color: var(--sage); } .fb.no { color: var(--rose); }
+  .stat-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.2rem 0 0.6rem; }
+  .big { font-family: var(--mono); font-size: clamp(1.9rem, 1.4rem + 1.8vw, 2.8rem); line-height: 1.05; letter-spacing: -0.02em; }
+  .big small { font-size: 0.4em; color: var(--dim); letter-spacing: 0.04em; }
+  .formula { font-family: var(--mono); font-size: 0.76rem; color: var(--dim); overflow-wrap: anywhere; line-height: 1.6; }
+  .formula b { color: var(--ink); font-weight: 500; }
+  .legend { display: flex; gap: 0.5rem 1.1rem; flex-wrap: wrap; font-family: var(--mono); font-size: 0.72rem; color: var(--dim); margin: 0.4rem 0 0.6rem; }
+  .sw { display: inline-block; width: 0.8em; height: 0.8em; border-radius: 2px; vertical-align: -0.06em; margin-right: 0.4em; }
+  .sw.t { background: var(--temper); } .sw.s { background: var(--sage); } .sw.u { background: var(--just); }
+  .fields { display: flex; flex-wrap: wrap; gap: 0.8rem 1.2rem; align-items: flex-end; margin: 0.8rem 0; }
+  .field { display: flex; flex-direction: column; gap: 0.3rem; }
+  .field > span { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+  select { min-height: 2.6rem; }
+  button { min-height: 2.6rem; }
+  kbd { font-family: var(--mono); font-size: 0.78em; padding: 0.05rem 0.35rem; border: 1px solid var(--rule); border-radius: 2px; background: var(--panel-2); color: var(--ink); }
+  .msg { font-family: var(--mono); font-size: 0.8rem; color: var(--temper); min-height: 1.4em; }
+  .result-head { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1rem; }
+  @media (min-width: 40rem) { .result-head { grid-template-columns: 1fr 1fr; } }
+  .rbox { border: 1px solid var(--rule); border-radius: 3px; padding: 0.9rem 1rem; background: var(--panel-2); }
+  .rbox h3 { margin-bottom: 0.5rem; }
+  tr.total td { border-top: 1px solid var(--dim); font-weight: 500; }
+  .scope-label { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); margin: 0.9rem 0 0.3rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .conf { width: 100%; max-width: 14rem; display: inline-block; vertical-align: middle; margin: 0 0 0 0.3rem; }
+  .live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--rule); margin-right: 0.4rem; vertical-align: 0.05em; }
+  .live-dot.on { background: var(--rose); }
+  .privacy { border-left: 2px solid var(--just); padding-left: 0.9rem; }
+  ol.steps { max-width: var(--measure); margin: 0 0 1.1rem; padding-left: 1.4rem; }
+  ol.steps li { margin: 0.3rem 0; padding-left: 0.2rem; }
+</style>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">Lab &middot; 06</span>
+  <h1>The Listening Test</h1>
+  <p class="lede">The <a href="../notes/tuning-channel.md">tuning-channel note</a> estimates that a piano's tuning can hide about 290 bits of data before an audience notices. That figure rests on two listening thresholds that were estimated, not measured. This page measures them with your ears.</p>
+  <p>Each trial plays the same sound twice. One of the two has been altered, and you pick which one. The test takes about ten minutes. Use a quiet room, and headphones if you have them. Nothing leaves this browser unless you send it yourself.</p>
+  <ol class="steps">
+    <li>Set up your sound and do two practice trials (section 01).</li>
+    <li>Run Test A, an altered tuning (section 02).</li>
+    <li>Run Test B, a spread unison (section 03).</li>
+    <li>Read your results, and download them if you want to share them (section 04).</li>
+  </ol>
+</header>
+
+<section id="camp">
+  <div class="sec-head"><span class="sec-mark">01</span><div><h2>Set up your sound</h2></div></div>
+  <p>Do these steps once, before the tests.</p>
+  <ol class="steps">
+    <li>Choose <b>Phone speaker</b> or <b>Headphones</b>.</li>
+    <li>Press <b>Play the reference chord</b>.</li>
+    <li>Set the volume so the chord is clear but quiet. Leave it there for both tests.</li>
+  </ol>
+
+  <div class="panel">
+    <h3>Output and level</h3>
+    <div class="btn-row" role="group" aria-label="Playback register">
+      <button id="oct-hi" aria-pressed="true">Phone speaker</button>
+      <button id="oct-lo" aria-pressed="false">Headphones</button>
+    </div>
+    <p class="note" id="oct-note">Phone speaker plays everything two octaves higher (four times the frequency), because a small speaker reproduces little below 500&nbsp;Hz. Beats run four times as fast up there, which probably makes both tests easier. Your choice is saved with your results.</p>
+    <div class="slider-row">
+      <label for="vol">Volume</label>
+      <input type="range" id="vol" min="0" max="100" value="70" aria-describedby="vol-read">
+      <span class="readout num" id="vol-read">70%</span>
+    </div>
+    <div class="btn-row">
+      <button data-tone="just" id="ref-play" data-needs-sound>Play the reference chord</button>
+    </div>
+  </div>
+
+  <p>Next, press <b>Start practice</b>. You get one trial of each test with a very large alteration, so both should be easy. If you miss either one, check your volume and cable before you start the real tests.</p>
+
+  <div class="panel" id="P-panel">
+    <h3>Practice &middot; two trials</h3>
+    <div class="stat-row" id="P-stat"><span class="chip">not started</span></div>
+    <div class="btn-row">
+      <button data-tone="just" id="P-start" data-needs-sound>Start practice</button>
+      <button id="P-replay" data-needs-sound disabled>Replay <kbd>space</kbd></button>
+    </div>
+    <div class="answer-row">
+      <button class="lamp" id="P-1" disabled><span>First</span><small>key 1</small></button>
+      <button class="lamp" id="P-2" disabled><span>Second</span><small>key 2</small></button>
+    </div>
+    <div class="fb" id="P-fb" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="test-a">
+  <div class="sec-head"><span class="sec-mark">02</span><div><h2>Test A: an altered tuning</h2></div></div>
+  <p>You hear a five-chord sequence (C, A minor, F, G, C) twice. One run uses equal temperament, the standard piano tuning that splits the octave into twelve equal semitones. In the other run, six of the twelve note names are raised by &Delta; cents and the other six are lowered by &Delta;. A cent is a hundredth of a semitone. Which six go up is chosen at random each trial.</p>
+  <ol class="steps">
+    <li>Press <b>Start test A</b>. The two runs play back to back. The <b>First</b> and <b>Second</b> buttons light up while each run plays.</li>
+    <li>Press <b>First</b> (key <kbd>1</kbd>) or <b>Second</b> (key <kbd>2</kbd>) for the run that sounded altered. You can answer once the second run starts.</li>
+    <li>Press <b>Replay</b> (<kbd>space</kbd>) to hear the pair again. If you're unsure, take your best guess.</li>
+    <li>Keep answering. The test ends on its own, after at most 40 trials.</li>
+  </ol>
+  <p>The size of &Delta; adjusts to your answers. Two right answers in a row make it smaller, and one wrong answer makes it larger. This method is called a staircase. Over the run, &Delta; settles at the size you pick correctly about 71 percent of the time. That size is your threshold.</p>
+
+  <div class="panel" id="A-panel">
+    <h3>Test A &middot; which run was altered?</h3>
+    <div class="stat-row" id="A-stat"><span class="chip">not started</span></div>
+    <div class="meter" aria-hidden="true"><i id="A-meter"></i></div>
+    <div class="btn-row">
+      <button data-tone="just" id="A-start" data-needs-sound>Start test A</button>
+      <button id="A-replay" data-needs-sound disabled>Replay <kbd>space</kbd></button>
+    </div>
+    <div class="answer-row">
+      <button class="lamp" id="A-1" disabled><span>First</span><small>key 1</small></button>
+      <button class="lamp" id="A-2" disabled><span>Second</span><small>key 2</small></button>
+    </div>
+    <div class="fb" id="A-fb" aria-live="polite"></div>
+    <canvas id="A-cv" height="230" aria-label="Staircase for test A: the alteration size in cents on a log scale against trial number. Filled dots are right answers, hollow dots wrong ones, ringed dots are reversals."></canvas>
+    <p class="note" style="margin-top:0.6rem">Filled dots are right answers and hollow dots are wrong ones. A ring marks a reversal, a trial where the staircase changed direction. The green dashed line is the note's estimate of &plusmn;5 cents.</p>
+  </div>
+</section>
+
+<section id="test-b">
+  <div class="sec-head"><span class="sec-mark">03</span><div><h2>Test B: a spread unison</h2></div></div>
+  <p>In the middle and upper range of a piano, each note has three strings. They are normally tuned to the same pitch, which is called a unison. A tuner can set them slightly apart, and the note sounds a little fuller, the way a choir sounds fuller than one voice. The note assumes a spread of &plusmn;1.5 cents is heard as warmth, not as a mistake.</p>
+  <p>You hear the note A twice. In one, all three strings are exactly together. In the other, one string is &Delta; cents flat, one is in tune, and one is &Delta; cents sharp. Pick the one that was spread. The buttons, keys and staircase work the same as in Test A.</p>
+  <p>Listen to the end of each note, not the attack. Close pitches produce beats, a slow rise and fall in loudness. Here the beats show up as the sound fades.</p>
+
+  <div class="panel" id="B-panel">
+    <h3>Test B &middot; which note was spread?</h3>
+    <div class="stat-row" id="B-stat"><span class="chip">not started</span></div>
+    <div class="meter" aria-hidden="true"><i id="B-meter"></i></div>
+    <div class="btn-row">
+      <button data-tone="just" id="B-start" data-needs-sound>Start test B</button>
+      <button id="B-replay" data-needs-sound disabled>Replay <kbd>space</kbd></button>
+    </div>
+    <div class="answer-row">
+      <button class="lamp" id="B-1" disabled><span>First</span><small>key 1</small></button>
+      <button class="lamp" id="B-2" disabled><span>Second</span><small>key 2</small></button>
+    </div>
+    <div class="fb" id="B-fb" aria-live="polite"></div>
+    <canvas id="B-cv" height="230" aria-label="Staircase for test B: the unison spread in cents on a log scale against trial number, with reversals ringed."></canvas>
+    <p class="note" style="margin-top:0.6rem">The marks are the same as in Test A. The green dashed line is the note's estimate of &plusmn;1.5 cents.</p>
+  </div>
+</section>
+
+<section id="results">
+  <div class="sec-head"><span class="sec-mark">04</span><div><h2>Your results</h2></div></div>
+  <p>This section feeds your two thresholds into the note's formulas. The result is the channel size: how many bits a tuning could hide, where one bit is one yes-or-no choice. Until you finish a test, the note's estimate is used in its place.</p>
+  <p>The channel has three parts. Temperament comes from Test A. Unisons come from Test B. Per-key stretch is a small offset on each of the 88 keys. It sits on top of the usual stretch curve, which tunes high notes slightly sharp and low notes slightly flat. This test does not measure it.</p>
+  <p>Treat your numbers as a lower bound. Here you know one of two sounds is altered, you hear them back to back, and you can replay them. A concert audience has none of that help, so it would need larger alterations before noticing. The piano can probably hide more than the figure shown.</p>
+
+  <div class="panel" id="res-panel">
+    <h3>Results</h3>
+    <div class="result-head">
+      <div class="rbox">
+        <h3>Temperament threshold, A</h3>
+        <div class="big num" id="r-a">&mdash;</div>
+        <div class="readout" id="r-a-sub">Test A not run yet. The table below uses the note's &plusmn;5 cents until you run it.</div>
+      </div>
+      <div class="rbox">
+        <h3>Unison threshold, B</h3>
+        <div class="big num" id="r-b">&mdash;</div>
+        <div class="readout" id="r-b-sub">Test B not run yet. The table below uses the note's &plusmn;1.5 cents until you run it.</div>
+      </div>
+    </div>
+    <p id="r-compare" class="wide"></p>
+
+    <div class="table-scroll">
+      <table id="r-table" aria-label="The tuning channel recomputed">
+        <thead><tr><th>Sub-channel</th><th class="opt">Note's window</th><th>Note's bits</th><th class="opt">Your window</th><th>Your bits</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="formula" id="r-formulas"></div>
+
+    <div class="legend" aria-hidden="true">
+      <span><i class="sw t"></i>temperament</span><span><i class="sw s"></i>per-key stretch</span><span><i class="sw u"></i>unisons</span>
+    </div>
+    <canvas id="r-cv" height="150" aria-label="Bar chart comparing the note's estimated channel capacity in bits with the capacity recomputed from your thresholds, split into temperament, stretch and unisons."></canvas>
+    <div class="readout" id="r-hover" aria-live="polite">Hover over or tap a bar segment to see its numbers.</div>
+
+    <div class="btn-row">
+      <button data-tone="just" id="dl-json">Download JSON</button>
+      <button id="copy-sum">Copy summary</button>
+    </div>
+    <div class="readout" id="copy-msg" aria-live="polite"></div>
+    <p class="note privacy">Your answers stay in this tab. The page makes no network requests. The only thing it stores is your speaker choice, which this browser remembers for next time. The JSON file holds every trial (test, &Delta;, which one was altered, your answer, right or wrong, timestamp). It also holds device details: sample rate, your browser's user-agent string, output choice, volume and screen size. To contribute, send the file to whoever shared this page with you. Results from many listeners are more useful than results from one.</p>
+  </div>
+</section>
+
+<section id="piano">
+  <div class="sec-head"><span class="sec-mark">05</span><div><h2>Measure a real piano</h2></div></div>
+  <p>If you have a piano nearby, you can measure how far one of its intervals is from pure. An interval is two notes played together. It is pure when the two frequencies form an exact whole-number ratio, such as 3:2 for a fifth.</p>
+  <p>A piano note is a mix of partials: the main pitch plus fainter tones at about 2, 3, 4 and more times its frequency. When a partial of the low note nearly matches a partial of the high note, the two beat. For a fifth, the low note's third partial meets the high note's second. The beat rate gives the tuning error. The strings' own behavior adds some uncertainty.</p>
+  <p>The page measures the loudness of the microphone signal 100 times a second. This record is the loudness envelope. The page finds a slow, steady pulse in it and converts the pulse rate into cents.</p>
+  <ol class="steps">
+    <li>Choose the interval and the lower note below.</li>
+    <li>Press <b>Listen through the microphone</b> and allow access.</li>
+    <li>Strike both notes, hold the keys down, and stay quiet for about ten seconds.</li>
+    <li>Read the beat rate and the distance from pure. The confidence figure shows how clear the pulse was.</li>
+  </ol>
+  <p>No piano? Press <b>Test with a synthetic piano</b>. It runs the meter on a computer-made dyad (two notes sounded together) whose beat rate is known exactly. <b>Hear the synthetic dyad</b> plays it aloud.</p>
+
+  <div class="panel" id="mic-panel">
+    <h3>Beat meter</h3>
+    <div class="fields">
+      <label class="field"><span>Interval you played</span><select id="m-iv"></select></label>
+      <label class="field"><span>Lower note</span><select id="m-root"></select></label>
+    </div>
+    <div class="slider-row">
+      <label for="m-win">Analysis window</label>
+      <input type="range" id="m-win" min="8" max="16" step="1" value="12">
+      <span class="readout num" id="m-win-read">12 s</span>
+    </div>
+    <div class="btn-row">
+      <button data-tone="temper" id="m-mic">Listen through the microphone</button>
+      <button id="m-synth">Test with a synthetic piano</button>
+      <button id="m-hear" data-needs-sound>Hear the synthetic dyad</button>
+    </div>
+    <div class="msg" id="m-msg" aria-live="polite"></div>
+
+    <div class="scope-label"><span><i class="live-dot" id="m-dot"></i>Waveform</span><span id="m-src">idle</span></div>
+    <canvas id="m-wave" height="80" aria-label="Live waveform of the microphone or synthetic signal."></canvas>
+    <div class="scope-label"><span>Loudness envelope, 100 per second</span><span id="m-env-lab">last 12 s</span></div>
+    <canvas id="m-env" height="130" aria-label="Loudness envelope over the analysis window, with the fitted decay curve dashed."></canvas>
+    <div class="scope-label"><span>Spectrum of the envelope, 0.2 to 20 Hz</span><span>log frequency</span></div>
+    <canvas id="m-spec" height="180" aria-label="Spectrum of the loudness envelope from 0.2 to 20 hertz on a log axis; the tallest peak is the beat rate. A dashed line marks the beat equal temperament predicts for the chosen interval."></canvas>
+
+    <div class="grid-3" style="margin-top:1rem">
+      <div><h3>Beat rate</h3><div class="big num" id="m-hz">&mdash;</div><div class="readout">confidence <span class="num" id="m-conf-t">&mdash;</span><span class="meter conf"><i id="m-conf"></i></span></div></div>
+      <div><h3>Distance from pure</h3><div class="big num" id="m-cents">&mdash;</div><div class="readout" id="m-cents-sub">Beats can't tell sharp from flat.</div></div>
+      <div><h3>Equal temperament says</h3><div class="big num" id="m-et">&mdash;</div><div class="readout" id="m-et-sub"></div></div>
+    </div>
+    <p class="formula" id="m-formula" style="margin-top:1rem"></p>
+    <div class="readout" id="m-synth-out" aria-live="polite"></div>
+  </div>
+</section>
+
+<div class="foot">
+  <p class="note"><strong>What was measured, and how.</strong> Test A plays C&ndash;Am&ndash;F&ndash;G&ndash;C voiced C3&nbsp;E4&nbsp;G4&nbsp;C5, A2&nbsp;E4&nbsp;A4&nbsp;C5, F2&nbsp;F4&nbsp;A4&nbsp;C5, G2&nbsp;D4&nbsp;G4&nbsp;B4, C3&nbsp;E4&nbsp;G4&nbsp;C5. Chords start 0.8&nbsp;s apart and the last rings for 1.9&nbsp;s. Each note is a <code>Kit.sound.pluck</code>: six partials, each slightly sharp by the factor 1&nbsp;+&nbsp;0.0004h&sup2; (a small stiff-string stretch), with exponential decay. The altered run moves a random six of the twelve pitch classes up by &Delta; and the other six down by &Delta;. Seven pitch classes appear in the progression, so at least one always moves against the rest, and the alteration is never a plain transposition. Every altered pitch class sits at the edge of a &plusmn;&Delta; window, so some intervals are off by as much as 2&Delta;. Test B plays A4 (440&nbsp;Hz, or 1760&nbsp;Hz on the phone setting) as three 3.4&nbsp;s plucks struck together in phase, at 0,&nbsp;0,&nbsp;0 or &minus;&Delta;,&nbsp;0,&nbsp;+&Delta; cents.</p>
+  <p class="note">Both tests are two-interval forced choice, with the altered sound's position random. Each uses a 2-down-1-up staircase (Levitt, 1971), which converges near 70.7% correct. &Delta; starts at 12 cents (A) or 4 cents (B). It moves by a factor of 1.5, then 1.2 from the second reversal on, and is capped at 40 or 16 cents. A run stops at 8 reversals or 40 trials. The threshold is the geometric mean of &Delta; at the last six reversals. A run that ends with fewer than two reversals reports the geometric mean of its last six levels and is flagged as unconverged.</p>
+  <p class="note">A forced choice measures discrimination: an alert listener, a reference next to the target, and unlimited replays. An audience has none of these, so these thresholds sit below the audience detection window the note asks about, and the recomputed channel is conservative. Results also depend on the speaker or headphones, the register, the room, the level, practice and fatigue, and on one progression in one key. A real piano's partials are louder, longer and more inharmonic than these synthetic ones. One listener's results do not generalize.</p>
+  <p class="note">The channel uses the note's own formulas with your thresholds rounded to 0.01 cent. Temperament: levels = &lfloor;2A/2&rfloor;&nbsp;+&nbsp;1 at the note's 2-cent strobe-tuner resolution, bits = 12&middot;log<sub>2</sub>(levels). Per-key stretch: not measured here. The page takes the note's 88&middot;log<sub>2</sub>3 &asymp; 139.5 bits and scales it linearly by A/5, capped at 1, because a per-key offset should be no larger than the temperament window it sits inside. A finer threshold can shrink this term but never grow it. Unisons: levels = &lfloor;2B/1&rfloor;&nbsp;+&nbsp;1 at 1-cent resolution, two strings by 60 notes, halved for stability. The note's inputs (5 and 1.5 cents) give 31.0&nbsp;+&nbsp;139.5&nbsp;+&nbsp;120.0 = 290.5 bits.</p>
+  <p class="note">The beat meter takes a 40&nbsp;ms Hann-weighted RMS every 10&nbsp;ms. It starts 0.25&nbsp;s after the loudest point in the window (the strike). It divides the envelope by a quadratic fit to its logarithm to remove the decay, applies a Hann window, and evaluates a direct Fourier transform from max(0.2&nbsp;Hz, 1.5/T) to 20&nbsp;Hz on a grid no coarser than min(0.02, 1/4T)&nbsp;Hz, then refines the tallest peak. T is the analyzed length. Confidence is the share of the band's power within &plusmn;2/T of the peak, times min(1, cycles/3), times min(1, depth/0.2%), where depth is the beat's modulation depth. It is cut to 30% for a peak pinned to the bottom of the band. The cents figure assumes harmonic partials, c&nbsp;=&nbsp;1200&middot;log<sub>2</sub>(1&nbsp;+&nbsp;b/(p&middot;f<sub>low</sub>)), and treats the lower note as sitting at equal-tempered pitch with A4&nbsp;=&nbsp;440&nbsp;Hz. Beats can't tell sharp from flat. Real strings are stiff and their partials run sharp, which shifts the coincident partials and so the beat rate, more at the ends of the keyboard. Browsers may process the microphone signal even when asked not to. The synthetic test runs the same estimator on a dyad whose beat is known exactly.</p>
+</div>
+
+</div>
+<script src="kit.js"></script>
+<script>
+// [verify:beat] begin
+// The beat estimator. DOM-free and self-contained: tools/verify.mjs can lift
+// this block out and run it in Node.
+
+// A Hann-weighted RMS envelope at `rate` values per second, computed
+// incrementally so the microphone and a whole buffer go through one path.
+// Power is taken four times per output step and averaged, which keeps the
+// fast roughness between unrelated partials from aliasing into the band.
+function makeEnvelope(fs, rate, winSec) {
+  rate = rate || 100; winSec = winSec || 0.04;
+  var sub = Math.max(1, Math.round(fs / (rate * 4)));
+  var L = Math.max(4, Math.round(winSec * fs));
+  var w = new Float64Array(L), ws = 0, i;
+  for (i = 0; i < L; i++) { w[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * (i + 0.5) / L); ws += w[i]; }
+  for (i = 0; i < L; i++) w[i] /= ws;
+  var ring = new Float64Array(L), pos = 0, count = 0, acc = 0, nacc = 0;
+  return {
+    envFs: fs / (sub * 4), L: L,
+    push: function (chunk) {
+      var out = [];
+      for (var k = 0; k < chunk.length; k++) {
+        ring[pos] = chunk[k]; pos++; if (pos === L) pos = 0; count++;
+        if (count >= L && (count - L) % sub === 0) {
+          var s = 0, j = 0, p = pos, v;
+          for (; p < L; p++, j++) { v = ring[p]; s += w[j] * v * v; }
+          for (p = 0; p < pos; p++, j++) { v = ring[p]; s += w[j] * v * v; }
+          acc += s; nacc++;
+          if (nacc === 4) { out.push(Math.sqrt(acc / 4)); acc = 0; nacc = 0; }
+        }
+      }
+      return out;
+    }
+  };
+}
+
+function dftPower(r, f, fsE) {
+  var w = 2 * Math.PI * f / fsE, c = Math.cos(w), s = Math.sin(w);
+  var re = 0, im = 0, pr = 1, pi = 0, t;
+  for (var i = 0; i < r.length; i++) {
+    re += r[i] * pr; im += r[i] * pi;
+    t = pr * c - pi * s; pi = pr * s + pi * c; pr = t;
+  }
+  return re * re + im * im;
+}
+
+// From an envelope to a beat rate. Returns {hz, confidence, freqs, power,
+// start, trend, lo, hi, T, level}.
+function beatSpectrum(env, envFs, fmin, fmax) {
+  var n = env.length, i;
+  var res = { hz: NaN, confidence: 0, freqs: null, power: null, start: 0, trend: null, lo: fmin, hi: fmax, T: 0, level: 0, why: "" };
+  if (n < envFs * 2) { res.why = "short"; return res; }
+  var im = 0;
+  for (i = 1; i < n; i++) if (env[i] > env[im]) im = i;
+  var peak = env[im]; res.level = peak;
+  if (!(peak > 1e-5)) { res.why = "quiet"; return res; }
+  var start = im + Math.round(0.25 * envFs);
+  res.start = start;
+  var m = n - start;
+  if (m < envFs * 1.5) { res.why = "strike"; return res; }
+  var T = m / envFs; res.T = T;
+  // quadratic fit to the log envelope: the decay
+  var eps = peak * 1e-3, S = [0, 0, 0, 0, 0], Y = [0, 0, 0], u, y, u2;
+  for (i = 0; i < m; i++) {
+    u = m > 1 ? (2 * i / (m - 1)) - 1 : 0; u2 = u * u;
+    y = Math.log(env[start + i] + eps);
+    S[0] += 1; S[1] += u; S[2] += u2; S[3] += u2 * u; S[4] += u2 * u2;
+    Y[0] += y; Y[1] += y * u; Y[2] += y * u2;
+  }
+  var M = [[S[0], S[1], S[2], Y[0]], [S[1], S[2], S[3], Y[1]], [S[2], S[3], S[4], Y[2]]];
+  for (var c = 0; c < 3; c++) {
+    var piv = c;
+    for (var r2 = c + 1; r2 < 3; r2++) if (Math.abs(M[r2][c]) > Math.abs(M[piv][c])) piv = r2;
+    var tmp = M[c]; M[c] = M[piv]; M[piv] = tmp;
+    for (var r3 = 0; r3 < 3; r3++) {
+      if (r3 === c || M[c][c] === 0) continue;
+      var fct = M[r3][c] / M[c][c];
+      for (var k = c; k < 4; k++) M[r3][k] -= fct * M[c][k];
+    }
+  }
+  var a = M[0][3] / M[0][0], b = M[1][3] / M[1][1], q = M[2][3] / M[2][2];
+  var trend = new Float64Array(m), rr = new Float64Array(m), mean = 0;
+  for (i = 0; i < m; i++) {
+    u = m > 1 ? (2 * i / (m - 1)) - 1 : 0;
+    trend[i] = Math.exp(a + b * u + q * u * u);
+    rr[i] = env[start + i] / trend[i] - 1;
+    mean += rr[i];
+  }
+  mean /= m;
+  for (i = 0; i < m; i++) rr[i] = (rr[i] - mean) * (0.5 - 0.5 * Math.cos(2 * Math.PI * (i + 0.5) / m));
+  res.trend = trend;
+  var lo = Math.max(fmin, 1.5 / T), hi = Math.min(fmax, envFs * 0.45);
+  res.lo = lo; res.hi = hi;
+  if (!(hi > lo)) { res.why = "band"; return res; }
+  var df = Math.min(0.02, 1 / (4 * T));
+  var nb = Math.floor((hi - lo) / df) + 1;
+  var freqs = new Float64Array(nb), power = new Float64Array(nb), best = 0, tot = 0;
+  for (i = 0; i < nb; i++) {
+    freqs[i] = lo + i * df;
+    power[i] = dftPower(rr, freqs[i], envFs);
+    tot += power[i];
+    if (power[i] > power[best]) best = i;
+  }
+  // refine: a fine scan around the coarse peak, then a parabola
+  var h = df / 8, fb = freqs[best], pb = power[best];
+  for (var j = -8; j <= 8; j++) {
+    var fj = freqs[best] + j * h;
+    if (fj < lo || fj > hi) continue;
+    var pj = dftPower(rr, fj, envFs);
+    if (pj > pb) { pb = pj; fb = fj; }
+  }
+  var pm = dftPower(rr, fb - h, envFs), pp = dftPower(rr, fb + h, envFs);
+  var den = pm - 2 * pb + pp, delta = den < 0 ? 0.5 * (pm - pp) / den : 0;
+  if (delta > 1) delta = 1; if (delta < -1) delta = -1;
+  var hz = fb + delta * h;
+  var lobe = 0, half = 2 / T;
+  for (i = 0; i < nb; i++) if (Math.abs(freqs[i] - hz) <= half) lobe += power[i];
+  var conf = tot > 0 ? lobe / tot : 0;
+  conf *= Math.min(1, hz * T / 3);
+  // modulation depth: a Hann-windowed cosine of amplitude A peaks at A*m/4
+  var depth = 4 * Math.sqrt(dftPower(rr, hz, envFs)) / m;
+  res.depth = depth;
+  conf *= Math.min(1, depth / 0.002);
+  if (hz - lo < 0.5 / T) conf *= 0.3;           // a peak pinned to the band edge is leftover decay
+  res.hz = hz; res.confidence = Math.max(0, Math.min(1, conf));
+  res.freqs = freqs; res.power = power;
+  return res;
+}
+
+// estimateBeat(samples, fs, fmin, fmax) -> {hz, confidence, ...}
+function estimateBeat(samples, fs, fmin, fmax) {
+  var E = makeEnvelope(fs, 100, 0.04);
+  var env = Float64Array.from(E.push(samples));
+  var r = beatSpectrum(env, E.envFs, fmin == null ? 0.2 : fmin, fmax == null ? 20 : fmax);
+  r.env = env; r.envFs = E.envFs;
+  return r;
+}
+
+// A struck dyad with harmonic partials, 1/k amplitudes, a 4 ms attack and
+// per-partial exponential decay (higher partials die faster).
+function synthDyad(f1, f2, fs, seconds, partials) {
+  partials = partials || 8;
+  var N = Math.round(fs * seconds), out = new Float64Array(N), seed = 12345;
+  var att = Math.max(1, Math.round(0.004 * fs)), notes = [f1, f2];
+  for (var nI = 0; nI < 2; nI++) {
+    for (var k = 1; k <= partials; k++) {
+      var fk = notes[nI] * k;
+      if (fk >= fs * 0.45) break;
+      seed = (seed * 16807) % 2147483647;
+      var ph = 2 * Math.PI * seed / 2147483647;
+      var w = 2 * Math.PI * fk / fs, c = Math.cos(w), s = Math.sin(w);
+      var pr = Math.cos(ph), pi = Math.sin(ph), t;
+      var tau = 4 / (1 + 0.25 * (k - 1)), dec = Math.exp(-1 / (tau * fs)), a = 1 / k;
+      for (var i = 0; i < N; i++) {
+        out[i] += (i < att ? a * i / att : a) * pi;
+        t = pr * c - pi * s; pi = pr * s + pi * c; pr = t;
+        a *= dec;
+      }
+    }
+  }
+  var mx = 0;
+  for (var i2 = 0; i2 < N; i2++) if (Math.abs(out[i2]) > mx) mx = Math.abs(out[i2]);
+  if (mx > 0) for (var i3 = 0; i3 < N; i3++) out[i3] *= 0.5 / mx;
+  return out;
+}
+// [verify:beat] end
+
+(function () {
+  "use strict";
+  Kit.nav("listen.html");
+  Kit.soundBar();
+  var S = Kit.sound;
+  var $ = function (id) { return document.getElementById(id); };
+  var FAST = false;               // the test harness flips this to skip pauses
+
+  function mtof(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function fmt(x, d) { return (x == null || !isFinite(x)) ? "—" : x.toFixed(d == null ? 2 : d); }
+  function geo(a) { if (!a.length) return NaN; var s = 0; a.forEach(function (x) { s += Math.log(x); }); return Math.exp(s / a.length); }
+  function monoFont(px) { return px + "px " + Kit.css("--mono"); }
+  function isDark() { var h = Kit.css("--ground").replace("#", ""); if (h.length === 3) h = h.replace(/./g, "$&$&"); var n = parseInt(h, 16); return ((n >> 16 & 255) + (n >> 8 & 255) + (n & 255)) / 3 < 128; }
+  function glowOp() { return isDark() ? "lighter" : "source-over"; }
+  // right-aligned text on a backing plate, so labels stay legible over marks
+  function pill(g, text, x, y, color, plate) {
+    var wd = g.measureText(text).width, top = g.textBaseline === "top" ? y : y - 13;
+    g.fillStyle = Kit.alpha(plate, 0.88); g.fillRect(x - wd - 4, top - 1, wd + 6, 15);
+    g.fillStyle = color; g.fillText(text, x, y);
+  }
+  function ease(t) { t = Math.max(0, Math.min(1, t)); return 1 - Math.pow(1 - t, 3); }
+
+  // ───────────────────────── output, level, register ─────────────────────────
+  var OCT = 4, VOL = 0.7, OUT = null;
+  function out() {
+    if (!OUT) { var c = S.audio(); OUT = c.createGain(); OUT.gain.value = VOL; OUT.connect(S.bus()); }
+    return OUT;
+  }
+  var octHi = $("oct-hi"), octLo = $("oct-lo");
+  function setOct(v) {
+    OCT = v;
+    octHi.setAttribute("aria-pressed", v === 4 ? "true" : "false");
+    octLo.setAttribute("aria-pressed", v === 1 ? "true" : "false");
+    try { localStorage.setItem("listen-oct", String(v)); } catch (e) {}
+  }
+  try { var so = localStorage.getItem("listen-oct"); if (so === "1") setOct(1); } catch (e) {}
+  octHi.addEventListener("click", function () { setOct(4); });
+  octLo.addEventListener("click", function () { setOct(1); });
+  function outputName() { return OCT === 4 ? "phone speaker" : "headphones"; }
+
+  $("vol").addEventListener("input", function (e) {
+    VOL = e.target.value / 100;
+    $("vol-read").textContent = e.target.value + "%";
+    if (OUT) OUT.gain.setTargetAtTime(VOL, S.audio().currentTime, 0.03);
+  });
+
+  function chordNodes(t, midis, offsets, g, dur, gain) {
+    var nodes = [];
+    midis.forEach(function (m) {
+      var c = offsets ? offsets[m % 12] : 0;
+      var v = S.pluck(mtof(m) * OCT * Math.pow(2, c / 1200), t, dur, gain, g);
+      nodes.push.apply(nodes, v.nodes);
+    });
+    return nodes;
+  }
+  $("ref-play").addEventListener("click", function () {
+    var c = S.audio(), g = c.createGain(); g.connect(out());
+    var t = c.currentTime + 0.05;
+    var nodes = chordNodes(t, [48, 64, 67, 72], null, g, 2.6, 0.09);
+    S.register("ref", g, nodes);
+    S.later(function () { S.stop("ref"); }, 2800);
+  });
+
+  // ───────────────────────── the two stimuli ─────────────────────────
+  var PROG = [[48, 64, 67, 72], [45, 64, 69, 72], [41, 65, 69, 72], [43, 62, 67, 71], [48, 64, 67, 72]];
+  var TESTS = {
+    A: {
+      name: "altered tuning", start: 12, max: 40, assume: 5, len: 5.1, gap: 0.8,
+      ticks: [0.5, 1, 2, 5, 10, 20, 40], ymin: 0.3, ymax: 48,
+      make: function (d) { return shuffle([1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1]).map(function (s) { return s * d; }); },
+      play: function (t, stim, g) {
+        var nodes = [];
+        PROG.forEach(function (ch, i) {
+          var last = i === PROG.length - 1;
+          nodes.push.apply(nodes, chordNodes(t + i * 0.8, ch, stim, g, last ? 1.9 : 1.5, 0.085));
+        });
+        return nodes;
+      }
+    },
+    B: {
+      name: "spread unison", start: 4, max: 16, assume: 1.5, len: 3.4, gap: 0.7,
+      ticks: [0.1, 0.2, 0.5, 1, 2, 5, 10], ymin: 0.08, ymax: 20,
+      make: function (d) { return d; },
+      play: function (t, stim, g) {
+        var d = stim || 0, nodes = [];
+        [-d, 0, d].forEach(function (c) {
+          var v = S.pluck(mtof(69) * OCT * Math.pow(2, c / 1200), t, 3.4, 0.1, g);
+          nodes.push.apply(nodes, v.nodes);
+        });
+        return nodes;
+      }
+    }
+  };
+
+  // ───────────────────────── the staircase ─────────────────────────
+  function Staircase(start, max) {
+    this.d = start; this.max = max; this.run = 0; this.dir = 0;
+    this.revs = []; this.revTrials = []; this.levels = []; this.done = false;
+  }
+  Staircase.prototype.update = function (correct) {
+    this.levels.push(this.d);
+    var step = 0;
+    if (correct) { this.run++; if (this.run === 2) { this.run = 0; step = -1; } }
+    else { this.run = 0; step = 1; }
+    var rev = false;
+    if (step) {
+      if (this.dir !== 0 && step !== this.dir) { this.revs.push(this.d); this.revTrials.push(this.levels.length - 1); rev = true; }
+      this.dir = step;
+      var f = this.revs.length >= 2 ? 1.2 : 1.5;
+      this.d = step < 0 ? this.d / f : Math.min(this.max, this.d * f);
+    }
+    if (this.revs.length >= 8 || this.levels.length >= 40) this.done = true;
+    return rev;
+  };
+  Staircase.prototype.threshold = function () {
+    if (this.revs.length >= 2) return { value: geo(this.revs.slice(-6)), converged: this.revs.length >= 6, used: Math.min(6, this.revs.length) };
+    return { value: geo(this.levels.slice(-6)), converged: false, used: 0 };
+  };
+
+  // ───────────────────────── trial log ─────────────────────────
+  var LOG = [];
+  var RESULT = { A: null, B: null };
+
+  // ───────────────────────── one player for every trial ─────────────────────────
+  var play = { token: 0, timers: [] };
+  function clearTimers() { play.timers.forEach(clearTimeout); play.timers = []; }
+  function playTrial(tr, onPhase) {
+    clearTimers();
+    var tok = ++play.token;
+    var c = S.audio(), g = c.createGain(); g.connect(out());
+    var T = TESTS[tr.test];
+    var t0 = c.currentTime + 0.15, t1 = t0 + T.len + T.gap;
+    var nodes = [];
+    [t0, t1].forEach(function (t, i) {
+      nodes.push.apply(nodes, T.play(t, (i + 1) === tr.order ? tr.stim : null, g));
+    });
+    S.register("trial", g, nodes);
+    var at = function (sec, fn) { play.timers.push(setTimeout(function () { if (tok === play.token) fn(); }, Math.max(0, sec * 1000))); };
+    var lead = t0 - c.currentTime;
+    at(lead, function () { onPhase(1); });
+    at(lead + (t1 - t0), function () { onPhase(2); });
+    at(lead + (t1 - t0) + T.len, function () { onPhase(0); if (S.playing("trial")) S.stop("trial"); });
+  }
+  function stopTrial() { play.token++; clearTimers(); if (S.playing("trial")) S.stop("trial"); }
+
+  // ───────────────────────── a runner: practice, or a staircase ─────────────────────────
+  var ACTIVE = null;
+  function Runner(prefix, cfg) {
+    var self = this;
+    this.prefix = prefix; this.cfg = cfg;
+    this.el = {
+      start: $(prefix + "-start"), replay: $(prefix + "-replay"), a1: $(prefix + "-1"), a2: $(prefix + "-2"),
+      fb: $(prefix + "-fb"), stat: $(prefix + "-stat"), meter: $(prefix + "-meter"), cv: $(prefix + "-cv")
+    };
+    this.sc = null; this.cur = null; this.canAnswer = false; this.running = false; this.history = [];
+    this.anim = { t0: 0, raf: 0 };
+    this.el.start.addEventListener("click", function () { self.start(); });
+    this.el.replay.addEventListener("click", function () { self.replay(); });
+    this.el.a1.addEventListener("click", function () { self.answer(1); });
+    this.el.a2.addEventListener("click", function () { self.answer(2); });
+    if (this.el.cv) Kit.onTheme(function () { self.draw(); });
+    this.draw();
+  }
+  Runner.prototype.lamps = function (phase) {
+    this.el.a1.classList.toggle("on", phase === 1);
+    this.el.a2.classList.toggle("on", phase === 2);
+  };
+  Runner.prototype.setAnswerable = function (v) {
+    this.canAnswer = v;
+    this.el.a1.disabled = !v; this.el.a2.disabled = !v;
+  };
+  Runner.prototype.start = function () {
+    if (ACTIVE && ACTIVE !== this) ACTIVE.abandon();
+    stopTrial();
+    ACTIVE = this; this.running = true; this.history = [];
+    this.el.fb.textContent = ""; this.el.fb.className = "fb";
+    if (this.cfg.practice) this.pi = 0;
+    else { var T = TESTS[this.cfg.test]; this.sc = new Staircase(T.start, T.max); RESULT[this.cfg.test] = null; renderResults(); }
+    this.el.start.textContent = this.cfg.practice ? "Restart practice" : "Restart test " + this.cfg.test;
+    this.next();
+  };
+  Runner.prototype.abandon = function () {
+    if (!this.running) return;
+    this.running = false; this.cur = null; this.setAnswerable(false); this.lamps(0);
+    this.el.replay.disabled = true;
+    this.el.fb.textContent = "Paused. Press Start to begin again. The run starts over.";
+    this.el.fb.className = "fb";
+  };
+  Runner.prototype.next = function () {
+    var tr;
+    if (this.cfg.practice) {
+      var p = this.cfg.practice[this.pi];
+      tr = { test: p.test, delta: p.delta, n: this.pi + 1 };
+    } else {
+      tr = { test: this.cfg.test, delta: this.sc.d, n: this.sc.levels.length + 1 };
+    }
+    tr.order = Math.random() < 0.5 ? 1 : 2;
+    tr.stim = TESTS[tr.test].make(tr.delta);
+    this.cur = tr; this.el.a1.classList.remove("right", "wrong"); this.el.a2.classList.remove("right", "wrong");
+    this.setAnswerable(false);
+    this.el.replay.disabled = S.isMuted();
+    this.status();
+    this.playCur();
+  };
+  Runner.prototype.playCur = function () {
+    var self = this, tr = this.cur;
+    if (!tr) return;
+    if (S.isMuted()) { this.setAnswerable(true); return; }
+    tr.plays = (tr.plays || 0) + 1;
+    if (!tr.t0) tr.t0 = performance.now();
+    playTrial(tr, function (phase) {
+      if (self.cur !== tr) return;
+      self.lamps(phase);
+      if (phase === 2) self.setAnswerable(true);
+    });
+  };
+  Runner.prototype.replay = function () { if (this.running && this.cur) this.playCur(); };
+  Runner.prototype.answer = function (k, force) {
+    var tr = this.cur;
+    if (!this.running || !tr || (!this.canAnswer && !force)) return;
+    stopTrial(); this.lamps(0);
+    this.cur = null; this.setAnswerable(false);
+    var correct = k === tr.order;
+    var rec = {
+      test: tr.test, practice: !!this.cfg.practice, trial: tr.n, delta: +tr.delta.toFixed(4),
+      order: tr.order, answer: k, correct: correct, timestamp: new Date().toISOString(),
+      rt_ms: tr.t0 ? Math.round(performance.now() - tr.t0) : null, plays: tr.plays || 0, output: outputName()
+    };
+    if (tr.test === "A") rec.pattern = tr.stim.map(function (x) { return +x.toFixed(4); });
+    LOG.push(rec);
+    (k === 1 ? this.el.a1 : this.el.a2).classList.add(correct ? "right" : "wrong");
+    var which = tr.order === 1 ? "first" : "second";
+    var word = tr.test === "A" ? "altered" : "spread";
+    this.el.fb.textContent = (correct ? "Right. " : "Wrong. ") + "The " + which + " one was " + word + ", by " + fmt(tr.delta) + " cents.";
+    this.el.fb.className = "fb " + (correct ? "ok" : "no");
+    this.history.push({ delta: tr.delta, correct: correct, rev: false });
+    var self = this, finished = false;
+    if (this.cfg.practice) {
+      this.pi++;
+      if (this.pi >= this.cfg.practice.length) finished = true;
+    } else {
+      var rev = this.sc.update(correct);
+      if (rev) this.history[this.history.length - 1].rev = true;
+      finished = this.sc.done;
+    }
+    this.anim.t0 = performance.now(); this.animate();
+    if (finished) { this.finish(); return; }
+    this.status();
+    this.el.replay.disabled = true;
+    var wait = FAST ? 0 : 1100;
+    setTimeout(function () { if (self.running && !self.cur && ACTIVE === self) self.next(); }, wait);
+  };
+  Runner.prototype.finish = function () {
+    this.running = false; this.el.replay.disabled = true; ACTIVE = (ACTIVE === this) ? null : ACTIVE;
+    if (this.cfg.practice) {
+      var right = this.history.filter(function (h) { return h.correct; }).length;
+      this.el.fb.textContent += "  Practice done: " + right + " of 2." + (right === 2 ? " You are ready for the tests." : " Check your output and volume, then try again.");
+      this.el.start.textContent = "Run practice again";
+      this.status(); return;
+    }
+    var th = this.sc.threshold(), key = this.cfg.test;
+    RESULT[key] = { threshold: th.value, converged: th.converged, reversalsUsed: th.used, trials: this.sc.levels.length,
+                    reversals: this.sc.revs.slice(), correct: this.history.filter(function (h) { return h.correct; }).length, output: outputName() };
+    this.el.fb.textContent += "  Done: threshold " + fmt(th.value) + " cents" + (th.converged ? "." : " (not converged, so treat it as a rough estimate).");
+    this.el.start.textContent = "Run test " + key + " again";
+    this.status(); this.draw(); renderResults();
+  };
+  Runner.prototype.status = function () {
+    var chips = [];
+    if (this.cfg.practice) {
+      var n = this.pi == null ? 0 : this.pi;
+      chips.push(this.running ? "trial " + Math.min(n + 1, 2) + " of 2" : (n >= 2 ? "done" : "not started"));
+      if (this.running && this.cur) chips.push(this.cur.test === "A" ? "temperament, Δ " + this.cur.delta + "¢" : "unison, Δ " + this.cur.delta + "¢");
+    } else if (this.sc) {
+      chips.push("trial " + (this.sc.levels.length + (this.running ? 1 : 0)) + (this.running ? "" : " done"));
+      chips.push("Δ " + fmt(this.running ? this.sc.d : this.sc.levels[this.sc.levels.length - 1]) + " cents");
+      chips.push("reversals " + this.sc.revs.length + " of 8");
+      if (RESULT[this.cfg.test]) chips.push("threshold " + fmt(RESULT[this.cfg.test].threshold) + "¢");
+      var prog = Math.max(this.sc.levels.length / 40, this.sc.revs.length / 8);
+      if (this.el.meter) this.el.meter.style.width = (100 * Math.min(1, prog)).toFixed(1) + "%";
+    } else chips.push("not started");
+    this.el.stat.innerHTML = chips.map(function (c) { return '<span class="chip num">' + c + "</span>"; }).join("");
+  };
+  Runner.prototype.animate = function () {
+    var self = this;
+    if (!this.el.cv) return;
+    cancelAnimationFrame(this.anim.raf);
+    var tick = function () {
+      self.draw();
+      if (!Kit.reduced && performance.now() - self.anim.t0 < 500) self.anim.raf = requestAnimationFrame(tick);
+    };
+    tick();
+  };
+  Runner.prototype.draw = function () {
+    var cv = this.el.cv;
+    if (!cv || !this.cfg.test) return;
+    var T = TESTS[this.cfg.test];
+    var f = Kit.fit(cv), g = f.g, w = f.w, h = f.h;
+    var ink = Kit.css("--ink"), dim = Kit.css("--dim"), rule = Kit.css("--rule"), just = Kit.css("--just"),
+        temper = Kit.css("--temper"), sage = Kit.css("--sage"), rose = Kit.css("--rose"), panel = Kit.css("--panel");
+    var L = 40, R = 14, Tp = 14, B = 28, pw = w - L - R, ph = h - Tp - B;
+    var ly0 = Math.log(T.ymin), ly1 = Math.log(T.ymax);
+    var Y = function (d) { return Tp + ph * (1 - (Math.log(Math.max(T.ymin, Math.min(T.ymax, d))) - ly0) / (ly1 - ly0)); };
+    var xN = Math.min(40, Math.max(24, this.history.length + 5));
+    var X = function (i) { return L + (i + 0.5) / xN * pw; };
+    g.clearRect(0, 0, w, h);
+    g.font = monoFont(11);
+    g.textBaseline = "middle"; g.textAlign = "right";
+    T.ticks.forEach(function (t) {
+      var y = Y(t);
+      g.strokeStyle = Kit.alpha(rule, 0.9); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(L, y); g.lineTo(w - R, y); g.stroke();
+      g.fillStyle = dim; g.fillText(String(t), L - 6, y);
+    });
+    g.textAlign = "center"; g.textBaseline = "top";
+    [1, 10, 20, 30, 40].forEach(function (n) { if (n <= xN) { g.fillStyle = dim; g.fillText(String(n), X(n - 1), h - B + 8); } });
+    g.save(); g.translate(10, Tp + ph / 2); g.rotate(-Math.PI / 2); g.textBaseline = "middle"; g.fillStyle = dim; g.fillText("Δ cents", 0, 0); g.restore();
+    g.textAlign = "right"; g.fillStyle = dim; g.fillText("trial", L - 6, h - B + 8);
+    // the note's guess
+    var ya = Y(T.assume);
+    g.setLineDash([5, 5]); g.strokeStyle = sage; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(L, ya); g.lineTo(w - R, ya); g.stroke(); g.setLineDash([]);
+    var hist = this.history, n = hist.length;
+    // the walk
+    if (n) {
+      g.strokeStyle = Kit.alpha(dim, 0.8); g.lineWidth = 1.5;
+      g.beginPath();
+      hist.forEach(function (p, i) { if (i) g.lineTo(X(i), Y(p.delta)); else g.moveTo(X(i), Y(p.delta)); });
+      if (this.running && this.sc) g.lineTo(X(n), Y(this.sc.d));
+      g.stroke();
+    }
+    // threshold
+    var res = RESULT[this.cfg.test];
+    var th = res ? res.threshold : (this.sc && this.sc.revs.length >= 2 ? this.sc.threshold().value : NaN);
+    var noteAbove = !(isFinite(th) && th > T.assume), labels = [];
+    labels.push(function () { g.textAlign = "right"; g.textBaseline = noteAbove ? "bottom" : "top";
+    pill(g, "note's estimate ±" + T.assume, w - R - 2, ya + (noteAbove ? -4 : 4), sage, panel); });
+    if (isFinite(th)) {
+      var yt = Y(th);
+      g.setLineDash(res ? [] : [2, 4]); g.strokeStyle = temper; g.lineWidth = res ? 2 : 1;
+      g.beginPath(); g.moveTo(L, yt); g.lineTo(w - R, yt); g.stroke(); g.setLineDash([]);
+      labels.push(function () { g.textAlign = "right"; g.textBaseline = noteAbove ? "top" : "bottom";
+      pill(g, (res ? "your threshold " : "running estimate ") + fmt(th) + "¢", w - R - 2, yt + (noteAbove ? 4 : -4), temper, panel); });
+    }
+    // marks
+    var age = (performance.now() - this.anim.t0) / 450;
+    hist.forEach(function (p, i) {
+      var x = X(i), y = Y(p.delta);
+      var s = (i === n - 1 && !Kit.reduced) ? ease(age) : 1;
+      if (p.rev) {
+        g.strokeStyle = temper; g.lineWidth = 2;
+        g.beginPath(); g.arc(x, y, 8 * s, 0, 2 * Math.PI); g.stroke();
+      }
+      g.beginPath(); g.arc(x, y, 4.2 * (0.4 + 0.6 * s), 0, 2 * Math.PI);
+      if (p.correct) { g.fillStyle = just; g.fill(); }
+      else { g.fillStyle = panel; g.fill(); g.strokeStyle = rose; g.lineWidth = 2; g.stroke(); }
+    });
+    // the next level, glowing
+    if (this.running && this.sc) {
+      var xn = X(n), yn = Y(this.sc.d);
+      g.save(); g.globalCompositeOperation = glowOp();
+      var gr = g.createRadialGradient(xn, yn, 0, xn, yn, 16);
+      gr.addColorStop(0, Kit.alpha(temper, 0.55)); gr.addColorStop(1, Kit.alpha(temper, 0));
+      g.fillStyle = gr; g.beginPath(); g.arc(xn, yn, 16, 0, 2 * Math.PI); g.fill(); g.restore();
+      g.strokeStyle = temper; g.lineWidth = 1.5; g.beginPath(); g.arc(xn, yn, 4.5, 0, 2 * Math.PI); g.stroke();
+    }
+    g.font = monoFont(11);
+    labels.forEach(function (f) { f(); });
+    if (!n && !this.running) {
+      g.fillStyle = dim; g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillText("The staircase appears here as you answer.", L + pw / 2, Tp + ph / 2 + 22);
+    }
+  };
+
+  var PR = new Runner("P", { practice: [{ test: "A", delta: 25 }, { test: "B", delta: 10 }] });
+  var RA = new Runner("A", { test: "A" });
+  var RB = new Runner("B", { test: "B" });
+
+  document.addEventListener("keydown", function (e) {
+    var tg = e.target && e.target.tagName;
+    if (tg === "INPUT" || tg === "SELECT" || tg === "TEXTAREA" || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (!ACTIVE || !ACTIVE.running) return;
+    if (e.key === "1") { e.preventDefault(); ACTIVE.answer(1); }
+    else if (e.key === "2") { e.preventDefault(); ACTIVE.answer(2); }
+    else if (e.key === " " || e.code === "Space") { e.preventDefault(); ACTIVE.replay(); }
+  });
+  S.onChange(function () {
+    // Stop or Escape mid-trial: let the listener answer from what they heard, or replay
+    [PR, RA, RB].forEach(function (r) {
+      if (r.running && r.cur && !S.playing("trial")) { r.lamps(0); r.setAnswerable(true); r.el.replay.disabled = S.isMuted(); }
+    });
+  });
+
+  // ───────────────────────── results ─────────────────────────
+  function channel(A, B) {
+    var tl = Math.floor(2 * A / 2 + 1e-9) + 1, temp = 12 * Math.log2(tl);
+    var stretch = 88 * Math.log2(3) * Math.min(1, A / 5);
+    var ul = Math.floor(2 * B / 1 + 1e-9) + 1, uni = 0.5 * 2 * 60 * Math.log2(ul);
+    return { A: A, B: B, tl: tl, temp: temp, stretch: stretch, ul: ul, uni: uni, total: temp + stretch + uni };
+  }
+  var NOTE = channel(5, 1.5);
+  function userChannel() {
+    var A = RESULT.A ? Math.round(RESULT.A.threshold * 100) / 100 : 5;
+    var B = RESULT.B ? Math.round(RESULT.B.threshold * 100) / 100 : 1.5;
+    return channel(A, B);
+  }
+  var barHits = [];
+  function renderResults() {
+    var U = userChannel();
+    ["A", "B"].forEach(function (k) {
+      var r = RESULT[k], big = $("r-" + k.toLowerCase()), sub = $("r-" + k.toLowerCase() + "-sub");
+      if (!r) {
+        big.innerHTML = "&mdash;";
+        sub.textContent = "Test " + k + " not run yet. The table below uses the note's ±" + (k === "A" ? "5" : "1.5") + " cents until you run it.";
+      } else {
+        big.innerHTML = "±" + fmt(r.threshold) + " <small>cents</small>";
+        sub.textContent = r.trials + " trials, " + r.correct + " right, " + r.reversals.length + " reversals" +
+          (r.converged ? ". Threshold is the geometric mean of the last " + r.reversalsUsed + " reversals." : r.reversalsUsed ? ". Only " + r.reversalsUsed + " reversals, so the estimate is rough." : ". No reversals, so the run did not converge.") +
+          " Output: " + r.output + ".";
+      }
+    });
+    var words = [];
+    function cmp(r, guess, what) {
+      if (!r) return;
+      var x = r.threshold, ratio = x / guess;
+      if (Math.abs(ratio - 1) < 0.1) words.push("On " + what + " your threshold came within 10% of the note's estimate: ±" + fmt(x) + " cents against ±" + guess + ".");
+      else if (ratio < 1) words.push("On " + what + " you detected alterations down to ±" + fmt(x) + " cents, " + fmt(1 / ratio, 1) + " times smaller than the note's ±" + guess + ". Your hearing is finer than the note assumed.");
+      else words.push("On " + what + " you needed ±" + fmt(x) + " cents to pick the altered one, " + fmt(ratio, 1) + " times the note's ±" + guess + ". The note's estimate was cautious.");
+    }
+    cmp(RESULT.A, 5, "temperament"); cmp(RESULT.B, 1.5, "unisons");
+    if (RESULT.A || RESULT.B) words.push("With the note's formulas, your thresholds give " + fmt(U.total, 0) + " bits, compared with its " + fmt(NOTE.total, 0) + ". This test is stricter than a concert, so treat the figure as a lower bound.");
+    else words.push("Run either test to see how your thresholds compare with the note's estimates.");
+    $("r-compare").textContent = words.join(" ");
+
+    var rows = [
+      ["Temperament", "±5¢ @ 2¢ → " + NOTE.tl + " levels", NOTE.temp, "±" + fmt(U.A) + "¢ → " + U.tl + " levels", U.temp,
+       "12·log₂(⌊2·" + fmt(U.A) + "/2⌋+1) = 12·log₂(" + U.tl + ")"],
+      ["Per-key stretch", "±2¢ @ 2¢ → 3 levels", NOTE.stretch, "note's × min(1, A/5) = ×" + fmt(Math.min(1, U.A / 5)), U.stretch,
+       "88·log₂(3)·min(1, " + fmt(U.A) + "/5)"],
+      ["Unisons", "±1.5¢ @ 1¢ → " + NOTE.ul + " levels", NOTE.uni, "±" + fmt(U.B) + "¢ → " + U.ul + " levels", U.uni,
+       "½·2·60·log₂(⌊2·" + fmt(U.B) + "/1⌋+1) = 60·log₂(" + U.ul + ")"]
+    ];
+    var html = rows.map(function (r) {
+      return "<tr><td>" + r[0] + "</td><td class=\"opt\">" + r[1] + "</td><td>" + fmt(r[2], 1) + "</td><td class=\"opt\">" + r[3] + "</td><td><b>" + fmt(r[4], 1) + "</b></td></tr>";
+    }).join("");
+    $("r-formulas").innerHTML = rows.map(function (r) { return r[0] + ": <b>" + r[5] + " = " + fmt(r[4], 1) + " bits</b>"; }).join("<br>") +
+      "<br>Thresholds rounded to 0.01 cent. Per-key stretch is not measured here. It scales with A and is capped at the note's 139.5 bits.";
+    html += "<tr class=\"total\"><td>Total</td><td class=\"opt\"></td><td>" + fmt(NOTE.total, 1) + "</td><td class=\"opt\">" +
+      (RESULT.A || RESULT.B ? "" : "(note's values)") + "</td><td><b>" + fmt(U.total, 1) + "</b></td></tr>";
+    $("r-table").querySelector("tbody").innerHTML = html;
+    drawBars();
+  }
+  function drawBars() {
+    var cv = $("r-cv"), f = Kit.fit(cv), g = f.g, w = f.w, h = f.h;
+    var U = userChannel(), dim = Kit.css("--dim"), ink = Kit.css("--ink"), rule = Kit.css("--rule"), panel = Kit.css("--panel");
+    var cols = [Kit.css("--temper"), Kit.css("--sage"), Kit.css("--just")];
+    var rows = [{ label: "The note's estimates", c: NOTE }, { label: (RESULT.A || RESULT.B) ? "Your ears" : "Your ears (not measured yet)", c: U }];
+    var mx = Math.max(NOTE.total, U.total) * 1.06, step = mx > 800 ? 200 : mx > 400 ? 100 : 50;
+    mx = Math.ceil(mx / step) * step;
+    var L = 4, R = 54, bh = 24, top = 18;
+    var X = function (v) { return L + (w - L - R) * v / mx; };
+    g.clearRect(0, 0, w, h);
+    g.font = monoFont(11);
+    for (var t = 0; t <= mx; t += step) {
+      var x = X(t);
+      g.strokeStyle = rule; g.lineWidth = 1; g.beginPath(); g.moveTo(x, top - 4); g.lineTo(x, h - 20); g.stroke();
+      g.fillStyle = dim; g.textAlign = t === 0 ? "left" : "center"; g.textBaseline = "top"; g.fillText(String(t), x, h - 16);
+    }
+    g.textAlign = "right"; g.fillText("bits", w - 2, h - 16);
+    barHits = [];
+    rows.forEach(function (r, i) {
+      var y = top + i * 56;
+      g.fillStyle = dim; g.textAlign = "left"; g.textBaseline = "bottom"; g.fillText(r.label, L, y + 12);
+      var yb = y + 16, x0 = X(0);
+      var vals = [["temperament", r.c.temp], ["per-key stretch", r.c.stretch], ["unisons", r.c.uni]];
+      vals.forEach(function (v, j) {
+        var x1 = x0 + (X(v[1]) - X(0));
+        var ww = Math.max(0, x1 - x0 - (j < 2 ? 2 : 0));
+        if (ww > 0) {
+          g.fillStyle = cols[j];
+          g.beginPath();
+          if (g.roundRect) g.roundRect(x0, yb, ww, bh, j === 2 || (j === 1 && r.c.uni <= 0) ? [0, 4, 4, 0] : 0); else g.rect(x0, yb, ww, bh);
+          g.fill();
+        }
+        barHits.push({ x0: x0, x1: x1, y0: yb, y1: yb + bh, text: r.label + ": " + v[0] + " " + fmt(v[1], 1) + " bits" });
+        x0 = x1;
+      });
+      g.fillStyle = ink; g.textAlign = "left"; g.textBaseline = "middle";
+      g.fillText(fmt(r.c.total, 0), x0 + 6, yb + bh / 2);
+    });
+  }
+  function barHover(e) {
+    var r = $("r-cv").getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    var hit = barHits.filter(function (b) { return x >= b.x0 && x <= b.x1 && y >= b.y0 - 4 && y <= b.y1 + 4; })[0];
+    if (hit) $("r-hover").textContent = hit.text;
+  }
+  $("r-cv").addEventListener("pointermove", barHover);
+  $("r-cv").addEventListener("pointerdown", barHover);
+  Kit.onTheme(drawBars);
+
+  function deviceInfo() {
+    var sr = null;
+    try { sr = S.audio().sampleRate; } catch (e) {}
+    return { sampleRate: sr, userAgent: navigator.userAgent, output: outputName(), registerFactor: OCT,
+             volume: VOL, reducedMotion: Kit.reduced, screen: { w: screen.width, h: screen.height, dpr: window.devicePixelRatio || 1 } };
+  }
+  function payload() {
+    var U = userChannel();
+    return {
+      page: "comma/lab/listen.html", schema: 1, created: new Date().toISOString(), device: deviceInfo(),
+      method: { staircase: "2-down-1-up, factor 1.5 then 1.2 after 2nd reversal, stop at 8 reversals or 40 trials, threshold = geometric mean of last 6 reversals",
+                testA: "C-Am-F-G-C, Kit.sound.pluck; doctored = six random pitch classes +delta, six -delta",
+                testB: "A4 three strings, reference 0/0/0 vs -delta/0/+delta" },
+      results: RESULT,
+      channel: { note: NOTE, yours: U, formulas: {
+        temperament: "12*log2(floor(2A/2)+1)", stretch: "88*log2(3)*min(1, A/5)", unisons: "0.5*2*60*log2(floor(2B/1)+1)" } },
+      trials: LOG
+    };
+  }
+  function summary() {
+    var U = userChannel(), d = deviceInfo(), lines = ["The Listening Test: results", "Output: " + d.output + ", sample rate " + (d.sampleRate || "unknown") + " Hz"];
+    ["A", "B"].forEach(function (k) {
+      var r = RESULT[k], nm = k === "A" ? "Test A (altered tuning)" : "Test B (spread unison)";
+      lines.push(nm + ": " + (r ? "±" + fmt(r.threshold) + " cents, " + r.trials + " trials, " + r.reversals.length + " reversals" + (r.converged ? "" : ", not converged") : "not run"));
+    });
+    lines.push("Channel by the note's formulas: temperament " + fmt(U.temp, 1) + " + stretch " + fmt(U.stretch, 1) + " + unisons " + fmt(U.uni, 1) + " = " + fmt(U.total, 1) + " bits (the note's estimate: " + fmt(NOTE.total, 1) + ")");
+    lines.push("Forced-choice thresholds are stricter than audience detection, so this is a lower bound.");
+    return lines.join("\n");
+  }
+  $("dl-json").addEventListener("click", function () {
+    var blob = new Blob([JSON.stringify(payload(), null, 2)], { type: "application/json" });
+    var a = document.createElement("a"), url = URL.createObjectURL(blob);
+    a.href = url; a.download = "listening-test-" + new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-") + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    $("copy-msg").textContent = "Saved " + LOG.length + " trials to your downloads. Nothing was sent.";
+  });
+  $("copy-sum").addEventListener("click", function () {
+    var txt = summary(), done = function () { $("copy-msg").textContent = "Summary copied to the clipboard."; };
+    var fallback = function () {
+      var ta = document.createElement("textarea"); ta.value = txt; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) { $("copy-msg").textContent = "Could not copy to the clipboard. Here is the summary:\n" + txt; }
+      ta.remove();
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback);
+    else fallback();
+  });
+  renderResults();
+
+  // ───────────────────────── the beat meter ─────────────────────────
+  var IVS = [
+    { name: "unison (two strings)", p: 1, q: 1, semi: 0 },
+    { name: "minor third 6:5", p: 6, q: 5, semi: 3 },
+    { name: "major third 5:4", p: 5, q: 4, semi: 4 },
+    { name: "fourth 4:3", p: 4, q: 3, semi: 5 },
+    { name: "fifth 3:2", p: 3, q: 2, semi: 7 },
+    { name: "major sixth 5:3", p: 5, q: 3, semi: 9 },
+    { name: "octave 2:1", p: 2, q: 1, semi: 12 }
+  ];
+  var NAMES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
+  var selIv = $("m-iv"), selRoot = $("m-root");
+  IVS.forEach(function (v, i) { var o = document.createElement("option"); o.value = i; o.textContent = v.name; selIv.appendChild(o); });
+  for (var m = 36; m <= 84; m++) { var o = document.createElement("option"); o.value = m; o.textContent = NAMES[m % 12] + (Math.floor(m / 12) - 1) + "  " + mtof(m).toFixed(1) + " Hz"; selRoot.appendChild(o); }
+  selIv.value = "4"; selRoot.value = "60";
+  var WIN = 12;
+  $("m-win").addEventListener("input", function (e) { WIN = +e.target.value; $("m-win-read").textContent = WIN + " s"; $("m-env-lab").textContent = "last " + WIN + " s"; analyze(); drawMeter(); });
+
+  function ivInfo() {
+    var iv = IVS[+selIv.value], root = +selRoot.value, fl = mtof(root), fhET = mtof(root + iv.semi);
+    var bET = Math.abs(iv.p * fl - iv.q * fhET);
+    var cET = Math.abs(1200 * Math.log2(Math.pow(2, iv.semi / 12) / (iv.p / iv.q)));
+    return { iv: iv, root: root, fl: fl, fhET: fhET, bET: bET, cET: cET };
+  }
+  function centsFromBeat(b, I) { return 1200 * Math.log2(1 + b / (I.iv.p * I.fl)); }
+
+  var live = { mode: null, fs: 48000, E: null, env: [], wave: new Float32Array(1024), wpos: 0, res: null, lastA: 0, raf: 0, stream: null, synth: null, visible: true };
+  function resetLive(fs) {
+    live.fs = fs; live.E = makeEnvelope(fs, 100, 0.04); live.env = []; live.wave = new Float32Array(Math.min(4096, Math.round(fs * 0.04))); live.wpos = 0; live.res = null;
+  }
+  function feed(chunk) {
+    var wv = live.wave, n = wv.length;
+    for (var i = 0; i < chunk.length; i++) { wv[live.wpos] = chunk[i]; live.wpos = (live.wpos + 1) % n; }
+    var nv = live.E.push(chunk);
+    for (var j = 0; j < nv.length; j++) live.env.push(nv[j]);
+    var keep = Math.round(16 * live.E.envFs);
+    if (live.env.length > keep + 200) live.env.splice(0, live.env.length - keep);
+  }
+  function windowEnv() { var n = Math.round(WIN * (live.E ? live.E.envFs : 100)); return live.env.slice(-n); }
+  function analyze() {
+    if (!live.E || !live.env.length) return;
+    live.res = beatSpectrum(Float64Array.from(windowEnv()), live.E.envFs, 0.2, 20);
+    showReadouts(live.res);
+  }
+  function showReadouts(r) {
+    var I = ivInfo();
+    $("m-et").innerHTML = fmt(I.bET) + " <small>Hz</small>";
+    $("m-et-sub").textContent = I.iv.name + " on " + NAMES[I.root % 12] + (Math.floor(I.root / 12) - 1) + ": " + fmt(I.cET) + " cents from pure" + (I.cET < 0.01 ? " (pure in equal temperament, so any beat comes from mistuning or string stiffness)" : "");
+    var p = I.iv.p, q = I.iv.q;
+    var fml = "b = |" + p + "·f_low − " + q + "·f_high|.  c = 1200·log₂(1 + b / (" + p + " × " + fmt(I.fl) + " Hz))";
+    if (!r || !isFinite(r.hz)) {
+      $("m-hz").innerHTML = "&mdash;"; $("m-cents").innerHTML = "&mdash;"; $("m-conf-t").textContent = "—"; $("m-conf").style.width = "0%";
+      var why = r ? ({ short: "Collecting signal…", quiet: "Too quiet. Play louder or move the microphone closer.", strike: "Note just struck. Wait a few seconds.", band: "Analysis window too short." })[r.why] || "" : "";
+      $("m-cents-sub").textContent = why || "Beats can't tell sharp from flat.";
+      $("m-formula").innerHTML = "<b>" + fml + "</b>";
+      return;
+    }
+    var c = centsFromBeat(r.hz, I);
+    $("m-hz").innerHTML = fmt(r.hz) + " <small>Hz</small>";
+    $("m-conf-t").textContent = Math.round(r.confidence * 100) + "% " + (r.confidence > 0.5 ? "steady" : r.confidence > 0.25 ? "weak" : "probably noise");
+    $("m-conf").style.width = (100 * r.confidence).toFixed(0) + "%";
+    $("m-cents").innerHTML = fmt(c) + " <small>cents</small>";
+    var diffSame = Math.abs(c - I.cET), diffOpp = c + I.cET;
+    $("m-cents-sub").textContent = "Beats can't tell sharp from flat. Versus equal temperament: " + fmt(diffSame) + "¢ off if it leans the same way, " + fmt(diffOpp) + "¢ if the opposite way.";
+    $("m-formula").innerHTML = "<b>" + fml + " = " + fmt(c, 3) + " cents</b>. The beat rate b = " + fmt(r.hz, 3) + " Hz is the tallest peak in " + fmt(r.T, 1) + " s of envelope.";
+  }
+
+  // canvases
+  var cvW = $("m-wave"), cvE = $("m-env"), cvS = $("m-spec");
+    function drawMeter() {
+    var just = Kit.css("--just"), temper = Kit.css("--temper"), dim = Kit.css("--dim"), rule = Kit.css("--rule"), ink = Kit.css("--ink"), sage = Kit.css("--sage");
+    // waveform
+    var f = Kit.fit(cvW), g = f.g, w = f.w, h = f.h, wv = live.wave, n = wv.length, i;
+    g.clearRect(0, 0, w, h);
+    g.strokeStyle = rule; g.lineWidth = 1; g.beginPath(); g.moveTo(0, h / 2); g.lineTo(w, h / 2); g.stroke();
+    var mx = 1e-4; for (i = 0; i < n; i++) mx = Math.max(mx, Math.abs(wv[i]));
+    var sc = (h / 2 - 6) / Math.max(mx, 0.02);
+    g.save(); g.globalCompositeOperation = glowOp();
+    [[5, 0.12], [1.6, 0.9]].forEach(function (pass) {
+      g.strokeStyle = Kit.alpha(just, pass[1]); g.lineWidth = pass[0]; g.beginPath();
+      for (var k = 0; k < n; k++) { var v = wv[(live.wpos + k) % n], x = k / (n - 1) * w, y = h / 2 - v * sc; if (k) g.lineTo(x, y); else g.moveTo(x, y); }
+      g.stroke();
+    });
+    g.restore();
+    // envelope
+    f = Kit.fit(cvE); g = f.g; w = f.w; h = f.h;
+    g.clearRect(0, 0, w, h);
+    var env = windowEnv(), fsE = live.E ? live.E.envFs : 100, Wn = Math.round(WIN * fsE);
+    g.font = monoFont(10); g.fillStyle = dim; g.textBaseline = "top";
+    for (var s = 0; s <= WIN; s += 2) { var xs = w - s / WIN * w; g.strokeStyle = rule; g.beginPath(); g.moveTo(xs, 0); g.lineTo(xs, h - 14); g.stroke(); g.textAlign = s === 0 ? "right" : s === WIN ? "left" : "center"; g.fillText(s === 0 ? "now" : "−" + s + " s", xs, h - 12); }
+    if (env.length > 1) {
+      var em = 1e-6; for (i = 0; i < env.length; i++) em = Math.max(em, env[i]);
+      var X0 = w - env.length / Wn * w, ex = function (k) { return X0 + k / Wn * w; }, ey = function (v) { return (h - 18) - v / em * (h - 26); };
+      g.beginPath(); g.moveTo(ex(0), h - 18);
+      for (i = 0; i < env.length; i++) g.lineTo(ex(i), ey(env[i]));
+      g.lineTo(ex(env.length - 1), h - 18); g.closePath();
+      g.fillStyle = Kit.alpha(just, 0.16); g.fill();
+      g.save(); g.globalCompositeOperation = glowOp();
+      g.strokeStyle = Kit.alpha(just, 0.9); g.lineWidth = 1.5; g.beginPath();
+      for (i = 0; i < env.length; i++) { if (i) g.lineTo(ex(i), ey(env[i])); else g.moveTo(ex(i), ey(env[i])); }
+      g.stroke(); g.restore();
+      var r = live.res;
+      if (r && r.trend && r.start < env.length) {
+        g.setLineDash([4, 4]); g.strokeStyle = temper; g.lineWidth = 1.5; g.beginPath();
+        for (i = 0; i < r.trend.length && r.start + i < env.length; i++) { var xx = ex(r.start + i), yy = ey(r.trend[i]); if (i) g.lineTo(xx, yy); else g.moveTo(xx, yy); }
+        g.stroke(); g.setLineDash([]);
+        g.strokeStyle = Kit.alpha(temper, 0.6); g.beginPath(); g.moveTo(ex(r.start), 0); g.lineTo(ex(r.start), h - 18); g.stroke();
+        g.fillStyle = temper; g.textAlign = "left"; g.fillText("analysis from here", Math.min(ex(r.start) + 4, w - 120), 2);
+      }
+    } else { g.fillStyle = dim; g.textAlign = "center"; g.fillText("No signal yet.", w / 2, h / 2 - 8); }
+    // spectrum
+    f = Kit.fit(cvS); g = f.g; w = f.w; h = f.h;
+    g.clearRect(0, 0, w, h);
+    var L = 6, Rr = 6, B = 18, lf0 = Math.log(0.2), lf1 = Math.log(20);
+    var FX = function (fr) { return L + (w - L - Rr) * (Math.log(fr) - lf0) / (lf1 - lf0); };
+    g.font = monoFont(10); g.textBaseline = "top";
+    [0.2, 0.5, 1, 2, 5, 10, 20].forEach(function (t) { var x = FX(t); g.strokeStyle = rule; g.lineWidth = 1; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h - B); g.stroke(); g.fillStyle = dim; g.textAlign = t === 0.2 ? "left" : t === 20 ? "right" : "center"; g.fillText(t + (t === 20 ? " Hz" : ""), x, h - B + 4); });
+    var I = ivInfo();
+    if (I.bET > 0.2 && I.bET < 20) {
+      var xe = FX(I.bET); g.setLineDash([3, 4]); g.strokeStyle = sage; g.lineWidth = 1.5; g.beginPath(); g.moveTo(xe, 14); g.lineTo(xe, h - B); g.stroke(); g.setLineDash([]);
+      g.fillStyle = sage; g.textAlign = xe > w - 70 ? "right" : "left"; g.fillText("ET " + fmt(I.bET), xe + (xe > w - 70 ? -4 : 4), 2);
+    }
+    var rs = live.res;
+    if (rs && rs.power) {
+      var pm = 1e-30; for (i = 0; i < rs.power.length; i++) pm = Math.max(pm, rs.power[i]);
+      var PY = function (p) { return (h - B) - p / pm * (h - B - 26); };
+      g.beginPath(); g.moveTo(FX(rs.freqs[0]), h - B);
+      for (i = 0; i < rs.power.length; i++) g.lineTo(FX(rs.freqs[i]), PY(rs.power[i]));
+      g.lineTo(FX(rs.freqs[rs.freqs.length - 1]), h - B); g.closePath();
+      g.fillStyle = Kit.alpha(temper, 0.14); g.fill();
+      g.save(); g.globalCompositeOperation = glowOp();
+      [[6, 0.14], [1.7, 0.95]].forEach(function (pass) {
+        g.strokeStyle = Kit.alpha(temper, pass[1]); g.lineWidth = pass[0]; g.beginPath();
+        for (var k = 0; k < rs.power.length; k++) { var x = FX(rs.freqs[k]), y = PY(rs.power[k]); if (k) g.lineTo(x, y); else g.moveTo(x, y); }
+        g.stroke();
+      });
+      g.restore();
+      if (isFinite(rs.hz)) {
+        var xp = FX(rs.hz);
+        g.fillStyle = ink; g.beginPath(); g.arc(xp, PY(pm), 4, 0, 2 * Math.PI); g.fill();
+        g.font = monoFont(11); g.textAlign = xp > w - 90 ? "right" : "left"; g.textBaseline = "middle";
+        g.fillText(fmt(rs.hz) + " Hz", xp + (xp > w - 90 ? -9 : 9), PY(pm));
+      }
+    } else { g.fillStyle = dim; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("Strike an interval and hold it, or try the synthetic piano.", w / 2, (h - B) / 2); }
+  }
+  Kit.onTheme(drawMeter);
+  selIv.addEventListener("change", function () { showReadouts(live.res); drawMeter(); });
+  selRoot.addEventListener("change", function () { showReadouts(live.res); drawMeter(); });
+  if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { live.visible = es[0].isIntersecting; }).observe($("mic-panel"));
+
+  var lastFrame = 0;
+  function loop(now) {
+    live.raf = 0;
+    if (!live.mode) { drawMeter(); return; }
+    var dt = Math.min(0.1, (now - (lastFrame || now)) / 1000); lastFrame = now;
+    if (live.mode === "synth") {
+      var sy = live.synth, speed = 4, nPush = Math.round(dt * speed * sy.fs);
+      if (Kit.reduced) nPush = sy.samples.length;
+      var end = Math.min(sy.samples.length, sy.pos + Math.max(1, nPush));
+      feed(sy.samples.subarray(sy.pos, end)); sy.pos = end;
+      if (sy.pos >= sy.samples.length) { finishSynth(); }
+    }
+    if (now - live.lastA > 250) { live.lastA = now; analyze(); }
+    if (!document.hidden && live.visible) drawMeter();
+    if (live.mode) live.raf = requestAnimationFrame(loop);
+  }
+  function kick() { if (!live.raf) { lastFrame = 0; live.raf = requestAnimationFrame(loop); } }
+  document.addEventListener("visibilitychange", function () { if (!document.hidden && live.mode) kick(); });
+
+  function setMode(mode, label) {
+    live.mode = mode;
+    $("m-src").textContent = label;
+    $("m-dot").classList.toggle("on", mode === "mic");
+    $("m-mic").textContent = mode === "mic" ? "Stop listening" : "Listen through the microphone";
+    $("m-mic").setAttribute("aria-pressed", mode === "mic" ? "true" : "false");
+  }
+
+  // microphone
+  function stopMic() {
+    if (live.stream) { live.stream.getTracks().forEach(function (t) { t.stop(); }); live.stream = null; }
+    if (live.node) { try { live.node.disconnect(); live.src.disconnect(); } catch (e) {} live.node = null; }
+    if (live.mode === "mic") { setMode(null, "idle"); analyze(); drawMeter(); }
+  }
+  $("m-mic").addEventListener("click", function () {
+    if (live.mode === "mic") { S.stop("mic"); stopMic(); return; }
+    var msg = $("m-msg");
+    if (!window.isSecureContext) { msg.textContent = "Browsers allow the microphone only on secure pages. Open this page over https or from localhost."; return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { msg.textContent = "This browser gives no microphone access here. The synthetic piano still works."; return; }
+    msg.textContent = "Requesting microphone access…";
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: false }).then(function (stream) {
+      if (live.mode === "synth") abortSynth();
+      var c = S.audio();
+      resetLive(c.sampleRate);
+      live.stream = stream;
+      live.src = c.createMediaStreamSource(stream);
+      live.node = c.createScriptProcessor(2048, 1, 1);
+      var mute = c.createGain(); mute.gain.value = 0;
+      live.node.onaudioprocess = function (e) { if (live.mode === "mic") feed(e.inputBuffer.getChannelData(0)); };
+      live.src.connect(live.node); live.node.connect(mute); mute.connect(c.destination);
+      S.register("mic", mute, [], stopMic);
+      setMode("mic", "microphone, " + c.sampleRate + " Hz");
+      msg.textContent = "Listening. Strike the interval, hold the keys down, and stay quiet for about ten seconds.";
+      kick();
+    }, function (err) {
+      var n = err && err.name;
+      msg.textContent = n === "NotAllowedError" || n === "SecurityError" ? "Microphone access was denied. The synthetic piano needs no permission."
+        : n === "NotFoundError" ? "No microphone found. The synthetic piano still works."
+        : "The microphone could not be opened (" + (n || "unknown error") + ").";
+    });
+  });
+
+  // The synthesis and the whole-buffer estimate run in a Blob worker built from
+  // the very functions above (they reference nothing outside themselves), so a
+  // click never stalls a frame. If workers are unavailable, run them inline.
+  var worker = null, jobs = {}, jobId = 0;
+  try {
+    var src = [makeEnvelope, dftPower, beatSpectrum, estimateBeat, synthDyad].map(String).join("\n") +
+      "\nonmessage = function (e) { var d = e.data, s = synthDyad(d.f1, d.f2, d.fs, d.seconds, d.partials), r = null;" +
+      " if (d.estimate) { r = estimateBeat(s, d.fs, 0.2, 20); r = { hz: r.hz, confidence: r.confidence, freqs: r.freqs, power: r.power, T: r.T, depth: r.depth }; }" +
+      " postMessage({ id: d.id, samples: s, res: r }, [s.buffer]); };";
+    worker = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
+    worker.onmessage = function (e) { var j = jobs[e.data.id]; delete jobs[e.data.id]; if (j) j.cb(e.data.samples, e.data.res); };
+    worker.onerror = function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      worker = null;
+      var pend = jobs; jobs = {};
+      Object.keys(pend).forEach(function (k) { offMain(pend[k].job, pend[k].cb); });
+    };
+  } catch (e) { worker = null; }
+  function offMain(job, cb) {
+    if (worker) { job.id = ++jobId; jobs[job.id] = { job: job, cb: cb }; worker.postMessage(job); return; }
+    setTimeout(function () {
+      var smp = synthDyad(job.f1, job.f2, job.fs, job.seconds, job.partials);
+      cb(smp, job.estimate ? estimateBeat(smp, job.fs, 0.2, 20) : null);
+    }, 0);
+  }
+
+  // synthetic piano
+  function synthSpec() {
+    var I = ivInfo(), fl = I.fl, fh = I.fhET;
+    var detuned = I.bET < 0.25;                        // unison, octave: pure in ET, so give it a known nudge
+    if (detuned) fh *= Math.pow(2, 1.2 / 1200);
+    return { I: I, fl: fl, fh: fh, truth: Math.abs(I.iv.p * fl - I.iv.q * fh), detuned: detuned, fs: 12000, seconds: 14, partials: 8 };
+  }
+  function abortSynth() { live.synth = null; if (live.mode === "synth") setMode(null, "idle"); }
+  function finishSynth() {
+    var sy = live.synth; if (!sy) return;
+    var r = sy.res;   // estimateBeat over the whole buffer, same estimator as the live view
+    var sp = sy.spec, err = (r.hz - sp.truth) / sp.truth;
+    var cT = centsFromBeat(sp.truth, sp.I), cE = centsFromBeat(r.hz, sp.I);
+    live.lastSynth = { truth: sp.truth, estimate: r.hz, confidence: r.confidence, relErr: err };
+    $("m-synth-out").innerHTML = "<b>Synthetic " + sp.I.iv.name + " on " + NAMES[sp.I.root % 12] + (Math.floor(sp.I.root / 12) - 1) +
+      (sp.detuned ? " (upper note raised 1.2¢ so there is a beat to measure)" : ", equal tempered") + ".</b> True beat " + fmt(sp.truth, 3) + " Hz (" + fmt(cT, 3) +
+      "¢). Measured over the whole 14 s recording: " + fmt(r.hz, 3) + " Hz (" + fmt(cE, 3) + "¢), off by " + fmt(100 * err, 2) + "%, confidence " + Math.round(100 * r.confidence) + "%." +
+      (sp.truth > 20 ? " This beat is above the meter's 20 Hz limit, so the measurement is not valid. Pick a lower note." : "");
+    live.res = r; live.res.trend = null; showReadouts(r);
+    live.synth = null; setMode(null, "synthetic, done");
+    drawMeter();
+    document.body.dataset.synthDone = "1";
+  }
+  $("m-synth").addEventListener("click", function () {
+    if (live.mode === "mic") { S.stop("mic"); stopMic(); }
+    var sp = synthSpec();
+    delete document.body.dataset.synthDone;
+    $("m-msg").textContent = "";
+    $("m-synth-out").textContent = "Generating the synthetic notes…";
+    var mine = live.synthTok = (live.synthTok || 0) + 1;
+    offMain({ f1: sp.fl, f2: sp.fh, fs: sp.fs, seconds: sp.seconds, partials: sp.partials, estimate: true }, function (samples, res) {
+      if (mine !== live.synthTok || live.mode === "mic") return;
+      resetLive(sp.fs);
+      live.synth = { samples: samples, pos: 0, fs: sp.fs, spec: sp, res: res };
+      $("m-synth-out").textContent = "Running the synthetic notes through the meter at four times real speed…";
+      setMode("synth", "synthetic, " + sp.fs + " Hz");
+      kick();
+    });
+  });
+  $("m-hear").addEventListener("click", function () {
+    var sp = synthSpec(), c = S.audio();
+    offMain({ f1: sp.fl * OCT, f2: sp.fh * OCT, fs: 24000, seconds: 8, partials: sp.partials, estimate: false }, function (samples) {
+      if (S.isMuted()) return;
+      var buf = c.createBuffer(1, samples.length, 24000), ch = buf.getChannelData(0);
+      for (var i = 0; i < samples.length; i++) ch[i] = samples[i];
+      var src = c.createBufferSource(), g = c.createGain(); g.gain.value = 0.8;
+      src.buffer = buf; src.connect(g); g.connect(out()); src.start();
+      S.register("synth", g, [src]);
+      src.onended = function () { if (S.playing("synth")) S.stop("synth"); };
+    });
+  });
+
+  showReadouts(null); drawMeter();
+
+  // hooks for the headless test harness (and the curious)
+  window.ListenTest = {
+    runners: { P: PR, A: RA, B: RB },
+    get fast() { return FAST; }, set fast(v) { FAST = !!v; },
+    current: function (k) { var r = { P: PR, A: RA, B: RB }[k]; return r.cur ? { test: r.cur.test, delta: r.cur.delta, order: r.cur.order, n: r.cur.n } : null; },
+    answer: function (k, a) { ({ P: PR, A: RA, B: RB })[k].answer(a, true); },
+    results: function () { return RESULT; }, channel: userChannel, note: NOTE, payload: payload, summary: summary,
+    lastSynth: function () { return live.lastSynth || null; }
+  };
+})();
+</script>
+</body>
+</html>
